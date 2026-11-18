@@ -144,6 +144,7 @@ const LEAF=['#c0321c','#d9481c','#ee7a1f','#f2a62c','#e8c43c','#a3261a','#8c3a14
 for(let i=8;i<N-10;i+=2){
   const w=segs[i].env.water;
   for(const side of[-1,1]){
+    if(segs[i].env.park)continue;               // the parking area is kept clear
     if(w===2||w===side)continue;                 // nothing growing out in the lake
     if(rnd()<0.82){
       segs[i].sprites.push({x:side*(1.45+rnd()*3.2),h:1500+rnd()*1700,
@@ -203,14 +204,15 @@ signAt(goal[0]+8,1.62,'高雄大駐車場');
 // ===== Finish: the Roadster meeting in the Takao parking area =====
 const NA_COL=['#c8102e','#14161a','#2f6fb5','#c9c9cf','#1d5c3a','#e8c33a','#f2f2ee','#2a8fa8','#8a2f6b','#d8d4c8'];
 const venueEnd=N-40;
+for(let i=goal[0]+16;i<venueEnd;i++)segs[i].env.park=true;
 for(let i=goal[0]+18;i<venueEnd;i+=5){
   for(const side of[-1,1]){
-    if(rnd()<0.72)segs[i].sprites.push({kind:'car',x:side*(1.72+rnd()*1.2),
+    if(rnd()<0.74)segs[i].sprites.push({kind:'car',x:side*(1.62+rnd()*1.15),
       col:NA_COL[Math.floor(rnd()*NA_COL.length)],ph:rnd()});
   }
 }
 for(let i=goal[0]+26;i<venueEnd;i+=9){
-  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/9)%2?1:-1)*1.3});
+  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/9)%2?1:-1)*1.28});
 }
 segs[goal[0]+34].sprites.push({kind:'banner',x:1.85,text:'ロードスターミーティング'});
 segs[goal[0]+46].sprites.push({kind:'banner',x:-1.85,text:'高雄大駐車場'});
@@ -390,6 +392,7 @@ function project(p,cx,cy,cz){
 function quad(x1,y1,x2,y2,x3,y3,x4,y4,c){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x3,y3);ctx.lineTo(x4,y4);ctx.closePath();ctx.fill()}
 function fog(c,f){return c} // distance haze handled by overlay below
 const GROUND=[['#6d3a1a','#7b4420'],['#8a4a1c','#995623']];
+const PARK=[['#55575b','#5e6064'],['#4c4e52','#585a5e']];
 function drawTree(s,sc,sx,sy,clip){
   const h=s.h*sc*H/2, w=h*0.55;
   if(h<2)return;
@@ -598,6 +601,7 @@ function drawPuddle(o,sc,sx,sy,clip,rw){
   ctx.restore();
 }
 function drawRail(seg,side,clip){
+  if(seg.env.park)return;
   if(seg.env.bridge)return bridgeRail(seg,side,clip);
   const a=seg.p1.screen,b=seg.p2.screen;
   const x1=a.x+side*a.w*1.14,x2=b.x+side*b.w*1.14;
@@ -648,7 +652,7 @@ function renderWorld(st){
     project(s.p1,camX-x,camY,z0);project(s.p2,camX-x-dx,camY,z0);
     x+=dx;dx+=s.curve;
     if(s.p1.camera.z<=CAMD||s.p2.screen.y>=s.p1.screen.y||s.p2.screen.y>=maxy)continue;
-    const a=s.p1.screen,b=s.p2.screen,g=GROUND[(Math.floor(s.index/40))%2][s.dark];
+    const a=s.p1.screen,b=s.p2.screen,g=(s.env.park?PARK:GROUND)[(Math.floor(s.index/40))%2][s.dark];
     ctx.fillStyle=g;ctx.fillRect(0,b.y,W,a.y-b.y);
     if(s.env.water===2){waterBand(s,a,b,-1,st);waterBand(s,a,b,1,st)}
     else if(s.env.water)waterBand(s,a,b,s.env.water,st);

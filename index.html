@@ -43,7 +43,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <canvas id="c" width="960" height="540" aria-label="ドライバー視点の走行画面"></canvas>
   <div id="overlay">
     <h1>紅葉ヒルクライム</h1>
-    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夕暮れから夜へ、霧や雨も移ろう道を、落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。</p>
+    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夜明け前の暗さから霧と雨を抜け、たどり着くのは晴れた早朝。落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。</p>
     <div class="res" id="res"></div>
     <button id="go">スタート</button>
   </div>
@@ -95,6 +95,7 @@ piece(16,12,16,5,-25);
 const ogura=piece(18,20,18,2,40);                  // 小倉山展望台のクリスト
 piece(18,20,18,0,-45);                             // 保津峡へ落ちる
 piece(22,30,22,-4,-20);
+const tunA=piece(24,150,24,0,-18);                  // 保津峡トンネル
 const hozuApp=piece(28,55,28,3,-5);                // 保津峡展望台へ
 const lakeA0=piece(30,90,30,2,0);                  // 保津川沿い（左手に川）
 const bayA=piece(25,70,25,-1.5,0);                 // 保津川橋
@@ -129,27 +130,77 @@ piece(25,50,25,-4,-20);
 piece(20,30,20,3,15);
 piece(16,16,16,-6,5);
 piece(16,16,16,6,5);
+const tunB=piece(24,150,24,0,14);                  // 高雄トンネル
 const goal=piece(40,90,40,0,-10);                  // 高雄大駐車場への直線
 piece(40,40,40,0,0);
 const N=segs.length,TOTAL=N*SEG;
 const CPS=[Math.floor(N*0.25),Math.floor(N*0.5),Math.floor(N*0.75)];
 const FIN=TOTAL-SEG*120;   // the finish line sits inside the meeting area, with the rows of cars ahead
+const FINSEG=Math.floor(FIN/SEG);
 // water and bridge sections
 mark([lakeA0[0],lakeA1[1]],s=>s.env.water=-1);
 mark(bayA,s=>{s.env.water=2;s.env.bridge=true});
 mark(valleyB,s=>{s.env.water=2;s.env.bridge=true});
 mark([lakeB0[0],lakeB1[1]],s=>s.env.water=1);
 mark(bayB,s=>{s.env.water=2;s.env.bridge=true});
+// two tunnels bored through the ridge, and stretches of deep forest
+mark([tunA[0]+14,tunA[1]-14],s=>{s.env.tunnel=1;s.env.tname='保津峡トンネル'});
+mark([tunB[0]+14,tunB[1]-14],s=>{s.env.tunnel=1;s.env.tname='高雄トンネル'});
+const FOREST=[[hozuApp[1]+12,hozuApp[1]+96],[shobu[1]+8,shobu[1]+78]];
+for(const r of FOREST)mark(r,s=>s.env.forest=1);
+
+// ===== the sights along the pass: viewpoints, the little park, the fishing pond =====
+// cleared of roadside trees so the structures stay visible from the road
+const VIEWS=[[ogura[0]+6,ogura[0]+36],[hozuApp[0]+8,hozuApp[0]+42],[atago[0]+2,atago[0]+30],[shobu[0]+2,shobu[0]+30]];
+const YUEN=[tunnel[1]+12,goal[0]-16];
+const clearRange=(a,b)=>{for(let i=Math.max(0,a);i<Math.min(N,b);i++)segs[i].env.clear=1};
+for(const r of VIEWS)clearRange(r[0],r[1]);
+clearRange(YUEN[0]+22,YUEN[0]+48);
+clearRange(YUEN[0]+64,YUEN[0]+92);
+
+// ===== 高雄大駐車場: the last climb opens out into the meeting car park =====
+// body colours of the NAs that turn up at a ユーノス meeting
+const NA_COL=['#c8102e','#c8102e','#b4142a','#2f6fb5','#1d5c3a','#e8c33a','#c9c9cf','#f2f2ee',
+  '#14161a','#2a8fa8','#8a2f6b','#d8d4c8','#b8321f','#e0a03a','#3b4a8c','#6f8f4a'];
+const PARK0=goal[0]+14,venueEnd=N-4;
+const LOTW=2.15;                  // tarmac reaches this far out, in road half-widths
+const STALL=7;                    // one parking bay every seven segments
+for(let i=PARK0-18;i<venueEnd;i++){
+  const s=segs[i],t=Math.max(0,Math.min(1,(i-(PARK0-18))/18));
+  s.env.park=1;
+  s.env.lot=1+(LOTW-1)*(t*t*(3-2*t));      // the road opens out into the lot
+}
 // roadside trees (autumn palette)
 const LEAF=['#c0321c','#d9481c','#ee7a1f','#f2a62c','#e8c43c','#a3261a','#8c3a14'];
 for(let i=8;i<N-10;i+=2){
-  const w=segs[i].env.water;
+  const w=segs[i].env.water,lot=segs[i].env.lot;
+  if(segs[i].env.tunnel)continue;                // nothing grows inside the bore
+  if(segs[i].env.forest){
+    // a thick wood crowding the road, the crowns closing overhead
+    for(const side of[-1,1]){
+      if(rnd()<0.97)segs[i].sprites.push({x:side*(1.06+rnd()*0.5),h:2500+rnd()*2000,
+        col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.28,r:rnd()});
+      if(rnd()<0.7)segs[i].sprites.push({x:side*(1.9+rnd()*3.4),h:2200+rnd()*2000,
+        col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.3,r:rnd()});
+    }
+    continue;
+  }
   for(const side of[-1,1]){
-    if(segs[i].env.park)continue;               // the parking area is kept clear
     if(w===2||w===side)continue;                 // nothing growing out in the lake
+    if(segs[i].env.clear)continue;               // a viewpoint or the park stands here
+    if(lot){                                     // the car park is ringed with trees, the bays kept clear
+      if(rnd()<0.9)segs[i].sprites.push({x:side*(lot+0.45+rnd()*2.3),h:1500+rnd()*1500,
+        col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.12,r:rnd()});
+      continue;
+    }
     if(rnd()<0.82){
       segs[i].sprites.push({x:side*(1.45+rnd()*3.2),h:1500+rnd()*1700,
         col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.14,r:rnd()});
+    }
+    // a deeper band of forest so the hillside behind never reads as bare ground
+    if(i%4===0&&rnd()<0.62){
+      segs[i].sprites.push({x:side*(5.2+rnd()*8),h:1600+rnd()*2100,
+        col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.3,r:rnd()});
     }
   }
 }
@@ -161,7 +212,7 @@ function addObstacle(i,kind,x){
   segs[i].sprites.push(o);obstacles.push(o);return o;
 }
 let lastOb=-99;
-for(let i=100;i<N-150;i++){
+for(let i=100;i<PARK0-40;i++){
   if(i-lastOb<52)continue;
   const bend=Math.abs(segs[i].curve)+Math.abs(segs[i-2].curve)+Math.abs(segs[i+2].curve);
   if(bend>9)continue;                             // keep the sharpest corners clean
@@ -202,29 +253,56 @@ signAt(pondApp[0]+34,1.62,'菖蒲谷池');
 signAt(shobu[0]+8,-1.62,'菖蒲ヶ丘展望台');
 signAt(tunnel[0]+8,1.62,'紅葉のトンネル');
 signAt(goal[0]+8,1.62,'高雄大駐車場');
-// ===== Finish: the Roadster meeting in the Takao parking area =====
-const NA_COL=['#c8102e','#14161a','#2f6fb5','#c9c9cf','#1d5c3a','#e8c33a','#f2f2ee','#2a8fa8','#8a2f6b','#d8d4c8'];
-const venueEnd=N-4;
-for(let i=goal[0]+16;i<venueEnd;i++)segs[i].env.park=true;
-// an inner row right along the shoulder, and a looser row behind it
-for(let i=goal[0]+16;i<venueEnd;i+=6){
+segs[tunA[0]+14].sprites.push({kind:'portal',x:0,h:2700,text:'保津峡トンネル'});
+segs[tunB[0]+14].sprites.push({kind:'portal',x:0,h:2600,text:'高雄トンネル'});
+// 展望台: a timber deck and a roofed shelter at each viewpoint
+const deckAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:1250,ph:rnd()});
+const shelterAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:2350,roof:true,ph:rnd()});
+deckAt(VIEWS[0][0]+8,-1,1.62);shelterAt(VIEWS[0][0]+18,-1,2.6);
+deckAt(VIEWS[1][0]+10,1,1.62);shelterAt(VIEWS[1][0]+22,1,2.65);
+deckAt(VIEWS[2][0]+6,-1,1.62);shelterAt(VIEWS[2][0]+16,-1,2.6);
+deckAt(VIEWS[3][0]+6,-1,1.62);shelterAt(VIEWS[3][0]+16,-1,2.65);
+// 観空台遊園地: the wheel turning over the trees, striped tents, bunting
+segs[YUEN[0]+52].sprites.push({kind:'ferris',x:10.5,h:18500,ph:0});
+segs[YUEN[0]+90].sprites.push({kind:'ferris',x:13.5,h:13500,ph:1.7});
+segs[YUEN[0]+28].sprites.push({kind:'tent',x:3.35,h:2600,col:0});
+segs[YUEN[0]+38].sprites.push({kind:'tent',x:4.6,h:2300,col:1});
+segs[YUEN[0]+70].sprites.push({kind:'tent',x:3.5,h:2450,col:2});
+segs[YUEN[0]+80].sprites.push({kind:'tent',x:4.7,h:2150,col:3});
+segs[YUEN[0]+4].sprites.push({kind:'arch',x:0,text:'観空台遊園地'});
+for(let i=YUEN[0]+4;i<YUEN[1];i+=8)segs[i].sprites.push({kind:'flag',x:(Math.floor(i/8)%2?1:-1)*1.34});
+// 菖蒲谷池の釣り堀: huts on stilts out over the water, a floating jetty, a sign
+segs[lakeB0[0]+30].sprites.push({kind:'pier',x:1.58,h:560});
+segs[lakeB0[0]+44].sprites.push({kind:'hut',x:2.85,h:2000});
+segs[lakeB0[0]+98].sprites.push({kind:'pier',x:1.62,h:520});
+segs[lakeB0[0]+112].sprites.push({kind:'hut',x:3.15,h:1900});
+segs[lakeB1[0]+40].sprites.push({kind:'pier',x:1.58,h:540});
+segs[lakeB1[0]+56].sprites.push({kind:'hut',x:3.0,h:2050});
+signAt(lakeB0[0]+34,1.66,'つり堀');
+// ===== Finish: the Roadster meeting filling the 高雄大駐車場 =====
+const pickCol=()=>NA_COL[Math.floor(rnd()*NA_COL.length)];
+function parkCar(i,x,view,top,pod){
+  segs[Math.max(0,Math.min(venueEnd-2,i))].sprites.push({kind:'car',x,col:pickCol(),view,top,pod});
+}
+// bays down both sides of the central aisle, two ranks deep and nearly full
+for(let i=PARK0+2;i<venueEnd-10;i+=STALL){
   for(const side of[-1,1]){
-    if(rnd()<0.8)segs[i].sprites.push({kind:'car',x:side*(1.22+rnd()*0.3),
-      col:NA_COL[Math.floor(rnd()*NA_COL.length)],ph:rnd()});
+    if(rnd()<0.95)parkCar(i,side*(0.96+rnd()*0.08),rnd()<0.5?'front':'rear',rnd()<0.34,rnd()<0.55);
+    if(rnd()<0.9)parkCar(i+4,side*(1.76+rnd()*0.10),rnd()<0.5?'front':'rear',rnd()<0.4,rnd()<0.5);
   }
 }
-for(let i=goal[0]+21;i<venueEnd;i+=8){
-  for(const side of[-1,1]){
-    if(rnd()<0.6)segs[i].sprites.push({kind:'car',x:side*(2.0+rnd()*0.9),
-      col:NA_COL[Math.floor(rnd()*NA_COL.length)],ph:rnd()});
+// the line-up across the head of the lot, every car turned to face the gate
+for(const off of[22,36,52]){
+  const i=FINSEG+off;
+  for(let k=-6;k<=6;k++){
+    if(rnd()<0.07)continue;
+    parkCar(i,k*0.56,rnd()<0.82?'front':'rear',rnd()<0.25,rnd()<0.72);
   }
 }
-for(let i=goal[0]+30;i<venueEnd;i+=9){
-  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/9)%2?1:-1)*1.06});
+for(let i=PARK0+12;i<venueEnd-8;i+=10){
+  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/10)%2?1:-1)*0.72});
 }
-segs[goal[0]+40].sprites.push({kind:'banner',x:1.55,text:'ロードスターミーティング'});
-segs[goal[0]+52].sprites.push({kind:'banner',x:-1.55,text:'高雄大駐車場'});
-segs[venueEnd-46].sprites.push({kind:'banner',x:1.5,text:'ロードスターミーティング会場'});
+segs[venueEnd-62].sprites.push({kind:'banner',x:0,span:1.1,text:'ようこそ 高雄大駐車場へ'});
 segs[goal[0]+10].sprites.push({kind:'arch',x:0,text:'ロードスターミーティング'});
 segs[venueEnd-150].sprites.push({kind:'arch',x:0,text:'ゴール'});
 
@@ -245,25 +323,28 @@ let bgOff=0;
 // ===== Sky, weather and time of day, blended along the course =====
 // p = progress through the course: golden hour at the start, night at the finish.
 const SKY_KEYS=[
- {p:0,top:[79,134,181],mid:[159,195,214],low:[246,217,164],hor:[244,181,101],sun:1,amb:1,sunCol:[255,232,170]},
- {p:.22,top:[64,110,152],mid:[146,178,200],low:[242,202,152],hor:[233,166,106],sun:.85,amb:.92,sunCol:[255,216,150]},
- {p:.40,top:[52,82,124],mid:[124,146,168],low:[214,166,138],hor:[206,138,85],sun:.4,amb:.74,sunCol:[255,180,120]},
- {p:.56,top:[44,61,82],mid:[90,106,122],low:[143,138,134],hor:[125,117,112],sun:.06,amb:.56,sunCol:[220,160,120]},
- {p:.70,top:[27,36,56],mid:[51,65,90],low:[93,90,114],hor:[122,96,85],sun:0,amb:.44,sunCol:[0,0,0]},
- {p:.78,top:[16,24,44],mid:[30,42,66],low:[58,60,82],hor:[80,68,70],sun:0,amb:.38,sunCol:[0,0,0]},
- {p:.9,top:[8,14,30],mid:[13,24,48],low:[26,36,56],hor:[35,42,56],sun:0,amb:.26,sunCol:[0,0,0]},
- {p:1,top:[7,12,26],mid:[11,22,44],low:[24,34,52],hor:[32,38,52],sun:0,amb:.23,sunCol:[0,0,0]}
+ {p:0,top:[10,16,34],mid:[18,28,50],low:[34,44,66],hor:[60,60,70],sun:0,amb:.26,sunCol:[0,0,0]},
+ {p:.14,top:[9,15,32],mid:[16,26,48],low:[30,40,60],hor:[52,54,64],sun:0,amb:.24,sunCol:[0,0,0]},
+ {p:.30,top:[12,19,38],mid:[23,34,56],low:[42,50,68],hor:[74,66,70],sun:0,amb:.28,sunCol:[0,0,0]},
+ {p:.46,top:[18,27,48],mid:[36,48,71],low:[66,72,86],hor:[110,92,86],sun:.05,amb:.37,sunCol:[240,170,120]},
+ {p:.60,top:[27,39,64],mid:[54,68,93],low:[110,110,118],hor:[158,124,106],sun:.12,amb:.47,sunCol:[255,182,132]},
+ {p:.72,top:[42,62,100],mid:[92,114,143],low:[182,164,155],hor:[230,168,124],sun:.38,amb:.62,sunCol:[255,198,152]},
+ {p:.82,top:[62,106,164],mid:[134,166,198],low:[230,206,188],hor:[250,198,152],sun:.66,amb:.78,sunCol:[255,216,172]},
+ {p:.90,top:[70,134,198],mid:[140,184,216],low:[212,230,242],hor:[246,228,198],sun:.86,amb:.93,sunCol:[255,238,208]},
+ {p:1,top:[62,132,204],mid:[128,180,222],low:[202,228,246],hor:[240,240,226],sun:.9,amb:1,sunCol:[255,246,222]}
 ];
+// fog thick in the first climb, rain through the middle, then it clears for dawn
 const WX_KEYS=[
- {p:0,rain:0,fog:.1,leaves:1},
- {p:.14,rain:0,fog:.55,leaves:1.1},
- {p:.26,rain:0,fog:.22,leaves:1.1},
- {p:.34,rain:.15,fog:.14,leaves:.7},
- {p:.46,rain:.9,fog:.16,leaves:.35},
- {p:.64,rain:.4,fog:.12,leaves:.5},
- {p:.76,rain:.04,fog:.07,leaves:.8},
- {p:.9,rain:0,fog:.06,leaves:1.2},
- {p:1,rain:0,fog:.06,leaves:1.5}
+ {p:0,rain:0,fog:.20,leaves:1},
+ {p:.12,rain:0,fog:.64,leaves:1.1},
+ {p:.24,rain:.05,fog:.32,leaves:1.1},
+ {p:.34,rain:.35,fog:.15,leaves:.7},
+ {p:.46,rain:.95,fog:.16,leaves:.35},
+ {p:.60,rain:.55,fog:.12,leaves:.5},
+ {p:.72,rain:.12,fog:.10,leaves:.8},
+ {p:.84,rain:0,fog:.15,leaves:1.1},
+ {p:.93,rain:0,fog:.05,leaves:1.2},
+ {p:1,rain:0,fog:.03,leaves:1.4}
 ];
 const TV={top:[0,0,0],mid:[0,0,0],low:[0,0,0],hor:[0,0,0],sunCol:[0,0,0],ground:[123,68,32],sun:1,amb:1,rain:0,fog:0,leaves:1,wet:0,night:0,label:'16:40　晴れ'};
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -293,7 +374,7 @@ function updateEnv(){
   TV.night=Math.max(0,Math.min(1,(.72-TV.amb)/.55));
   const gl=.3+.7*TV.amb;
   TV.ground=[Math.round(123*gl),Math.round(68*gl),Math.round(32*gl)];
-  const mins=Math.floor(16*60+40+p*180);
+  const mins=Math.floor(4*60+20+p*145);
   const hh=Math.floor(mins/60),mm=mins%60;
   const wn=TV.rain>.55?'雨':TV.rain>.18?'小雨':TV.fog>.62?'霧':TV.fog>.3?'霧が立ちこめ':'晴れ';
   TV.label=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+'　'+wn;
@@ -356,7 +437,8 @@ function waterBand(s,a,b,side,st){
   // thin bright waterline where the bank meets the lake
   quad(e1,a.y,e1+side*Math.max(1.5,a.w*.035),a.y,e2+side*Math.max(1.5,b.w*.035),b.y,e2,b.y,'rgba(255,238,198,.75)');
   // the far water mirrors the sky, which is what makes a lake read as water
-  if(k>.55)quad(e1,a.y,fx,a.y,fx,b.y,e2,b.y,rgba(TV.mid,(k-.55)*.5));
+  if(k>.5)quad(e1,a.y,fx,a.y,fx,b.y,e2,b.y,rgba(TV.mid,(k-.5)*.40));
+  if(k>.45)quad(e1,a.y,fx,a.y,fx,b.y,e2,b.y,'rgba(30,64,86,'+((k-.45)*.55).toFixed(3)+')');
   // broken glints drifting with the time of day
   if((s.index*7+Math.floor(st.t*9))%19<2){
     const gx=e1+side*a.w*(0.7+((s.index*13)%5)*0.55),gx2=e2+side*b.w*(0.7+((s.index*13)%5)*0.55);
@@ -404,7 +486,6 @@ function project(p,cx,cy,cz){
 function quad(x1,y1,x2,y2,x3,y3,x4,y4,c){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x3,y3);ctx.lineTo(x4,y4);ctx.closePath();ctx.fill()}
 function fog(c,f){return c} // distance haze handled by overlay below
 const GROUND=[['#6d3a1a','#7b4420'],['#8a4a1c','#995623']];
-const PARK=[['#55575b','#5e6064'],['#4c4e52','#585a5e']];
 function drawTree(s,sc,sx,sy,clip){
   const h=s.h*sc*H/2, w=h*0.55;
   if(h<2)return;
@@ -434,6 +515,12 @@ function drawObstacle(o,sc,sx,sy,clip,rw){
   if(o.kind==='arch')return drawArch(o,sc,sx,sy,clip);
   if(o.kind==='boat')return drawBoat(o,sc,sx,sy,clip);
   if(o.kind==='sign')return drawSign(o,sc,sx,sy,clip);
+  if(o.kind==='deck')return drawDeck(o,sc,sx,sy,clip);
+  if(o.kind==='ferris')return drawFerris(o,sc,sx,sy,clip);
+  if(o.kind==='tent')return drawTent(o,sc,sx,sy,clip);
+  if(o.kind==='hut')return drawHut(o,sc,sx,sy,clip);
+  if(o.kind==='pier')return drawPier(o,sc,sx,sy,clip);
+  if(o.kind==='portal')return drawPortal(o,sc,sx,sy,clip);
   if(o.kind==='rock')return drawRock(o,sc,sx,sy,clip);
   if(o.kind==='cone')return drawCone(o,sc,sx,sy,clip);
   if(o.kind==='barrier')return drawBarrier(o,sc,sx,sy,clip);
@@ -445,41 +532,166 @@ function shade(hex,f){
   const r=Math.min(255,Math.round(((n>>16)&255)*f)),g=Math.min(255,Math.round(((n>>8)&255)*f)),b=Math.min(255,Math.round((n&255)*f));
   return 'rgb('+r+','+g+','+b+')';
 }
-// a parked NA Roadster, seen nose-on with the pop-up lamps up
+// a parked NA (ユーノス) Roadster: 'front' with the pop-up lamps and the small oval
+// mouth, 'rear' with the twin round tail lamps. Roof up or down, lamps raised or flush.
 function drawCar(o,sc,sx,sy,clip){
-  const h=560*sc*H/2;if(h<1.2)return;
-  const w=h*1.6;
+  const h=700*sc*H/2;if(h<1.2)return;
+  const w=h*1.45;
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
   const c=o.col||'#c8102e';
-  ctx.fillStyle='rgba(16,8,4,.42)';ctx.beginPath();ctx.ellipse(sx,sy+1,w*.64,h*.09,0,0,TAU);ctx.fill();
-  const g=ctx.createLinearGradient(0,sy-h*.95,0,sy);
-  g.addColorStop(0,shade(c,1.32));g.addColorStop(.35,c);g.addColorStop(1,shade(c,.5));
+  ctx.fillStyle='rgba(10,6,3,.45)';ctx.beginPath();ctx.ellipse(sx,sy+Math.max(.6,h*.008),w*.60,h*.055,0,0,TAU);ctx.fill();
+  if(o.view==='rear')carRear(c,w,h,sx,sy,!!o.top);
+  else{
+    // the pop-ups wink open and shut, each car on its own beat
+    const ph=o.ph||0,P=6.5+ph*5.5,t=(st.t+ph*19)%P;
+    const amt=t<0.62?t/0.62:t<2.7?1:t<3.32?1-(t-2.7)/0.62:0;
+    const lamp=amt>0.88&&((st.t*3.5+ph*11)%2<1.05);
+    carFront(c,w,h,sx,sy,!!o.top,true,amt,lamp);
+  }
+  ctx.restore();
+}
+// the soft top, seen from the front or from behind
+function carTop(w,h,sx,sy,rear){
+  const g=ctx.createLinearGradient(0,sy-h*.84,0,sy-h*.64);
+  g.addColorStop(0,'#3c3a40');g.addColorStop(.5,'#1e1f24');g.addColorStop(1,'#111115');
   ctx.fillStyle=g;
   ctx.beginPath();
-  ctx.moveTo(sx-w*.5,sy-h*.1);
-  ctx.quadraticCurveTo(sx-w*.53,sy-h*.5,sx-w*.33,sy-h*.58);
-  ctx.lineTo(sx+w*.33,sy-h*.58);
-  ctx.quadraticCurveTo(sx+w*.53,sy-h*.5,sx+w*.5,sy-h*.1);
+  ctx.moveTo(sx-w*.295,sy-h*.648);
+  ctx.quadraticCurveTo(sx-w*.30,sy-h*.785,sx-w*.145,sy-h*.812);
+  ctx.quadraticCurveTo(sx,sy-h*.828,sx+w*.145,sy-h*.812);
+  ctx.quadraticCurveTo(sx+w*.30,sy-h*.785,sx+w*.295,sy-h*.652);
   ctx.closePath();ctx.fill();
-  // windscreen and cockpit opening
-  ctx.fillStyle='rgba(22,28,36,.85)';
-  ctx.beginPath();ctx.moveTo(sx-w*.29,sy-h*.56);ctx.lineTo(sx+w*.29,sy-h*.56);
-  ctx.lineTo(sx+w*.25,sy-h*.78);ctx.lineTo(sx-w*.25,sy-h*.78);ctx.closePath();ctx.fill();
-  // pop-up headlight pods, raised
-  for(const px of[-.33,.33]){
-    ctx.fillStyle=shade(c,1.12);
-    ctx.beginPath();ctx.roundRect(sx+w*px-w*.1,sy-h*.64,w*.2,h*.07,Math.max(1,h*.012));ctx.fill();
-    ctx.fillStyle='#fff6d6';ctx.beginPath();ctx.ellipse(sx+w*px,sy-h*.62,w*.055,h*.022,0,0,TAU);ctx.fill();
+  // the rear window set into the hood
+  const k=rear?1.16:1;
+  ctx.fillStyle='rgba(128,150,168,.42)';
+  ctx.beginPath();
+  ctx.moveTo(sx-w*.115*k,sy-h*.775);ctx.lineTo(sx+w*.115*k,sy-h*.775);
+  ctx.lineTo(sx+w*.10*k,sy-h*.70);ctx.lineTo(sx-w*.10*k,sy-h*.70);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.09)';ctx.lineWidth=Math.max(.6,h*.006);
+  for(const yy of[.735,.685]){ctx.beginPath();ctx.moveTo(sx-w*.283,sy-h*yy);
+    ctx.quadraticCurveTo(sx,sy-h*(yy+.012),sx+w*.283,sy-h*yy);ctx.stroke();}
+}
+// the windscreen standing on its frame
+function carScreen(w,h,sx,sy){
+  ctx.fillStyle='rgba(20,28,36,.93)';
+  ctx.beginPath();
+  ctx.moveTo(sx-w*.295,sy-h*.532);ctx.lineTo(sx+w*.295,sy-h*.532);
+  ctx.lineTo(sx+w*.255,sy-h*.655);ctx.lineTo(sx-w*.255,sy-h*.655);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(196,212,224,.20)';
+  ctx.beginPath();ctx.moveTo(sx-w*.245,sy-h*.643);ctx.lineTo(sx-w*.05,sy-h*.643);
+  ctx.lineTo(sx-w*.02,sy-h*.545);ctx.lineTo(sx-w*.28,sy-h*.545);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(240,236,226,.6)';ctx.lineWidth=Math.max(.5,h*.006);
+  ctx.beginPath();ctx.moveTo(sx-w*.255,sy-h*.655);ctx.lineTo(sx+w*.255,sy-h*.655);ctx.stroke();
+}
+// open car seen from behind: headrests over the deck, the bar, the screen beyond
+function carOpenBack(w,h,sx,sy){
+  ctx.fillStyle='#241e1a';ctx.beginPath();ctx.ellipse(sx,sy-h*.605,w*.26,h*.115,0,0,TAU);ctx.fill();
+  ctx.fillStyle='#4a3e34';
+  for(const px of[-.115,.115]){
+    ctx.beginPath();ctx.roundRect(sx+w*px-w*.055,sy-h*.675,w*.11,h*.095,Math.max(1,h*.018));ctx.fill();
   }
-  // grille mouth and indicators
-  ctx.fillStyle='#15110f';ctx.beginPath();ctx.roundRect(sx-w*.16,sy-h*.3,w*.32,h*.1,Math.max(1,h*.02));ctx.fill();
-  ctx.fillStyle='#f0a23a';
-  ctx.beginPath();ctx.ellipse(sx-w*.36,sy-h*.24,w*.05,h*.022,0,0,TAU);ctx.fill();
-  ctx.beginPath();ctx.ellipse(sx+w*.36,sy-h*.24,w*.05,h*.022,0,0,TAU);ctx.fill();
-  // bumper
-  ctx.fillStyle=shade(c,.4);ctx.fillRect(sx-w*.5,sy-h*.1,w,h*.1);
-  ctx.restore();
+  ctx.strokeStyle='rgba(214,208,190,.85)';ctx.lineWidth=Math.max(.7,h*.014);
+  ctx.beginPath();ctx.moveTo(sx-w*.175,sy-h*.625);ctx.quadraticCurveTo(sx,sy-h*.715,sx+w*.175,sy-h*.625);ctx.stroke();
+  ctx.strokeStyle='rgba(238,234,224,.5)';ctx.lineWidth=Math.max(.5,h*.006);
+  ctx.beginPath();ctx.moveTo(sx-w*.25,sy-h*.662);ctx.lineTo(sx+w*.25,sy-h*.662);ctx.stroke();
+}
+function carFront(c,w,h,sx,sy,top,pods,amt,lamp){
+  amt=amt===undefined?1:amt;
+  if(top)carTop(w,h,sx,sy,false);
+  // nose, wide fenders and the low hood
+  const g=ctx.createLinearGradient(0,sy-h*.56,0,sy);
+  g.addColorStop(0,shade(c,1.34));g.addColorStop(.32,c);g.addColorStop(1,shade(c,.52));
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(sx-w*.50,sy-h*.09);
+  ctx.quadraticCurveTo(sx-w*.505,sy-h*.34,sx-w*.45,sy-h*.46);
+  ctx.quadraticCurveTo(sx-w*.425,sy-h*.525,sx-w*.40,sy-h*.535);
+  ctx.lineTo(sx+w*.40,sy-h*.535);
+  ctx.quadraticCurveTo(sx+w*.425,sy-h*.525,sx+w*.45,sy-h*.46);
+  ctx.quadraticCurveTo(sx+w*.505,sy-h*.34,sx+w*.50,sy-h*.09);
+  ctx.closePath();ctx.fill();
+  // the crease along each fender
+  ctx.strokeStyle='rgba(255,240,214,.26)';ctx.lineWidth=Math.max(.7,h*.014);
+  for(const s of[-1,1]){
+    ctx.beginPath();ctx.moveTo(sx+s*w*.46,sy-h*.15);
+    ctx.quadraticCurveTo(sx+s*w*.45,sy-h*.42,sx+s*w*.36,sy-h*.52);ctx.stroke();
+  }
+  // the cowl line the screen sits on
+  ctx.strokeStyle='rgba(50,8,4,.30)';ctx.lineWidth=Math.max(.6,h*.010);
+  ctx.beginPath();ctx.moveTo(sx-w*.21,sy-h*.533);ctx.lineTo(sx+w*.21,sy-h*.533);ctx.stroke();
+  carScreen(w,h,sx,sy);
+  // pop-up lamps: standing up out of the hood, or lying flush in it
+  for(const s of[-1,1]){
+    const px=sx+s*w*.345,base=sy-h*.538;
+    if(pods&&amt>0.03){
+      const rise=h*.095*amt;
+      if(lamp){
+        const g=ctx.createRadialGradient(px,base-rise,0,px,base-rise,Math.max(3,w*.55));
+        g.addColorStop(0,'rgba(255,244,200,.75)');
+        g.addColorStop(.45,'rgba(255,228,160,.28)');
+        g.addColorStop(1,'rgba(255,220,140,0)');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,base-rise,Math.max(3,w*.55),0,TAU);ctx.fill();
+      }
+      ctx.fillStyle='rgba(18,9,5,.30)';ctx.beginPath();ctx.ellipse(px,base,w*.108,h*.014,0,0,TAU);ctx.fill();
+      ctx.fillStyle=shade(c,1.0);
+      ctx.beginPath();ctx.roundRect(px-w*.10,base-rise,w*.20,rise+Math.max(.8,h*.008),Math.max(1,h*.012));ctx.fill();
+      ctx.strokeStyle='rgba(28,14,8,.55)';ctx.lineWidth=Math.max(.5,h*.006);ctx.stroke();
+      if(amt>0.55){
+        ctx.fillStyle='rgba(16,11,8,.92)';ctx.fillRect(px-w*.082,base-rise+rise*.22,w*.164,Math.max(.6,h*.020*amt));
+        ctx.fillStyle=lamp?'#fff8d8':'#5b5348';
+        ctx.beginPath();ctx.ellipse(px,base-rise+rise*.34,w*.055,Math.max(.5,h*.013*amt),0,0,TAU);ctx.fill();
+      }
+    }else{
+      ctx.strokeStyle=shade(c,1.6);ctx.lineWidth=Math.max(.6,h*.010);
+      ctx.beginPath();ctx.ellipse(px,base+h*.008,w*.085,h*.018,0,0,TAU);ctx.stroke();
+      ctx.fillStyle='rgba(255,244,210,.22)';ctx.beginPath();ctx.ellipse(px,base+h*.008,w*.05,h*.008,0,0,TAU);ctx.fill();
+    }
+  }
+  // bumper, the small oval mouth, indicators and the plate
+  ctx.fillStyle=shade(c,.40);ctx.fillRect(sx-w*.50,sy-h*.09,w,h*.09);
+  ctx.fillStyle='#100d0c';ctx.beginPath();ctx.ellipse(sx,sy-h*.245,w*.145,h*.048,0,0,TAU);ctx.fill();
+  ctx.fillStyle='rgba(255,236,196,.22)';ctx.beginPath();ctx.ellipse(sx,sy-h*.267,w*.115,h*.012,0,0,TAU);ctx.fill();
+  for(const s of[-1,1]){
+    ctx.fillStyle='#e8962e';
+    ctx.beginPath();ctx.roundRect(sx+s*w*.41-w*.042,sy-h*.215,w*.084,h*.030,Math.max(1,h*.008));ctx.fill();
+  }
+  ctx.fillStyle='#e9e6d8';ctx.fillRect(sx-w*.068,sy-h*.168,w*.136,h*.044);
+  ctx.fillStyle='rgba(30,40,60,.55)';ctx.fillRect(sx-w*.044,sy-h*.156,w*.088,h*.016);
+}
+function carRear(c,w,h,sx,sy,top){
+  if(top)carTop(w,h,sx,sy,true);else carOpenBack(w,h,sx,sy);
+  // tail panel and boot lid seen from behind
+  const g=ctx.createLinearGradient(0,sy-h*.56,0,sy);
+  g.addColorStop(0,shade(c,1.24));g.addColorStop(.34,c);g.addColorStop(1,shade(c,.50));
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(sx-w*.495,sy-h*.09);
+  ctx.quadraticCurveTo(sx-w*.50,sy-h*.33,sx-w*.445,sy-h*.455);
+  ctx.quadraticCurveTo(sx-w*.42,sy-h*.52,sx-w*.40,sy-h*.532);
+  ctx.lineTo(sx+w*.40,sy-h*.532);
+  ctx.quadraticCurveTo(sx+w*.42,sy-h*.52,sx+w*.445,sy-h*.455);
+  ctx.quadraticCurveTo(sx+w*.50,sy-h*.33,sx+w*.495,sy-h*.09);
+  ctx.closePath();ctx.fill();
+  // boot lid seam and the lip along the deck
+  ctx.strokeStyle='rgba(40,12,8,.40)';ctx.lineWidth=Math.max(.5,h*.008);
+  ctx.beginPath();ctx.moveTo(sx-w*.29,sy-h*.49);ctx.lineTo(sx+w*.29,sy-h*.49);ctx.stroke();
+  ctx.strokeStyle='rgba(255,238,210,.20)';ctx.lineWidth=Math.max(.6,h*.012);
+  ctx.beginPath();ctx.moveTo(sx-w*.38,sy-h*.44);ctx.quadraticCurveTo(sx,sy-h*.41,sx+w*.38,sy-h*.44);ctx.stroke();
+  // the NA's twin round tail lamps
+  for(const s of[-1,1]){
+    const px=sx+s*w*.315,r=Math.max(1.4,w*.10);
+    ctx.fillStyle='#37090d';ctx.beginPath();ctx.arc(px,sy-h*.285,r,0,TAU);ctx.fill();
+    ctx.fillStyle='#cf1f24';ctx.beginPath();ctx.arc(px,sy-h*.285,r*.82,0,TAU);ctx.fill();
+    ctx.fillStyle='#8d1219';ctx.beginPath();ctx.arc(px,sy-h*.285,r*.44,0,TAU);ctx.fill();
+    ctx.fillStyle='rgba(255,196,152,.5)';ctx.beginPath();ctx.arc(px-w*.016,sy-h*.305,r*.22,0,TAU);ctx.fill();
+  }
+  // plate between them, bumper below, exhaust on one side
+  ctx.fillStyle='#e8e5d6';ctx.fillRect(sx-w*.078,sy-h*.315,w*.156,h*.066);
+  ctx.fillStyle='rgba(30,40,60,.5)';ctx.fillRect(sx-w*.042,sy-h*.294,w*.084,h*.018);
+  ctx.fillStyle=shade(c,.40);ctx.fillRect(sx-w*.495,sy-h*.09,w*.99,h*.09);
+  ctx.fillStyle='#8f9394';ctx.fillRect(sx+w*.33,sy-h*.058,w*.072,h*.040);
 }
 // のぼり
 function drawFlag(o,sc,sx,sy,clip){
@@ -495,7 +707,7 @@ function drawFlag(o,sc,sx,sy,clip){
   ctx.restore();
 }
 function drawArch(o,sc,sx,sy,clip){
-  const h=1500*sc*H/2;if(h<4)return;const w=h*2.45;
+  const h=1500*sc*H/2;if(h<4)return;const w=h*2.45*(o.span||1);
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
   // two tall posts
@@ -522,7 +734,7 @@ function drawArch(o,sc,sx,sy,clip){
   ctx.restore();
 }
 function drawBanner(o,sc,sx,sy,clip){
-  const h=900*sc*H/2;if(h<2)return;const w=h*3.6;
+  const h=900*sc*H/2;if(h<2)return;const w=h*3.6*(o.span||1);
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
   ctx.fillStyle='#5a5f63';
@@ -640,6 +852,164 @@ function drawPuddle(o,sc,sx,sy,clip,rw){
   ctx.fillStyle='rgba(214,232,240,.3)';ctx.beginPath();ctx.ellipse(sx-w*.12,sy-h*.22,w*.16,h*.22,0,0,TAU);ctx.fill();
   ctx.restore();
 }
+// ----- the sights: viewpoint decks, the little park, the fishing pond -----
+function drawDeck(o,sc,sx,sy,clip){
+  const h=(o.h||1250)*sc*H/2;if(h<2.5)return;
+  const w=h*(o.roof?2.5:2.3);
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  const post=Math.max(.9,w*.035);
+  // timber stilts under the deck
+  ctx.fillStyle='#4a3626';
+  ctx.fillRect(sx-w*.40,sy-h*.44,post,h*.44);
+  ctx.fillRect(sx+w*.40-post,sy-h*.44,post,h*.44);
+  // deck slab
+  ctx.fillStyle='#8a6a45';ctx.fillRect(sx-w*.50,sy-h*.48,w,h*.055);
+  ctx.fillStyle='#ab8657';ctx.fillRect(sx-w*.50,sy-h*.48,w,Math.max(.5,h*.012));
+  // railing: posts and two rails
+  ctx.strokeStyle='#6d5133';ctx.lineWidth=Math.max(.8,h*.018);
+  ctx.beginPath();
+  ctx.moveTo(sx-w*.50,sy-h*.46);ctx.lineTo(sx-w*.50,sy-h*.80);
+  ctx.moveTo(sx+w*.50,sy-h*.46);ctx.lineTo(sx+w*.50,sy-h*.80);
+  ctx.stroke();
+  for(const yy of[.63,.79]){
+    ctx.beginPath();ctx.moveTo(sx-w*.50,sy-h*yy);ctx.lineTo(sx+w*.50,sy-h*yy);ctx.stroke();
+  }
+  ctx.lineWidth=Math.max(.5,h*.008);
+  for(let k=-2;k<=2;k++){
+    ctx.beginPath();ctx.moveTo(sx+w*.16*k,sy-h*.46);ctx.lineTo(sx+w*.16*k,sy-h*.79);ctx.stroke();
+  }
+  // a bench set back on the deck
+  ctx.fillStyle='#6d5133';ctx.fillRect(sx-w*.26,sy-h*.55,w*.52,h*.022);
+  if(o.roof){
+    // 東屋: four posts carrying a pitched roof
+    ctx.fillStyle='#4a3626';
+    for(const px of[-.42,.42])ctx.fillRect(sx+w*px-post*.5,sy-h*.80,post,h*.34);
+    ctx.fillStyle='#7a2e22';
+    ctx.beginPath();ctx.moveTo(sx-w*.63,sy-h*.83);ctx.lineTo(sx,sy-h*1.0);
+    ctx.lineTo(sx+w*.63,sy-h*.83);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#a33a2a';
+    ctx.beginPath();ctx.moveTo(sx-w*.63,sy-h*.83);ctx.lineTo(sx,sy-h*1.0);
+    ctx.lineTo(sx,sy-h*.955);ctx.lineTo(sx-w*.57,sy-h*.815);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(20,10,6,.35)';
+    ctx.beginPath();ctx.moveTo(sx-w*.63,sy-h*.83);ctx.lineTo(sx+w*.63,sy-h*.83);
+    ctx.lineTo(sx+w*.60,sy-h*.805);ctx.lineTo(sx-w*.60,sy-h*.805);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+function drawFerris(o,sc,sx,sy,clip){
+  const h=(o.h||12000)*sc*H/2;if(h<4)return;
+  const w=h*.80,r=h*.38,cy=sy-h*.52;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  // A-frame legs
+  ctx.strokeStyle='#9aa0a6';ctx.lineWidth=Math.max(1,h*.018);
+  ctx.beginPath();ctx.moveTo(sx-w*.30,sy);ctx.lineTo(sx,cy);ctx.lineTo(sx+w*.30,sy);ctx.stroke();
+  ctx.strokeStyle='#767c82';ctx.lineWidth=Math.max(.8,h*.010);
+  ctx.beginPath();ctx.moveTo(sx-w*.17,sy-h*.24);ctx.lineTo(sx+w*.17,sy-h*.24);ctx.stroke();
+  // rim, doubled
+  ctx.strokeStyle='#eeeae0';ctx.lineWidth=Math.max(1.2,h*.013);
+  ctx.beginPath();ctx.arc(sx,cy,r,0,TAU);ctx.stroke();
+  ctx.strokeStyle='rgba(212,206,196,.85)';ctx.lineWidth=Math.max(.6,h*.006);
+  ctx.beginPath();ctx.arc(sx,cy,r*.84,0,TAU);ctx.stroke();
+  // spokes with a cabin hanging at each
+  const n=12,spin=st.t*.06+(o.ph||0);
+  for(let i=0;i<n;i++){
+    const a=i/n*TAU+spin;
+    const px=sx+Math.cos(a)*r,py=cy+Math.sin(a)*r;
+    ctx.strokeStyle='rgba(232,228,218,.5)';ctx.lineWidth=Math.max(.5,h*.004);
+    ctx.beginPath();ctx.moveTo(sx,cy);ctx.lineTo(px,py);ctx.stroke();
+    const cw=Math.max(1.4,h*.055),ch=Math.max(1,h*.042);
+    ctx.fillStyle=['#e2452f','#f0b429','#2f8fd0','#3fae6a','#c452a0','#f07a2a'][i%6];
+    ctx.fillRect(px-cw/2,py-ch/2,cw,ch);
+  }
+  ctx.fillStyle='#d8d2c6';ctx.beginPath();ctx.arc(sx,cy,Math.max(1,h*.018),0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawTent(o,sc,sx,sy,clip){
+  const h=(o.h||2400)*sc*H/2;if(h<2.5)return;
+  const w=h*1.55;
+  if(sy-h*1.15>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  const c=['#e2452f','#f0b429','#2f8fd0','#3fae6a','#c452a0'][(o.col||0)%5];
+  // poles
+  ctx.fillStyle='#9aa0a6';
+  for(const px of[-.44,.44])ctx.fillRect(sx+w*px-Math.max(.6,w*.012),sy-h*.66,Math.max(1,w*.024),h*.66);
+  // striped canopy
+  const n=6;
+  for(let i=0;i<n;i++){
+    ctx.fillStyle=(i%2)?c:'#f7f3e9';
+    ctx.beginPath();
+    ctx.moveTo(sx,sy-h);
+    ctx.lineTo(sx-w*(.5-i/n),sy-h*.66);
+    ctx.lineTo(sx-w*(.5-(i+1)/n),sy-h*.66);
+    ctx.closePath();ctx.fill();
+  }
+  ctx.fillStyle=c;ctx.fillRect(sx-w*.5,sy-h*.66,w,h*.028);
+  // flag on the peak
+  ctx.strokeStyle='#7b8187';ctx.lineWidth=Math.max(.6,w*.018);
+  ctx.beginPath();ctx.moveTo(sx,sy-h);ctx.lineTo(sx,sy-h*1.13);ctx.stroke();
+  ctx.fillStyle=c;
+  ctx.beginPath();ctx.moveTo(sx,sy-h*1.13);ctx.lineTo(sx+w*.22,sy-h*1.07);
+  ctx.lineTo(sx,sy-h*1.01);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+function drawHut(o,sc,sx,sy,clip){
+  const h=(o.h||2000)*sc*H/2;if(h<2.5)return;
+  const w=h*1.7;
+  if(sy-h*1.15>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  // stilts standing out in the pond
+  ctx.fillStyle='#4a3a2a';
+  for(const px of[-.42,-.14,.14,.42]){
+    ctx.fillRect(sx+w*px-Math.max(.6,w*.014),sy-h*.44,Math.max(1,w*.028),h*.44);
+  }
+  // deck and walls
+  ctx.fillStyle='#8a6a45';ctx.fillRect(sx-w*.50,sy-h*.46,w,h*.055);
+  ctx.fillStyle='#cbb894';ctx.fillRect(sx-w*.46,sy-h*.88,w*.92,h*.44);
+  ctx.fillStyle='rgba(60,40,20,.30)';ctx.fillRect(sx-w*.46,sy-h*.88,w*.92,h*.04);
+  // doorway and a small window
+  ctx.fillStyle='#2b2420';ctx.fillRect(sx-w*.11,sy-h*.72,w*.22,h*.28);
+  ctx.fillStyle='#7d6a4e';ctx.fillRect(sx-w*.40,sy-h*.79,w*.17,h*.11);
+  // pitched roof
+  ctx.fillStyle='#6b3b2a';
+  ctx.beginPath();ctx.moveTo(sx-w*.60,sy-h*.88);ctx.lineTo(sx,sy-h*1.14);
+  ctx.lineTo(sx+w*.60,sy-h*.88);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#8a4c34';
+  ctx.beginPath();ctx.moveTo(sx-w*.60,sy-h*.88);ctx.lineTo(sx,sy-h*1.14);
+  ctx.lineTo(sx,sy-h*1.08);ctx.lineTo(sx-w*.55,sy-h*.87);ctx.closePath();ctx.fill();
+  // つり堀 sign under the eaves
+  if(h>16){
+    ctx.fillStyle='#f7f3e5';ctx.fillRect(sx-w*.35,sy-h*.975,w*.70,h*.085);
+    ctx.strokeStyle='#7a6a4a';ctx.lineWidth=Math.max(.5,h*.005);ctx.strokeRect(sx-w*.35,sy-h*.975,w*.70,h*.085);
+    const fs=Math.min(h*.062,w*.62/3);
+    ctx.fillStyle='#1f4a2e';ctx.font='700 '+fs.toFixed(1)+'px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('つり堀',sx,sy-h*.932);
+  }
+  ctx.restore();
+}
+function drawPier(o,sc,sx,sy,clip){
+  const h=(o.h||560)*sc*H/2;if(h<1.2)return;
+  const w=h*6.2;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  if(o.shadow!==false){
+    ctx.fillStyle='rgba(18,36,46,.30)';
+    ctx.beginPath();ctx.ellipse(sx,sy+h*.10,w*.46,h*.12,0,0,TAU);ctx.fill();
+  }
+  // posts into the water
+  ctx.fillStyle='#4a3a2a';
+  for(let k=-2;k<=2;k++)ctx.fillRect(sx+w*.19*k-Math.max(.5,w*.008),sy-h*.26,Math.max(.8,w*.016),h*.40);
+  // plank deck
+  ctx.fillStyle='#7d6141';ctx.fillRect(sx-w*.5,sy-h*.28,w,h*.18);
+  ctx.fillStyle='#9a7b54';ctx.fillRect(sx-w*.5,sy-h*.28,w,Math.max(.5,h*.05));
+  ctx.fillStyle='rgba(40,26,14,.35)';
+  for(let k=1;k<8;k++)ctx.fillRect(sx-w*.5+w*k/8,sy-h*.28,Math.max(.5,w*.006),h*.18);
+  // a rail along the far edge
+  ctx.strokeStyle='#6d5133';ctx.lineWidth=Math.max(.5,h*.04);
+  ctx.beginPath();ctx.moveTo(sx-w*.5,sy-h*.50);ctx.lineTo(sx+w*.5,sy-h*.50);ctx.stroke();
+  ctx.restore();
+}
 function drawRail(seg,side,clip){
   if(seg.env.park)return;
   if(seg.env.bridge)return bridgeRail(seg,side,clip);
@@ -678,6 +1048,186 @@ function bridgeRail(seg,side,clip){
   quad(x1-side*a.scale*90*W/2,a.y,x1+side*a.scale*35*W/2,a.y,x2+side*b.scale*35*W/2,b.y,x2-side*b.scale*90*W/2,b.y,'#8f8d85');
   ctx.restore();
 }
+// ----- トンネル: the bore as nested rock arches, the exit glowing far ahead -----
+function drawTunnelRing(cx,cy,w,far,tint){
+  const aw=w*1.32,ah=w*1.58;
+  ctx.save();
+  ctx.beginPath();ctx.rect(0,0,W,Math.max(0,Math.min(H,cy)));ctx.clip();
+  ctx.beginPath();
+  ctx.rect(-6,-6,W+12,H+12);
+  ctx.moveTo(cx-aw,cy+60);
+  ctx.lineTo(cx-aw,cy-ah*.52);
+  ctx.quadraticCurveTo(cx-aw,cy-ah,cx-aw*.60,cy-ah);
+  ctx.lineTo(cx+aw*.60,cy-ah);
+  ctx.quadraticCurveTo(cx+aw,cy-ah,cx+aw,cy-ah*.52);
+  ctx.lineTo(cx+aw,cy+60);
+  ctx.closePath();
+  ctx.fillStyle='rgb('+Math.round(26+tint*16)+','+Math.round(21+tint*12)+','+Math.round(17+tint*9)+')';
+  ctx.fill('evenodd');
+  // the concrete lining at the mouth of the bore
+  ctx.strokeStyle='rgba(138,120,98,'+(0.20+tint*0.16).toFixed(2)+')';
+  ctx.lineWidth=Math.max(1,w*0.022);
+  ctx.stroke();
+  if(far){
+    // daylight at the far end
+    const g=ctx.createRadialGradient(cx,cy-ah*.42,0,cx,cy-ah*.40,Math.max(2,w*1.05));
+    g.addColorStop(0,'rgba(255,251,240,.98)');
+    g.addColorStop(.45,'rgba(255,243,220,.92)');
+    g.addColorStop(.8,'rgba(238,240,240,.55)');
+    g.addColorStop(1,'rgba(226,236,244,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.moveTo(cx-aw,cy+4);
+    ctx.lineTo(cx-aw,cy-ah*.52);
+    ctx.quadraticCurveTo(cx-aw,cy-ah,cx-aw*.60,cy-ah);
+    ctx.lineTo(cx+aw*.60,cy-ah);
+    ctx.quadraticCurveTo(cx+aw,cy-ah,cx+aw,cy-ah*.52);
+    ctx.lineTo(cx+aw,cy+4);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function drawTunnel(base){
+  let start=-1;
+  for(let n=0;n<DRAW;n++){
+    if(segs[(base.index+n)%N].env.tunnel){start=n;break}
+  }
+  if(start<0||start>60)return;                 // only once the mouth is in sight
+  const list=[];
+  for(let n=start;n<DRAW;n++){
+    const s=segs[(base.index+n)%N];
+    if(!s.env.tunnel)break;
+    list.push(s);
+  }
+  if(!list.length)return;
+  for(let i=list.length-1;i>=0;i-=3){
+    const scr=list[i].p1.screen;
+    if(!(scr.scale>0)||scr.y<0)continue;
+    const t=1-i/Math.max(1,list.length-1);
+    drawTunnelRing(scr.x,scr.y,scr.w,i>list.length-5,t);
+  }
+  // name board over the mouth
+  {
+    const s0=list[0],scr=s0.p1.screen;
+    if(s0.env.tname&&scr.scale>0&&scr.w>70&&scr.y>40){
+      const aw=scr.w*1.32,ah=scr.w*1.58;
+      const fs=Math.min(scr.w*0.30,scr.w*1.1/Math.max(2,s0.env.tname.length));
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(18,14,10,.55)';
+      ctx.fillRect(scr.x-fs*s0.env.tname.length*0.62,scr.y-ah-fs*1.25,fs*s0.env.tname.length*1.24,fs*1.5);
+      ctx.fillStyle='#e6dfc9';
+      ctx.font='700 '+fs.toFixed(1)+'px "Zen Kaku Gothic New",sans-serif';
+      ctx.fillText(s0.env.tname,scr.x,scr.y-ah-fs*0.5);
+    }
+  }
+  // sodium lamps along the crown, receding into the dark
+  for(let i=list.length-1;i>=0;i-=9){
+    const s=list[i],scr=s.p1.screen;
+    if(!(scr.scale>0)||scr.y<0)continue;
+    const aw=scr.w*1.32,ah=scr.w*1.58;
+    for(const side of[-1,1]){
+      const lx=scr.x+side*aw*.66,ly=scr.y-ah*.84;
+      const rr=Math.max(2.5,scr.w*.22);
+      const g=ctx.createRadialGradient(lx,ly,0,lx,ly,rr);
+      g.addColorStop(0,'rgba(255,214,150,.95)');
+      g.addColorStop(.35,'rgba(255,168,72,.42)');
+      g.addColorStop(1,'rgba(255,150,40,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(lx,ly,rr,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(255,226,176,.9)';ctx.beginPath();ctx.arc(lx,ly,Math.max(.8,scr.w*.035),0,TAU);ctx.fill();
+    }
+  }
+}
+// ----- the deep wood closing over the road -----
+function drawCanopy(base){
+  let f=0;
+  for(let n=-3;n<=8;n++)if(segs[(base.index+n+N)%N].env.forest)f++;
+  f=Math.min(1,f/7);
+  if(f<=0.06)return;
+  // the crowns hanging in at the top of the frame
+  for(let k=0;k<15;k++){
+    const x=-60+ (k/14)*(W+120) + Math.sin(st.t*0.35+k*1.9)*10;
+    const hh=(70+80*Math.abs(Math.sin(k*2.1+0.7)))*f;
+    const g=ctx.createLinearGradient(0,0,0,hh*1.1);
+    g.addColorStop(0,'rgba(24,38,20,'+(0.94*f).toFixed(2)+')');
+    g.addColorStop(.55,'rgba(32,48,24,'+(0.80*f).toFixed(2)+')');
+    g.addColorStop(1,'rgba(44,62,28,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.ellipse(x,hh*0.18,86+18*Math.sin(k*1.3),hh*0.92,0,0,TAU);ctx.fill();
+  }
+  // shafts of light coming down through the leaves
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let k=0;k<3;k++){
+    const x=W*(0.22+k*0.28)+Math.sin(st.t*0.2+k)*22;
+    const g=ctx.createLinearGradient(x,0,x+70,330);
+    g.addColorStop(0,'rgba(255,240,196,'+(0.10*f).toFixed(3)+')');
+    g.addColorStop(1,'rgba(255,236,180,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.moveTo(x-38,0);ctx.lineTo(x+38,0);ctx.lineTo(x+120,330);ctx.lineTo(x+16,330);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+// ----- the concrete portal where the road enters the hill -----
+function drawPortal(o,sc,sx,sy,clip){
+  const h=(o.h||2600)*sc*H/2;if(h<3)return;
+  const w=h*2.9;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  const aw=w*.40,ah=h*.70;
+  const bore=()=>{
+    ctx.moveTo(sx-aw,sy+4);
+    ctx.lineTo(sx-aw,sy-ah*.52);
+    ctx.quadraticCurveTo(sx-aw,sy-ah,sx-aw*.58,sy-ah);
+    ctx.lineTo(sx+aw*.58,sy-ah);
+    ctx.quadraticCurveTo(sx+aw,sy-ah,sx+aw,sy-ah*.52);
+    ctx.lineTo(sx+aw,sy+4);
+    ctx.closePath();
+  };
+  // the rock face the bore is cut through
+  ctx.beginPath();
+  ctx.rect(sx-w*.62,sy-h,w*1.24,h);
+  bore();
+  ctx.fillStyle='#463a2e';ctx.fill('evenodd');
+  // a lighter rim of concrete round the mouth
+  ctx.strokeStyle='#7d7060';ctx.lineWidth=Math.max(1.2,w*.028);
+  ctx.beginPath();bore();ctx.stroke();
+  ctx.strokeStyle='rgba(28,22,16,.55)';ctx.lineWidth=Math.max(.8,w*.010);
+  ctx.beginPath();bore();ctx.stroke();
+  ctx.restore();
+}
+// ----- the meeting car park: one wide slab of tarmac, painted bays, no centre line -----
+function drawLot(s,a,b){
+  const w1=a.w*s.env.lot,w2=b.w*s.env.lot;
+  ctx.fillStyle=GROUND[(Math.floor(s.index/40))%2][s.dark];ctx.fillRect(0,b.y,W,a.y-b.y);
+  // asphalt, laid in broad passes so it reads as one slab rather than a road
+  quad(a.x-w1,a.y,a.x+w1,a.y,b.x+w2,b.y,b.x-w2,b.y,(Math.floor(s.index/7)%2)?'#4a4c50':'#45474b');
+  // pale kerb where the tarmac meets the grass and trees
+  for(const side of[-1,1]){
+    quad(a.x+side*w1,a.y,a.x+side*(w1-a.w*.06),a.y,b.x+side*(w2-b.w*.06),b.y,b.x+side*w2,b.y,'rgba(198,194,182,.45)');
+  }
+  // the aisle edge, painted down both sides
+  const lw=Math.max(1,a.w*.007);
+  for(const side of[-1,1]){
+    quad(a.x+side*0.62*a.w,a.y,a.x+side*(0.62*a.w+lw),a.y,
+         b.x+side*(0.62*b.w+lw),b.y,b.x+side*0.62*b.w,b.y,'rgba(240,236,224,.78)');
+  }
+  // one white divider per bay, running out from the aisle across the bays
+  if(s.index%STALL===0){
+    const th=Math.max(1.2,a.w*.018);
+    for(const side of[-1,1]){
+      const x1=side*0.64,x2=side*(s.env.lot-0.09);
+      quad(a.x+x1*a.w,a.y,a.x+x2*a.w,a.y,a.x+x2*a.w,a.y-th,a.x+x1*a.w,a.y-th,'#e9e6d9');
+    }
+  }
+  // the chequered finish line, painted across the aisle
+  if(s.index===FINSEG-8){
+    const th=Math.max(2,a.w*.055);
+    for(let k=0;k<18;k++){
+      const x0=-0.6+1.2*k/18,x1=-0.6+1.2*(k+1)/18;
+      quad(a.x+x0*a.w,a.y,a.x+x1*a.w,a.y,a.x+x1*a.w,a.y-th,a.x+x0*a.w,a.y-th,(k%2)?'#1b1b1b':'#f2efe4');
+    }
+  }
+}
 function renderWorld(st){
   drawBackground();
   const base=segs[Math.floor(st.pos/SEG)%N];
@@ -692,8 +1242,9 @@ function renderWorld(st){
     project(s.p1,camX-x,camY,z0);project(s.p2,camX-x-dx,camY,z0);
     x+=dx;dx+=s.curve;
     if(s.p1.camera.z<=CAMD||s.p2.screen.y>=s.p1.screen.y||s.p2.screen.y>=maxy)continue;
-    const a=s.p1.screen,b=s.p2.screen,g=(s.env.park?PARK:GROUND)[(Math.floor(s.index/40))%2][s.dark];
-    ctx.fillStyle=g;ctx.fillRect(0,b.y,W,a.y-b.y);
+    const a=s.p1.screen,b=s.p2.screen;
+    if(s.env.lot){drawLot(s,a,b);maxy=b.y;continue}
+    ctx.fillStyle=GROUND[(Math.floor(s.index/40))%2][s.dark];ctx.fillRect(0,b.y,W,a.y-b.y);
     if(s.env.water===2){waterBand(s,a,b,-1,st);waterBand(s,a,b,1,st)}
     else if(s.env.water)waterBand(s,a,b,s.env.water,st);
     if(s.env.water&&s.env.water!==2&&s.p1.camera.z>SEG*4){
@@ -735,12 +1286,15 @@ function renderWorld(st){
   ctx.fillStyle=hg;ctx.fillRect(0,HZ-6,W,64);
   // fog sitting in the valley
   if(TV.fog>.02){
-    const fg=ctx.createLinearGradient(0,HZ-34,0,HZ+150);
-    fg.addColorStop(0,'rgba(200,203,203,'+Math.min(.78,TV.fog*.8).toFixed(3)+')');
-    fg.addColorStop(.5,'rgba(196,200,200,'+(TV.fog*.34).toFixed(3)+')');
+    const fg=ctx.createLinearGradient(0,HZ-72,0,HZ+180);
+    fg.addColorStop(0,'rgba(200,203,203,0)');
+    fg.addColorStop(.34,'rgba(202,205,205,'+Math.min(.72,TV.fog*.72).toFixed(3)+')');
+    fg.addColorStop(.62,'rgba(196,200,200,'+(TV.fog*.30).toFixed(3)+')');
     fg.addColorStop(1,'rgba(192,198,198,0)');
-    ctx.fillStyle=fg;ctx.fillRect(0,HZ-34,W,190);
+    ctx.fillStyle=fg;ctx.fillRect(0,HZ-72,W,252);
   }
+  drawTunnel(base);
+  drawCanopy(base);
   return base;
 }
 // ===== Cockpit: right-hand-drive open 2-seater, driver's eye view =====
@@ -1066,6 +1620,47 @@ function reset(){
   const ov=document.getElementById('overlay');ov.hidden=true;ov.style.background='';
   startAudio();
 }
+// ----- the goal fanfare: a bright major arpeggio over a warm pad -----
+function playFanfare(){
+  if(!ac)return;
+  try{
+    if(ac.state==='suspended')ac.resume();
+    const t0=ac.currentTime+.06,out=ac.createGain();
+    out.gain.value=.32;out.connect(ac.destination);
+    // a soft pad underneath
+    for(const p of [[261.63,.055],[392.00,.040],[523.25,.034]]){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=p[0];
+      g.gain.setValueAtTime(0,t0);
+      g.gain.linearRampToValueAtTime(p[1],t0+.45);
+      g.gain.setValueAtTime(p[1],t0+1.7);
+      g.gain.exponentialRampToValueAtTime(.001,t0+3.1);
+      o.connect(g);g.connect(out);o.start(t0);o.stop(t0+3.2);
+    }
+    // the arpeggio, each note a small bell
+    const seq=[[523.25,0],[659.25,.13],[783.99,.26],[1046.50,.39],[783.99,.58],[1046.50,.72],[1318.51,.88]];
+    for(const n of seq){
+      const a=t0+n[1],o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();
+      o.type='triangle';o2.type='sine';
+      o.frequency.value=n[0];o2.frequency.value=n[0]*2.005;
+      lp.type='lowpass';lp.frequency.value=4600;
+      g.gain.setValueAtTime(.0001,a);
+      g.gain.exponentialRampToValueAtTime(.20,a+.018);
+      g.gain.exponentialRampToValueAtTime(.0008,a+.62);
+      o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(out);
+      o.start(a);o2.start(a);o.stop(a+.7);o2.stop(a+.7);
+    }
+    // closing chord
+    [523.25,659.25,783.99,1046.50].forEach((f,i)=>{
+      const a=t0+1.06,o=ac.createOscillator(),g=ac.createGain();
+      o.type=i%2?'triangle':'sine';o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,a);
+      g.gain.exponentialRampToValueAtTime(.14,a+.03);
+      g.gain.exponentialRampToValueAtTime(.0008,a+1.7);
+      o.connect(g);g.connect(out);o.start(a);o.stop(a+1.8);
+    });
+  }catch(e){}
+}
 function endRun(kind){
   st.state=kind;
   const pct=Math.min(100,Math.round(st.pos/FIN*100));
@@ -1078,6 +1673,7 @@ function endRun(kind){
   document.getElementById('go').textContent='もう一度';
   o.style.background=kind==='finish'?'linear-gradient(180deg,rgba(13,10,8,.30),rgba(13,10,8,.66))':'';
   o.hidden=false;
+  if(kind==='finish')playFanfare();
 }
 // ----- obstacle contact -----
 function thud(kind){
@@ -1123,7 +1719,7 @@ function update(dt){
   if(thr)st.speed+=(MAXV*.16*Math.pow(1-sp,.85)+MAXV*.015)*dt; else st.speed-=MAXV*.035*dt;
   if(brk)st.speed-=MAXV*.5*dt;
   if(hb)st.speed-=MAXV*.22*dt;
-  if(!live)st.speed-=MAXV*.3*dt;
+  if(!live)st.speed-=MAXV*2.2*dt;      // she draws up just past the line
   st.speed-=slope*MAXV*.08*dt;
   // lateral: steering vs. centrifugal push in the bend
   const dx=dt*2.4*sp;
@@ -1239,10 +1835,11 @@ function drawHUD(){
   panel(W/2-86,34,172,52);
   ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.fillStyle='#f2e6d4';ctx.font='13px "Share Tech Mono",monospace';ctx.fillText(TV.label,W/2,54);
-  const note=(TV.night>.42&&!st.lightOn)?'ライト点灯 H':(st.wiper&&TV.rain>.18?'ワイパー作動中':'');
+  const inTun=segs[Math.floor(st.pos/SEG)%N].env.tunnel;
+  const note=(inTun&&!st.lightOn)?'トンネル内 ライト H':(TV.night>.42&&!st.lightOn)?'ライト点灯 H':(st.wiper&&TV.rain>.18?'ワイパー作動中':'');
   if(note){
     const bl=.55+.45*Math.sin(st.t*5);
-    ctx.fillStyle=note[0]==='ラ'?'rgba(255,180,90,'+bl.toFixed(2)+')':'#a08c76';
+    ctx.fillStyle=(note[0]==='ラ'||note[0]==='ト')?'rgba(255,180,90,'+bl.toFixed(2)+')':'#a08c76';
     ctx.font='10px "Zen Kaku Gothic New",sans-serif';ctx.fillText(note,W/2,71);
   }
   if(st.msgT>0){

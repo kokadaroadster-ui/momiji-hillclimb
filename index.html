@@ -151,7 +151,7 @@ for(const r of FOREST)mark(r,s=>s.env.forest=1);
 
 // ===== the sights along the pass: viewpoints, the little park, the fishing pond =====
 // cleared of roadside trees so the structures stay visible from the road
-const VIEWS=[[ogura[0]+6,ogura[0]+36],[hozuApp[0]+8,hozuApp[0]+42],[atago[0]+2,atago[0]+30],[shobu[0]+2,shobu[0]+30]];
+const VIEWS=[[ogura[0]-26,ogura[0]+34],[hozuApp[0]-26,hozuApp[0]+40],[atago[0]-26,atago[0]+28],[shobu[0]-26,shobu[0]+28]];
 const YUEN=[tunnel[1]+12,goal[0]-16];
 const clearRange=(a,b)=>{for(let i=Math.max(0,a);i<Math.min(N,b);i++)segs[i].env.clear=1};
 for(const r of VIEWS)clearRange(r[0],r[1]);

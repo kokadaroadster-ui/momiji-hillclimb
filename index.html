@@ -1083,7 +1083,7 @@ function drawHUD(){
   panel(W/2-86,34,172,52);
   ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.fillStyle='#f2e6d4';ctx.font='13px "Share Tech Mono",monospace';ctx.fillText(TV.label,W/2,54);
-  const note=(TV.night>.42&&!st.lightOn)?'ライト点灯 H':(st.wiper&&TV.rain>.1?'ワイパー作動中':'');
+  const note=(TV.night>.42&&!st.lightOn)?'ライト点灯 H':(st.wiper&&TV.rain>.18?'ワイパー作動中':'');
   if(note){
     const bl=.55+.45*Math.sin(st.t*5);
     ctx.fillStyle=note[0]==='ラ'?'rgba(255,180,90,'+bl.toFixed(2)+')':'#a08c76';

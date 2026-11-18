@@ -205,17 +205,25 @@ signAt(goal[0]+8,1.62,'高雄大駐車場');
 const NA_COL=['#c8102e','#14161a','#2f6fb5','#c9c9cf','#1d5c3a','#e8c33a','#f2f2ee','#2a8fa8','#8a2f6b','#d8d4c8'];
 const venueEnd=N-40;
 for(let i=goal[0]+16;i<venueEnd;i++)segs[i].env.park=true;
-for(let i=goal[0]+18;i<venueEnd;i+=5){
+// an inner row right along the shoulder, and a looser row behind it
+for(let i=goal[0]+16;i<venueEnd;i+=6){
   for(const side of[-1,1]){
-    if(rnd()<0.74)segs[i].sprites.push({kind:'car',x:side*(1.62+rnd()*1.15),
+    if(rnd()<0.8)segs[i].sprites.push({kind:'car',x:side*(1.22+rnd()*0.3),
       col:NA_COL[Math.floor(rnd()*NA_COL.length)],ph:rnd()});
   }
 }
-for(let i=goal[0]+26;i<venueEnd;i+=9){
-  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/9)%2?1:-1)*1.28});
+for(let i=goal[0]+21;i<venueEnd;i+=8){
+  for(const side of[-1,1]){
+    if(rnd()<0.6)segs[i].sprites.push({kind:'car',x:side*(2.0+rnd()*0.9),
+      col:NA_COL[Math.floor(rnd()*NA_COL.length)],ph:rnd()});
+  }
 }
-segs[goal[0]+34].sprites.push({kind:'banner',x:1.85,text:'ロードスターミーティング'});
-segs[goal[0]+46].sprites.push({kind:'banner',x:-1.85,text:'高雄大駐車場'});
+for(let i=goal[0]+30;i<venueEnd;i+=9){
+  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/9)%2?1:-1)*1.06});
+}
+segs[goal[0]+40].sprites.push({kind:'banner',x:1.55,text:'ロードスターミーティング'});
+segs[goal[0]+52].sprites.push({kind:'banner',x:-1.55,text:'高雄大駐車場'});
+segs[venueEnd-46].sprites.push({kind:'banner',x:1.5,text:'ロードスターミーティング会場'});
 // 紅葉のトンネル: the trees close over the road on the last climb
 for(let i=tunnel[0];i<tunnel[1];i++){
   for(const side of[-1,1]){
@@ -434,7 +442,7 @@ function shade(hex,f){
 }
 // a parked NA Roadster, seen nose-on with the pop-up lamps up
 function drawCar(o,sc,sx,sy,clip){
-  const h=430*sc*H/2;if(h<1.2)return;
+  const h=560*sc*H/2;if(h<1.2)return;
   const w=h*1.6;
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
@@ -482,7 +490,7 @@ function drawFlag(o,sc,sx,sy,clip){
   ctx.restore();
 }
 function drawBanner(o,sc,sx,sy,clip){
-  const h=760*sc*H/2;if(h<2)return;const w=h*3.6;
+  const h=900*sc*H/2;if(h<2)return;const w=h*3.6;
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
   ctx.fillStyle='#5a5f63';

@@ -1789,7 +1789,8 @@ function update(dt){
   const live=st.state==='run';
   if(st.hit>0)st.hit=Math.max(0,st.hit-dt*1.8);
   const ctrl=live&&st.spinPhase==='none';
-  const thr=ctrl&&keys.up,brk=ctrl&&keys.down,hb=ctrl&&keys.space;
+  const thr=live&&keys.up&&(st.spinPhase==='none'||st.spinPhase==='back');
+  const brk=ctrl&&keys.down,hb=ctrl&&keys.space;
   const tgt=ctrl?(keys.right?1:0)-(keys.left?1:0):0;
   st.steer+=(tgt-st.steer)*Math.min(1,dt*(tgt?7:10));
   const slope=(base.p2.world.y-base.p1.world.y)/SEG;
@@ -1817,7 +1818,7 @@ function update(dt){
       st.speed-=MAXV*.62*dt;                             // the back end lets go
       st.x+=st.spinSide*dt*3.1*Math.max(.28,sp);
       st.steer=st.spinSide*Math.sin(st.spinT*13)*.95;
-      if(st.spinT>.85){
+      if(st.spinT>1.15){
         st.spinPhase='off';st.spinT=0;st.hit=Math.max(st.hit,.9);
         st.fx=1.5;st.fxLabel='コースアウト…';thud('barrier');
       }
@@ -1825,13 +1826,13 @@ function update(dt){
       st.speed-=MAXV*.55*dt;
       st.x+=st.spinSide*dt*.45;
       st.steer*=Math.max(0,1-dt*5);
-      if(st.spinT>.5){st.spinPhase='back';st.spinT=0;st.fx=1.3;st.fxLabel='立て直して復帰！'}
+      if(st.spinT>.7){st.spinPhase='back';st.spinT=0;st.fx=1.3;st.fxLabel='立て直して復帰！'}
     }else{
       st.x+=(st.spinSide*.55-st.x)*Math.min(1,dt*2.8);
       st.spinAng*=Math.max(0,1-dt*3.2);st.spinAngV*=Math.max(0,1-dt*4.5);
       st.speed=Math.max(st.speed,MAXV*.13);              // never left stranded on the shoulder
       if(thr)st.speed+=MAXV*.09*dt;
-      if(st.spinT>1.2){st.spinPhase='none';st.spinT=0;st.spinCool=.45}
+      if(st.spinT>1.2){st.spinPhase='none';st.spinT=0;st.spinCool=.45;st.speed=Math.max(st.speed,MAXV*.15)}
     }
     st.x=Math.max(-1.95,Math.min(1.95,st.x));
     if(st.speed>MAXV*.05){

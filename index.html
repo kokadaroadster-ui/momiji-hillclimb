@@ -133,6 +133,7 @@ const goal=piece(40,90,40,0,-10);                  // 高雄大駐車場への�
 piece(40,40,40,0,0);
 const N=segs.length,TOTAL=N*SEG;
 const CPS=[Math.floor(N*0.25),Math.floor(N*0.5),Math.floor(N*0.75)];
+const FIN=TOTAL-SEG*120;   // the finish line sits inside the meeting area, with the rows of cars ahead
 // water and bridge sections
 mark([lakeA0[0],lakeA1[1]],s=>s.env.water=-1);
 mark(bayA,s=>{s.env.water=2;s.env.bridge=true});
@@ -225,7 +226,7 @@ segs[goal[0]+40].sprites.push({kind:'banner',x:1.55,text:'ロードスターミ�
 segs[goal[0]+52].sprites.push({kind:'banner',x:-1.55,text:'高雄大駐車場'});
 segs[venueEnd-46].sprites.push({kind:'banner',x:1.5,text:'ロードスターミーティング会場'});
 segs[goal[0]+10].sprites.push({kind:'arch',x:0,text:'ロードスターミーティング'});
-segs[venueEnd-32].sprites.push({kind:'arch',x:0,text:'ゴール'});
+segs[venueEnd-150].sprites.push({kind:'arch',x:0,text:'ゴール'});
 
 // 紅葉のトンネル: the trees close over the road on the last climb
 for(let i=tunnel[0];i<tunnel[1];i++){
@@ -1143,7 +1144,7 @@ function update(dt){
     }
   }
   st.kmh=st.speed/MAXV*198;
-  st.dist=Math.min(1,st.pos/TOTAL);
+  st.dist=Math.min(1,st.pos/FIN);
   st.distM=st.dist*10700;   // the parkway is 10.7km gate to gate
   // automatic 5-speed
   if(st.rpm>6700&&st.gear<4)st.gear++;
@@ -1173,7 +1174,7 @@ function update(dt){
     const idx=base.index;
     for(let i=0;i<3;i++)if(!st.cps[i]&&idx>=CPS[i]){st.cps[i]=true;st.time+=25;st.msg='チェックポイント　+25秒';st.msgT=2.4}
     st.msgT=Math.max(0,st.msgT-dt);
-    if(st.pos>=TOTAL-SEG*20)endRun('finish');
+    if(st.pos>=FIN)endRun('finish');
     else if(st.time<=0){st.time=0;endRun('over')}
   }
 }

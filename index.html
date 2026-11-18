@@ -256,12 +256,12 @@ signAt(goal[0]+8,1.62,'高雄大駐車場');
 segs[tunA[0]+14].sprites.push({kind:'portal',x:0,h:2700,text:'保津峡トンネル'});
 segs[tunB[0]+14].sprites.push({kind:'portal',x:0,h:2600,text:'高雄トンネル'});
 // 展望台: a timber deck and a roofed shelter at each viewpoint
-const deckAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:1250,ph:rnd()});
-const shelterAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:2350,roof:true,ph:rnd()});
-deckAt(VIEWS[0][0]+8,-1,1.62);shelterAt(VIEWS[0][0]+18,-1,2.6);
-deckAt(VIEWS[1][0]+10,1,1.62);shelterAt(VIEWS[1][0]+22,1,2.65);
-deckAt(VIEWS[2][0]+6,-1,1.62);shelterAt(VIEWS[2][0]+16,-1,2.6);
-deckAt(VIEWS[3][0]+6,-1,1.62);shelterAt(VIEWS[3][0]+16,-1,2.65);
+const deckAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:1750,ph:rnd()});
+const shelterAt=(i,side,x)=>segs[i].sprites.push({kind:'deck',x:side*x,h:3100,roof:true,ph:rnd()});
+deckAt(VIEWS[0][0]+4,-1,2.05);shelterAt(VIEWS[0][0]+16,-1,3.15);
+deckAt(VIEWS[1][0]+6,1,2.05);shelterAt(VIEWS[1][0]+18,1,3.2);
+deckAt(VIEWS[2][0]+2,-1,2.05);shelterAt(VIEWS[2][0]+14,-1,3.15);
+deckAt(VIEWS[3][0]+2,-1,2.05);shelterAt(VIEWS[3][0]+14,-1,3.2);
 // 観空台遊園地: the wheel turning over the trees, striped tents, bunting
 segs[YUEN[0]+52].sprites.push({kind:'ferris',x:10.5,h:18500,ph:0});
 segs[YUEN[0]+90].sprites.push({kind:'ferris',x:13.5,h:13500,ph:1.7});

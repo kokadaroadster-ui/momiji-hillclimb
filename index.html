@@ -299,8 +299,8 @@ for(const off of[22,36,52]){
     parkCar(i,k*0.56,rnd()<0.82?'front':'rear',rnd()<0.25,rnd()<0.72);
   }
 }
-for(let i=PARK0+12;i<venueEnd-8;i+=10){
-  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/10)%2?1:-1)*0.72});
+for(let i=PARK0+14;i<venueEnd-10;i+=16){
+  segs[i].sprites.push({kind:'flag',x:(Math.floor(i/16)%2?1:-1)*0.74});
 }
 segs[venueEnd-62].sprites.push({kind:'banner',x:0,span:1.1,text:'ようこそ 高雄大駐車場へ'});
 segs[goal[0]+10].sprites.push({kind:'arch',x:0,text:'ロードスターミーティング'});
@@ -695,7 +695,7 @@ function carRear(c,w,h,sx,sy,top){
 }
 // のぼり
 function drawFlag(o,sc,sx,sy,clip){
-  const h=1500*sc*H/2;if(h<2)return;const w=h*.3;
+  const h=(o.h||1050)*sc*H/2;if(h<2)return;const w=h*.30;
   if(sy-h>clip)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
   ctx.fillStyle='#6b7075';ctx.fillRect(sx-w*.05,sy-h,Math.max(1,w*.1),h);

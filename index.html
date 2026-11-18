@@ -63,21 +63,21 @@ body.bttf #wakaba .t{color:#d8f6ff}
 
 <div id="wrap">
   <canvas id="c" width="960" height="540" aria-label="ドライバー視点の走行画面"></canvas>
-  <button id="wakaba" type="button" title="Wボタン：1回でスピン＆コースアウト／3回連続でタイムトラベル" aria-label="Wボタン。1回でスピンしてコースアウト、3回連続でバック・トゥ・ザ・フューチャー風のタイムトラベル">
+  <button id="wakaba" type="button" title="Wボタン：1回でスピン＆コースアウト／3回連続でタイムトラベル／10回連打でドク登場" aria-label="Wボタン。1回でスピンしてコースアウト、3回連続でバック・トゥ・ザ・フューチャー風のタイムトラベル、10回連打でドクがポールダンスで登場">
     <span class="m" aria-hidden="true">W</span><span class="t">スピン</span>
   </button>
   <div id="overlay">
     <h1>紅葉ヒルクライム</h1>
-    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夜明け前の暗さから霧と雨を抜け、たどり着くのは晴れた早朝。落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。<br>走行中に画面左下のWボタンを押すと、スピンしてコースアウトします。3回連続で押すと……何かが起こります。</p>
+    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夜明け前の暗さから霧と雨を抜け、たどり着くのは晴れた早朝。落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。<br>走行中に画面左下のWボタンを押すと、スピンしてコースアウトします。3回連続で押すと……何かが起こります。10回連打すると、博士が飛んできます。</p>
     <div class="res" id="res"></div>
     <button id="go">スタート</button>
   </div>
 </div>
 <div id="pad">
   <div class="grp"><div class="k" id="kL">◀</div><div class="k" id="kR">▶</div><div class="k" id="kH" role="button" aria-label="ヘッドライト">灯</div><div class="k" id="kW" role="button" aria-label="ワイパー">ワ</div></div>
-  <div class="grp"><div class="k" id="kY" role="button" aria-label="Wボタン（1回でスピン、3回連続でタイムトラベル）">W</div><div class="k" id="kB">B</div><div class="k" id="kA">A</div></div>
+  <div class="grp"><div class="k" id="kY" role="button" aria-label="Wボタン（1回でスピン、3回連続でタイムトラベル、10回連打でドク登場）">W</div><div class="k" id="kB">B</div><div class="k" id="kA">A</div></div>
 </div>
-<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト　V ワイパー　画面のWボタンでスピン＆コースアウト（3回連続でタイムトラベル）</div>
+<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト　V ワイパー　画面のWボタンでスピン＆コースアウト（3回連続でタイムトラベル、10回連打でドク登場）</div>
 <script>
 // ===== Engine: track, sprites, background, road renderer =====
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -1637,7 +1637,8 @@ const st={pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,vib:0,re
   lampL:0,lampR:0,lightOn:false,hit:0,wiper:1,wipePhase:0,wipeBlend:0,
   time:55,state:'ready',scrape:0,msg:'',msgT:0,cps:[false,false,false],best:0,
   spinPhase:'none',spinT:0,spinSide:1,spinAng:0,spinAngV:0,spinCool:0,fx:0,fxMax:1.9,dustT:0,
-  ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0};
+  ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0,
+  docPhase:'none',docT:0,docFlash:0,docGlitterT:0};
 const keys={left:false,right:false,up:false,down:false,space:false};
 const KM={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'space'};
 addEventListener('keydown',e=>{
@@ -1704,8 +1705,9 @@ function updateAudio(){
 function reset(){
   Object.assign(st,{pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,distM:0,time:55,scrape:0,msg:'',msgT:0,cps:[false,false,false],state:'run',hit:0,wipePhase:0,wipeBlend:0,
     spinPhase:'none',spinT:0,spinAng:0,spinAngV:0,spinCool:0,fx:0,fxLabel:'',dustT:0,
-    ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0});
-  dustPuffs.length=0;ttEmbers.length=0;wakabaPresses.length=0;
+    ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0,
+    docPhase:'none',docT:0,docFlash:0,docGlitterT:0});
+  dustPuffs.length=0;ttEmbers.length=0;wakabaPresses.length=0;docPresses.length=0;docGlitter.length=0;
   document.body.classList.remove('bttf');
   const ov=document.getElementById('overlay');ov.hidden=true;ov.style.background='';
   document.body.classList.add('running');
@@ -1899,6 +1901,15 @@ const wakabaPresses=[];                 // recent press times, for the combo
 const ttEmbers=[];                      // embers rising off the burning tyres
 function triggerWakaba(){
   const now=performance.now();
+  // ten taps inside the window call the doctor out — counted before the spin, so the tenth tap is his, not another slide
+  if(st.state==='run'){
+    docPresses.push(now);
+    while(docPresses.length&&now-docPresses[0]>DOC_PRESS_WINDOW)docPresses.shift();
+    if(docPresses.length>=DOC_PRESS_NEEDED){
+      docPresses.length=0;
+      if(startDocDance())return;
+    }
+  }else docPresses.length=0;
   wakabaPresses.push(now);
   while(wakabaPresses.length&&now-wakabaPresses[0]>TT_PRESS_WINDOW)wakabaPresses.shift();
   if(wakabaPresses.length>=3){
@@ -2000,6 +2011,7 @@ function updateTimeTravel(dt){
 function update(dt){
   st.t+=dt;
   updateTimeTravel(dt);
+  updateDoc(dt);
   // pop-up lamps: the two motors run at slightly different speeds
   const lt=st.lightOn?1:0;
   st.lampL+=(lt-st.lampL)*Math.min(1,dt*(lt?7:6));
@@ -2307,6 +2319,233 @@ function drawBTTHUD(){
   ctx.fillText(charge?'チャージ中…':'TIME TRAVEL!',cx,cy+49);
   ctx.restore();
 }
+// ===== Wボタン10回連打: ドクがポールダンスで乱入する =====
+const DOC_PRESS_WINDOW=3800;            // ms — ten taps inside this window call the doctor out
+const DOC_PRESS_NEEDED=10;
+const docPresses=[];                    // recent tap times, for the ten-tap summon
+const DOC={in:.46,dance:4.6,out:.72};   // the cut-in arc: step in, dance, fade
+DOC.total=DOC.in+DOC.dance+DOC.out;
+const docGlitter=[];
+const docImg=new Image();
+docImg.decoding='async';docImg.src='doc.png';
+const DOC_H=H*.95,DOC_W=DOC_H*(356/820),DOC_CX=W*.645,DOC_BOT=H*1.006,DOC_POLE=DOC_CX+5;
+// the tenth tap: the road lights up and the doctor walks out to the pole
+function startDocDance(){
+  if(st.state!=='run')return false;
+  st.docPhase='in';st.docT=0;st.docFlash=1;st.docGlitterT=0;
+  st.hit=Math.max(st.hit,.55);
+  docGlitter.length=0;
+  docAudioPoleDance();
+  return true;
+}
+function updateDoc(dt){
+  if(st.docPhase==='none'){
+    if(st.docFlash>0)st.docFlash=Math.max(0,st.docFlash-dt*2.6);
+    if(docGlitter.length)docGlitter.length=0;
+    return;
+  }
+  st.docT+=dt;
+  const t=st.docT;
+  st.docFlash=Math.max(0,st.docFlash-dt*2.6);
+  // glitter rains down over the pole for as long as he dances
+  if(t>DOC.in*.55&&t<DOC.total-DOC.out*.6){
+    st.docGlitterT-=dt;
+    if(st.docGlitterT<=0){
+      st.docGlitterT=.05;
+      const pal=['255,226,120','150,235,255','255,140,220','255,255,255','150,255,200'];
+      docGlitter.push({x:DOC_CX+(Math.random()-.5)*DOC_W*2.4,y:-14,vx:(Math.random()-.5)*40,
+        vy:70+Math.random()*120,r:1.1+Math.random()*2.6,c:pal[(Math.random()*pal.length)|0],
+        life:0,max:2.4+Math.random()*1.8,ph:Math.random()*6.3});
+    }
+  }
+  for(let i=docGlitter.length-1;i>=0;i--){
+    const p=docGlitter[i];p.life+=dt;
+    if(p.life>=p.max||p.y>H+24){docGlitter.splice(i,1);continue}
+    p.x+=p.vx*dt+Math.sin(p.life*5+p.ph)*16*dt;p.y+=p.vy*dt;p.vy+=24*dt;
+  }
+  if(t>=DOC.total){st.docPhase='none';st.docT=0;st.docFlash=0;docGlitter.length=0}
+}
+// the pole: brushed steel with a hot highlight, drawn behind and again in front when he swings around it
+function drawDocPole(alpha,front){
+  const x=DOC_POLE,top=-10,bot=H*1.02,hw=front?3.4:5.4;
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';ctx.globalAlpha=alpha;
+  const gg=ctx.createLinearGradient(x-hw*5,0,x+hw*5,0);
+  gg.addColorStop(0,'rgba(110,200,255,0)');
+  gg.addColorStop(.5,'rgba(150,225,255,'+(front?.30:.20)+')');
+  gg.addColorStop(1,'rgba(110,200,255,0)');
+  ctx.fillStyle=gg;ctx.fillRect(x-hw*5,top,hw*10,bot-top);
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=alpha;
+  const mg=ctx.createLinearGradient(x-hw,0,x+hw,0);
+  mg.addColorStop(0,'#4d5a66');mg.addColorStop(.30,'#e6f6ff');mg.addColorStop(.50,'#ffffff');
+  mg.addColorStop(.72,'#8ba2b2');mg.addColorStop(1,'#333e48');
+  ctx.fillStyle=mg;ctx.fillRect(x-hw,top,hw*2,bot-top);
+  ctx.fillStyle='#f4fbff';
+  ctx.beginPath();ctx.ellipse(x,top+5,hw*1.5,hw*.85,0,0,TAU);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x,bot-6,hw*1.6,hw*.9,0,0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawDocOverlay(dt){
+  const on=st.docPhase!=='none',t=st.docT;
+  if(!on&&st.docFlash<=.012&&docGlitter.length===0)return;
+  const a=on?Math.min(1,t/.20)*(t>DOC.total-DOC.out?Math.max(0,(DOC.total-t)/DOC.out):1):0;
+  ctx.save();
+  // ---- the disco rig: coloured beams sweeping down over the pole
+  if(a>.02){
+    ctx.globalCompositeOperation='lighter';
+    const L=H*1.25;
+    for(let i=0;i<6;i++){
+      const ang=-Math.PI/2+Math.sin(st.t*1.05+i*1.07)*.86;
+      const dx=Math.cos(ang),dy=Math.sin(ang),w2=64+18*Math.sin(st.t*2+i);
+      const ex=DOC_POLE+dx*L,ey=-8+dy*L;
+      const hue=(i*58+st.t*46)%360;
+      const bg=ctx.createLinearGradient(DOC_POLE,-8,ex,ey);
+      bg.addColorStop(0,'hsla('+hue.toFixed(0)+',100%,74%,'+(.30*a).toFixed(3)+')');
+      bg.addColorStop(.55,'hsla('+hue.toFixed(0)+',100%,64%,'+(.12*a).toFixed(3)+')');
+      bg.addColorStop(1,'hsla('+hue.toFixed(0)+',100%,60%,0)');
+      ctx.fillStyle=bg;
+      ctx.beginPath();ctx.moveTo(DOC_POLE-3,-8);ctx.lineTo(DOC_POLE+3,-8);
+      ctx.lineTo(ex-dy*w2,ey+dx*w2);ctx.lineTo(ex+dy*w2,ey-dx*w2);ctx.closePath();ctx.fill();
+    }
+    // a warm pool of light on the road under the act
+    const pg=ctx.createRadialGradient(DOC_POLE,H*.86,6,DOC_POLE,H*.86,W*.30);
+    pg.addColorStop(0,'rgba(255,206,120,'+(.22*a).toFixed(3)+')');
+    pg.addColorStop(.55,'rgba(255,150,90,'+(.09*a).toFixed(3)+')');
+    pg.addColorStop(1,'rgba(255,120,60,0)');
+    ctx.fillStyle=pg;
+    ctx.beginPath();ctx.ellipse(DOC_POLE,H*.86,W*.34,H*.13,0,0,TAU);ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+  }
+  // ---- the pole, then the doctor orbiting it
+  if(a>.02){
+    drawDocPole(a,false);
+    const ph=st.t*2.7,swing=Math.sin(ph),turn=Math.cos(ph);
+    const sx=(.46+.54*Math.abs(turn))*(turn<0?-1:1)*1.07;
+    const bob=-Math.abs(Math.sin(ph*2))*7;
+    const rot=swing*.075+Math.sin(ph*2)*.02;
+    const cx=DOC_CX+swing*20;
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*.95;
+    const rg=ctx.createRadialGradient(cx,DOC_BOT-DOC_H*.52,12,cx,DOC_BOT-DOC_H*.52,DOC_W*1.7);
+    rg.addColorStop(0,'rgba(255,168,72,.20)');
+    rg.addColorStop(.5,'rgba(90,180,255,.11)');
+    rg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rg;ctx.fillRect(cx-DOC_W*1.8,DOC_BOT-DOC_H*1.15,DOC_W*3.6,DOC_H*1.25);
+    ctx.restore();
+    if(docImg.complete&&docImg.naturalWidth>0){
+      ctx.save();ctx.globalAlpha=a;
+      ctx.translate(cx,DOC_BOT+bob);ctx.rotate(rot);ctx.scale(sx,1);
+      ctx.drawImage(docImg,-DOC_W/2,-DOC_H,DOC_W,DOC_H);
+      ctx.restore();
+    }
+    if(turn<0)drawDocPole(a*.9,true);   // he is on the far side: the pole crosses him
+  }
+  // ---- sparks of the storm he arrived in, and the arc that follows him
+  if(a>.02){
+    if(t<DOC.in*1.1||Math.random()<.022){
+      bolt(DOC_POLE+(Math.random()-.5)*70,-12,DOC_POLE+(Math.random()-.5)*46,H*.30,36,2.2+Math.random()*1.5);
+    }
+    ctx.globalCompositeOperation='lighter';
+    for(const p of docGlitter){
+      const k=p.life/p.max,al=(1-k)*(1-k)*Math.min(1,a*1.4);
+      if(al<=.01)continue;
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3.6);
+      g.addColorStop(0,'rgba(255,255,255,'+al.toFixed(3)+')');
+      g.addColorStop(.35,'rgba('+p.c+','+(al*.85).toFixed(3)+')');
+      g.addColorStop(1,'rgba('+p.c+',0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r*3.6,0,TAU);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+  // ---- the words, left of the act
+  if(a>.02){
+    const fs=Math.min(46,W*.052),pop=1+.05*Math.sin(st.t*9);
+    ctx.save();ctx.globalAlpha=a;
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.translate(W*.045,H*.30);ctx.rotate(Math.sin(st.t*5)*.02);
+    ctx.font='700 '+(fs*pop).toFixed(1)+'px "Share Tech Mono",monospace';
+    ctx.shadowColor='rgba(130,225,255,.9)';ctx.shadowBlur=26;
+    ctx.fillStyle='#f4fdff';ctx.fillText('GREAT SCOTT!!',0,0);
+    ctx.shadowBlur=0;
+    ctx.font='700 22px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillStyle='#ffd76a';ctx.fillText('1.21 ジゴワット達成！',4,42);
+    ctx.font='700 15px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillStyle='rgba(196,238,255,.94)';ctx.fillText('ドク、ポールダンス中！',4,74);
+    ctx.restore();
+  }
+  // ---- the white-out of his arrival
+  if(st.docFlash>.012){
+    ctx.fillStyle='rgba(232,246,255,'+Math.min(.9,st.docFlash*.92).toFixed(3)+')';
+    ctx.fillRect(0,0,W,H);
+  }
+  ctx.restore();
+}
+// ----- a four-on-the-floor groove for the dance, with a crack of thunder to open it -----
+function docAudioPoleDance(){
+  if(!ac)return;
+  try{
+    if(ac.state==='suspended')ac.resume();
+    const t=ac.currentTime,out=ac.createGain();out.gain.value=.46;out.connect(ac.destination);
+    // the storm he arrives in: a sharp crack and a rolling tail
+    const nb0=noiseBuf(.6);
+    const s0=ac.createBufferSource();s0.buffer=nb0;
+    const bp0=ac.createBiquadFilter();bp0.type='bandpass';bp0.frequency.value=2600;bp0.Q.value=.8;
+    const g0=ac.createGain();g0.gain.setValueAtTime(.34,t);g0.gain.exponentialRampToValueAtTime(.0006,t+.55);
+    s0.connect(bp0);bp0.connect(g0);g0.connect(out);s0.start(t);s0.stop(t+.6);
+    const th=ac.createOscillator(),thg=ac.createGain();
+    th.type='sine';th.frequency.setValueAtTime(90,t);th.frequency.exponentialRampToValueAtTime(30,t+.7);
+    thg.gain.setValueAtTime(.34,t);thg.gain.exponentialRampToValueAtTime(.0006,t+.8);
+    th.connect(thg);thg.connect(out);th.start(t);th.stop(t+.85);
+    const beat=60/126,beats=12;
+    // kick on every beat
+    for(let i=0;i<beats;i++){
+      const at=t+i*beat;
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.setValueAtTime(138,at);o.frequency.exponentialRampToValueAtTime(42,at+.15);
+      g.gain.setValueAtTime(.40,at);g.gain.exponentialRampToValueAtTime(.0008,at+.21);
+      o.connect(g);g.connect(out);o.start(at);o.stop(at+.23);
+    }
+    // hats on the off-beats and a clap on two and four
+    const nb=noiseBuf(.14);
+    for(let i=0;i<beats*2;i++){
+      const at=t+i*beat/2+.015;
+      const s=ac.createBufferSource();s.buffer=nb;
+      const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=5400;
+      const g=ac.createGain();g.gain.setValueAtTime(.085,at);g.gain.exponentialRampToValueAtTime(.0006,at+.06);
+      s.connect(hp);hp.connect(g);g.connect(out);s.start(at);s.stop(at+.09);
+    }
+    for(let i=0;i<beats;i++){
+      if(i%2===0)continue;
+      const at=t+i*beat;
+      const s=ac.createBufferSource();s.buffer=nb;
+      const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1750;bp.Q.value=1.1;
+      const g=ac.createGain();g.gain.setValueAtTime(.14,at);g.gain.exponentialRampToValueAtTime(.0006,at+.13);
+      s.connect(bp);bp.connect(g);g.connect(out);s.start(at);s.stop(at+.16);
+    }
+    // the bass riff, and a brass stab on the downbeat of the second bar
+    const riff=[0,0,3,0,5,0,3,-2,0,0,3,7,5,3,2,-2];
+    for(let i=0;i<beats*2;i++){
+      const at=t+i*beat/2,semi=riff[i%riff.length];
+      const o=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();
+      o.type='sawtooth';o.frequency.setValueAtTime(55*Math.pow(2,semi/12),at);
+      lp.type='lowpass';lp.frequency.setValueAtTime(1100,at);lp.frequency.exponentialRampToValueAtTime(320,at+.16);
+      g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(.17,at+.015);
+      g.gain.exponentialRampToValueAtTime(.0005,at+.17);
+      o.connect(lp);lp.connect(g);g.connect(out);o.start(at);o.stop(at+.2);
+    }
+    const stab=(at,freqs,dur,amp)=>{
+      for(const f of freqs){
+        const o=ac.createOscillator(),g=ac.createGain();
+        o.type='square';o.frequency.value=f;
+        g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(amp,at+.02);
+        g.gain.exponentialRampToValueAtTime(.0004,at+dur);
+        o.connect(g);g.connect(out);o.start(at);o.stop(at+dur+.03);
+      }
+    };
+    stab(t+.03,[440,554.37,659.25],.42,.055);
+    stab(t+beat*4,[523.25,659.25,783.99,1046.5],.55,.048);
+    stab(t+beat*8,[587.33,739.99,880],.5,.045);
+  }catch(e){}
+}
 // ----- the W button's moment on screen: the spin called out over the road -----
 function drawWakabaFX(){
   if(st.fx<=0)return;
@@ -2368,6 +2607,7 @@ function frame(now){
   drawCockpit(st,dt);
   drawSparks(dt);
   drawBTTFOverlay(dt);
+  drawDocOverlay(dt);
   drawHUD();
   drawBTTHUD();
   drawWakabaFX();

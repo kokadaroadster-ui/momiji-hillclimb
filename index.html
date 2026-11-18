@@ -224,6 +224,9 @@ for(let i=goal[0]+30;i<venueEnd;i+=9){
 segs[goal[0]+40].sprites.push({kind:'banner',x:1.55,text:'ロードスターミーティング'});
 segs[goal[0]+52].sprites.push({kind:'banner',x:-1.55,text:'高雄大駐車場'});
 segs[venueEnd-46].sprites.push({kind:'banner',x:1.5,text:'ロードスターミーティング会場'});
+segs[goal[0]+10].sprites.push({kind:'arch',x:0,text:'ロードスターミーティング'});
+segs[venueEnd-14].sprites.push({kind:'arch',x:0,text:'ゴール'});
+
 // 紅葉のトンネル: the trees close over the road on the last climb
 for(let i=tunnel[0];i<tunnel[1];i++){
   for(const side of[-1,1]){
@@ -427,6 +430,7 @@ function drawObstacle(o,sc,sx,sy,clip,rw){
   if(o.kind==='car')return drawCar(o,sc,sx,sy,clip);
   if(o.kind==='flag')return drawFlag(o,sc,sx,sy,clip);
   if(o.kind==='banner')return drawBanner(o,sc,sx,sy,clip);
+  if(o.kind==='arch')return drawArch(o,sc,sx,sy,clip);
   if(o.kind==='boat')return drawBoat(o,sc,sx,sy,clip);
   if(o.kind==='sign')return drawSign(o,sc,sx,sy,clip);
   if(o.kind==='rock')return drawRock(o,sc,sx,sy,clip);
@@ -487,6 +491,33 @@ function drawFlag(o,sc,sx,sy,clip){
   ctx.fillStyle=g;ctx.fillRect(sx-w*.5,sy-h*.97,w,h*.72);
   ctx.fillStyle='#f4efe3';ctx.fillRect(sx-w*.5,sy-h*.73,w,h*.09);
   ctx.fillStyle='#f0c46a';ctx.beginPath();ctx.arc(sx,sy-h*.5,w*.19,0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawArch(o,sc,sx,sy,clip){
+  const h=1500*sc*H/2;if(h<4)return;const w=h*2.45;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  // two tall posts
+  ctx.fillStyle='#6b7075';
+  ctx.fillRect(sx-w*.5,sy-h,Math.max(1,w*.022),h);
+  ctx.fillRect(sx+w*.5-Math.max(1,w*.022),sy-h,Math.max(1,w*.022),h);
+  // banner across the top
+  const g=ctx.createLinearGradient(0,sy-h,0,sy-h*.72);
+  g.addColorStop(0,'#c8341f');g.addColorStop(1,'#8f1f12');
+  ctx.fillStyle=g;ctx.fillRect(sx-w*.54,sy-h,w*1.08,h*.26);
+  ctx.strokeStyle='#f6efe0';ctx.lineWidth=Math.max(.8,w*.006);
+  ctx.strokeRect(sx-w*.51,sy-h*.97,w*1.02,h*.2);
+  if(h>16){
+    const fs=Math.min(h*.15,w*1.0/Math.max(2,o.text.length));
+    ctx.fillStyle='#fdf7ea';ctx.font='700 '+fs.toFixed(1)+'px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(o.text,sx,sy-h*.85);
+  }
+  // pennants along the banner
+  ctx.fillStyle='#f0c46a';
+  for(let k=0;k<9;k++){
+    const px=sx-w*.45+w*.9*k/8;
+    ctx.beginPath();ctx.moveTo(px,sy-h*.74);ctx.lineTo(px+w*.03,sy-h*.74);ctx.lineTo(px+w*.015,sy-h*.68);ctx.closePath();ctx.fill();
+  }
   ctx.restore();
 }
 function drawBanner(o,sc,sx,sy,clip){

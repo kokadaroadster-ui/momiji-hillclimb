@@ -2367,7 +2367,7 @@ function updateDoc(dt){
 }
 // the pole: brushed steel with a hot highlight, drawn behind and again in front when he swings around it
 function drawDocPole(alpha,front){
-  const x=DOC_POLE,top=-10,bot=H*1.02,hw=front?3.4:5.4;
+  const x=DOC_POLE,top=-10,bot=H*1.02,hw=front?4.2:6.5;
   ctx.save();
   ctx.globalCompositeOperation='lighter';ctx.globalAlpha=alpha;
   const gg=ctx.createLinearGradient(x-hw*5,0,x+hw*5,0);
@@ -2420,7 +2420,7 @@ function drawDocOverlay(dt){
   if(a>.02){
     // a mirror ball over the act, throwing its sparkle around
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;
-    const bx=DOC_POLE,by=30,br=13;
+    const bx=DOC_POLE,by=52,br=14;
     const bg2=ctx.createRadialGradient(bx,by,2,bx,by,br*2.8);
     bg2.addColorStop(0,'rgba(255,255,255,.5)');bg2.addColorStop(.4,'rgba(180,225,255,.22)');
     bg2.addColorStop(1,'rgba(120,180,255,0)');
@@ -2440,9 +2440,9 @@ function drawDocOverlay(dt){
     drawDocPole(a,false);
     const ph=st.t*2.7,swing=Math.sin(ph),turn=Math.cos(ph);
     const sx=(.46+.54*Math.abs(turn))*(turn<0?-1:1)*1.07;
-    const bob=-Math.abs(Math.sin(ph*2))*7;
-    const rot=swing*.075+Math.sin(ph*2)*.02;
-    const cx=DOC_CX+swing*24;
+    const bob=-Math.abs(Math.sin(ph*2))*10;
+    const rot=swing*.115+Math.sin(ph*2)*.03;
+    const cx=DOC_CX+swing*40;
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*.95;
     const rg=ctx.createRadialGradient(cx,DOC_BOT-DOC_H*.52,12,cx,DOC_BOT-DOC_H*.52,DOC_W*1.7);
     rg.addColorStop(0,'rgba(255,168,72,.20)');
@@ -2477,10 +2477,10 @@ function drawDocOverlay(dt){
   }
   // ---- the words, left of the act
   if(a>.02){
-    const fs=Math.min(46,W*.052),pop=1+.05*Math.sin(st.t*9);
+    const fs=Math.min(34,W*.040),pop=1+.05*Math.sin(st.t*9);
     ctx.save();ctx.globalAlpha=a;
     ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.translate(W*.045,H*.20);ctx.rotate(Math.sin(st.t*5)*.02);
+    ctx.translate(W*.045,H*.325);ctx.rotate(Math.sin(st.t*5)*.02);
     ctx.font='700 '+(fs*pop).toFixed(1)+'px "Share Tech Mono",monospace';
     ctx.shadowColor='rgba(130,225,255,.9)';ctx.shadowBlur=26;
     ctx.fillStyle='#f4fdff';ctx.fillText('GREAT SCOTT!!',0,0);

@@ -2396,12 +2396,12 @@ function drawDocOverlay(dt){
     const L=H*1.25;
     for(let i=0;i<6;i++){
       const ang=-Math.PI/2+Math.sin(st.t*1.05+i*1.07)*.86;
-      const dx=Math.cos(ang),dy=Math.sin(ang),w2=30+9*Math.sin(st.t*2+i);
+      const dx=Math.cos(ang),dy=Math.sin(ang),w2=16+6*Math.sin(st.t*2+i);
       const ex=DOC_POLE+dx*L,ey=-8+dy*L;
       const hue=(i*58+st.t*46)%360;
       const bg=ctx.createLinearGradient(DOC_POLE,-8,ex,ey);
-      bg.addColorStop(0,'hsla('+hue.toFixed(0)+',100%,74%,'+(.30*a).toFixed(3)+')');
-      bg.addColorStop(.55,'hsla('+hue.toFixed(0)+',100%,64%,'+(.12*a).toFixed(3)+')');
+      bg.addColorStop(0,'hsla('+hue.toFixed(0)+',100%,74%,'+(.24*a).toFixed(3)+')');
+      bg.addColorStop(.55,'hsla('+hue.toFixed(0)+',100%,64%,'+(.10*a).toFixed(3)+')');
       bg.addColorStop(1,'hsla('+hue.toFixed(0)+',100%,60%,0)');
       ctx.fillStyle=bg;
       ctx.beginPath();ctx.moveTo(DOC_POLE-3,-8);ctx.lineTo(DOC_POLE+3,-8);
@@ -2480,7 +2480,7 @@ function drawDocOverlay(dt){
     const fs=Math.min(46,W*.052),pop=1+.05*Math.sin(st.t*9);
     ctx.save();ctx.globalAlpha=a;
     ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.translate(W*.045,H*.60);ctx.rotate(Math.sin(st.t*5)*.02);
+    ctx.translate(W*.045,H*.20);ctx.rotate(Math.sin(st.t*5)*.02);
     ctx.font='700 '+(fs*pop).toFixed(1)+'px "Share Tech Mono",monospace';
     ctx.shadowColor='rgba(130,225,255,.9)';ctx.shadowBlur=26;
     ctx.fillStyle='#f4fdff';ctx.fillText('GREAT SCOTT!!',0,0);

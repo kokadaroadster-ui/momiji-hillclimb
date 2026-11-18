@@ -203,7 +203,7 @@ signAt(tunnel[0]+8,1.62,'紅葉のトンネル');
 signAt(goal[0]+8,1.62,'高雄大駐車場');
 // ===== Finish: the Roadster meeting in the Takao parking area =====
 const NA_COL=['#c8102e','#14161a','#2f6fb5','#c9c9cf','#1d5c3a','#e8c33a','#f2f2ee','#2a8fa8','#8a2f6b','#d8d4c8'];
-const venueEnd=N-40;
+const venueEnd=N-4;
 for(let i=goal[0]+16;i<venueEnd;i++)segs[i].env.park=true;
 // an inner row right along the shoulder, and a looser row behind it
 for(let i=goal[0]+16;i<venueEnd;i+=6){
@@ -225,7 +225,7 @@ segs[goal[0]+40].sprites.push({kind:'banner',x:1.55,text:'ロードスターミ�
 segs[goal[0]+52].sprites.push({kind:'banner',x:-1.55,text:'高雄大駐車場'});
 segs[venueEnd-46].sprites.push({kind:'banner',x:1.5,text:'ロードスターミーティング会場'});
 segs[goal[0]+10].sprites.push({kind:'arch',x:0,text:'ロードスターミーティング'});
-segs[venueEnd-14].sprites.push({kind:'arch',x:0,text:'ゴール'});
+segs[venueEnd-32].sprites.push({kind:'arch',x:0,text:'ゴール'});
 
 // 紅葉のトンネル: the trees close over the road on the last climb
 for(let i=tunnel[0];i<tunnel[1];i++){
@@ -1173,7 +1173,7 @@ function update(dt){
     const idx=base.index;
     for(let i=0;i<3;i++)if(!st.cps[i]&&idx>=CPS[i]){st.cps[i]=true;st.time+=25;st.msg='チェックポイント　+25秒';st.msgT=2.4}
     st.msgT=Math.max(0,st.msgT-dt);
-    if(st.pos>=TOTAL-SEG*8)endRun('finish');
+    if(st.pos>=TOTAL-SEG*20)endRun('finish');
     else if(st.time<=0){st.time=0;endRun('over')}
   }
 }

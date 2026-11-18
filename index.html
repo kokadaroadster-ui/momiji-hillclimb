@@ -1062,7 +1062,7 @@ function updateAudio(){
 // ----- driving model -----
 function reset(){
   Object.assign(st,{pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,distM:0,time:55,scrape:0,msg:'',msgT:0,cps:[false,false,false],state:'run',hit:0,wipePhase:0,wipeBlend:0});
-  document.getElementById('overlay').hidden=true;
+  const ov=document.getElementById('overlay');ov.hidden=true;ov.style.background='';
   startAudio();
 }
 function endRun(kind){
@@ -1075,6 +1075,7 @@ function endRun(kind){
     :'あと少し届きませんでした。ブレーキを残すコーナーを見直してみましょう。';
   document.getElementById('res').textContent='到達 '+pct+'%　走行 '+(st.distM/1000).toFixed(2)+' km　残り '+Math.max(0,st.time).toFixed(1)+' 秒';
   document.getElementById('go').textContent='もう一度';
+  o.style.background=kind==='finish'?'linear-gradient(180deg,rgba(13,10,8,.30),rgba(13,10,8,.66))':'';
   o.hidden=false;
 }
 // ----- obstacle contact -----
@@ -1142,8 +1143,8 @@ function update(dt){
     }
   }
   st.kmh=st.speed/MAXV*198;
-  st.distM+=st.kmh/3.6*dt;
   st.dist=Math.min(1,st.pos/TOTAL);
+  st.distM=st.dist*10700;   // the parkway is 10.7km gate to gate
   // automatic 5-speed
   if(st.rpm>6700&&st.gear<4)st.gear++;
   if(st.rpm<3300&&st.gear>0)st.gear--;

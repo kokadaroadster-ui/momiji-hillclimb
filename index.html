@@ -2328,7 +2328,7 @@ DOC.total=DOC.in+DOC.dance+DOC.out;
 const docGlitter=[];
 const docImg=new Image();
 docImg.decoding='async';docImg.src='doc.png';
-const DOC_H=H*.95,DOC_W=DOC_H*(356/820),DOC_CX=W*.645,DOC_BOT=H*1.006,DOC_POLE=DOC_CX+5;
+const DOC_H=H*.87,DOC_W=DOC_H*(356/820),DOC_CX=W*.635,DOC_BOT=H*1.004,DOC_POLE=DOC_CX+95;
 // the tenth tap: the road lights up and the doctor walks out to the pole
 function startDocDance(){
   if(st.state!=='run')return false;
@@ -2396,7 +2396,7 @@ function drawDocOverlay(dt){
     const L=H*1.25;
     for(let i=0;i<6;i++){
       const ang=-Math.PI/2+Math.sin(st.t*1.05+i*1.07)*.86;
-      const dx=Math.cos(ang),dy=Math.sin(ang),w2=64+18*Math.sin(st.t*2+i);
+      const dx=Math.cos(ang),dy=Math.sin(ang),w2=30+9*Math.sin(st.t*2+i);
       const ex=DOC_POLE+dx*L,ey=-8+dy*L;
       const hue=(i*58+st.t*46)%360;
       const bg=ctx.createLinearGradient(DOC_POLE,-8,ex,ey);
@@ -2418,12 +2418,31 @@ function drawDocOverlay(dt){
   }
   // ---- the pole, then the doctor orbiting it
   if(a>.02){
+    // a mirror ball over the act, throwing its sparkle around
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;
+    const bx=DOC_POLE,by=30,br=13;
+    const bg2=ctx.createRadialGradient(bx,by,2,bx,by,br*2.8);
+    bg2.addColorStop(0,'rgba(255,255,255,.5)');bg2.addColorStop(.4,'rgba(180,225,255,.22)');
+    bg2.addColorStop(1,'rgba(120,180,255,0)');
+    ctx.fillStyle=bg2;ctx.beginPath();ctx.arc(bx,by,br*2.8,0,TAU);ctx.fill();
+    ctx.fillStyle='rgba(226,240,255,.92)';ctx.beginPath();ctx.arc(bx,by,br,0,TAU);ctx.fill();
+    ctx.strokeStyle='rgba(120,150,190,.5)';ctx.lineWidth=1;
+    for(let i=-2;i<=2;i++){
+      ctx.beginPath();ctx.moveTo(bx-br,by+i*br*.42);ctx.lineTo(bx+br,by+i*br*.42);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(bx+i*br*.42,by-br);ctx.lineTo(bx+i*br*.42,by+br);ctx.stroke();
+    }
+    for(let i=0;i<6;i++){
+      const sa=st.t*2.2+i*TAU/6,d2=br*(1.5+.9*Math.sin(st.t*3+i));
+      ctx.fillStyle='rgba(255,255,255,'+(.35+.5*Math.abs(Math.sin(st.t*4+i))).toFixed(2)+')';
+      ctx.beginPath();ctx.arc(bx+Math.cos(sa)*d2,by+Math.sin(sa)*d2*.9,1.5,0,TAU);ctx.fill();
+    }
+    ctx.restore();
     drawDocPole(a,false);
     const ph=st.t*2.7,swing=Math.sin(ph),turn=Math.cos(ph);
     const sx=(.46+.54*Math.abs(turn))*(turn<0?-1:1)*1.07;
     const bob=-Math.abs(Math.sin(ph*2))*7;
     const rot=swing*.075+Math.sin(ph*2)*.02;
-    const cx=DOC_CX+swing*20;
+    const cx=DOC_CX+swing*24;
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*.95;
     const rg=ctx.createRadialGradient(cx,DOC_BOT-DOC_H*.52,12,cx,DOC_BOT-DOC_H*.52,DOC_W*1.7);
     rg.addColorStop(0,'rgba(255,168,72,.20)');
@@ -2548,6 +2567,7 @@ function docAudioPoleDance(){
 }
 // ----- the W button's moment on screen: the spin called out over the road -----
 function drawWakabaFX(){
+  if(st.docPhase!=='none')return;   // the doctor's cut-in takes the screen while he dances
   if(st.fx<=0)return;
   const a=Math.min(1,st.fx*1.9);
   const age=Math.max(0,(st.fxMax||1.9)-st.fx);

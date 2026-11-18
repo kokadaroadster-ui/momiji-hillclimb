@@ -1773,9 +1773,9 @@ function triggerWakaba(){
   const btn=document.getElementById('wakaba');
   if(btn){btn.classList.add('hit');setTimeout(()=>btn.classList.remove('hit'),320)}
   wakabaSkid();
-  for(let i=0;i<18;i++)dustPuffs.push({x:W/2+(Math.random()-.5)*300,y:425+Math.random()*85,
-    vx:(Math.random()-.5)*260,vy:-40-Math.random()*150,r:8+Math.random()*18,
-    life:0,max:.8+Math.random()*.7,c:Math.random()<.55?'214,178,138':'170,152,134'});
+  for(let i=0;i<18;i++)dustPuffs.push({x:W/2+(Math.random()-.5)*340,y:360+Math.random()*110,
+    vx:(Math.random()-.5)*300,vy:-60-Math.random()*170,r:12+Math.random()*22,
+    life:0,max:.9+Math.random()*.8,c:Math.random()<.55?'214,178,138':'170,152,134'});
 }
 function update(dt){
   st.t+=dt;
@@ -1837,10 +1837,10 @@ function update(dt){
     st.x=Math.max(-1.95,Math.min(1.95,st.x));
     if(st.speed>MAXV*.05){
       st.dustT-=dt;
-      if(st.dustT<=0){st.dustT=.035;
-        for(let i=0;i<2;i++)dustPuffs.push({x:W/2+st.spinSide*40+(Math.random()-.5)*160,y:400+Math.random()*90,
-          vx:st.spinSide*(70+Math.random()*180),vy:-30-Math.random()*90,r:9+Math.random()*16,
-          life:0,max:.85+Math.random()*.7,c:Math.random()<.5?'214,178,138':'172,152,134'});
+      if(st.dustT<=0){st.dustT=.03;
+        for(let i=0;i<2;i++)dustPuffs.push({x:W/2+st.spinSide*30+(Math.random()-.5)*220,y:340+Math.random()*120,
+          vx:st.spinSide*(90+Math.random()*210),vy:-50-Math.random()*110,r:11+Math.random()*20,
+          life:0,max:.95+Math.random()*.8,c:Math.random()<.5?'214,178,138':'176,156,136'});
       }
     }
   }

@@ -31,7 +31,7 @@ button{font:inherit;color:var(--fg);background:var(--accent);border:0;border-rad
 button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 #pad{display:none;width:100%;max-width:720px;justify-content:space-between;gap:10px}
 #pad .grp{display:flex;gap:10px}
-#pad .k{width:clamp(64px,18vw,96px);height:clamp(52px,14vw,72px);display:flex;align-items:center;justify-content:center;
+#pad .k{width:clamp(44px,13vw,92px);height:clamp(44px,12vw,68px);display:flex;align-items:center;justify-content:center;
   background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:22px;color:var(--fg);touch-action:none}
 #pad .k.on{background:var(--accent)}
 #hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.7}
@@ -43,16 +43,16 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <canvas id="c" width="960" height="540" aria-label="ドライバー視点の走行画面"></canvas>
   <div id="overlay">
     <h1>紅葉ヒルクライム</h1>
-    <p>秋の山岳ワインディングを、オープン2シーターの運転席から。チェックポイントで時間が延びます。ゴールまで走り切ろう。</p>
+    <p>秋の山岳ワインディングを、オープン2シーターの運転席から。夕暮れから夜へ、霧や雨も移ろう峠を、落石やパイロンをかわして湖と橋の先のゴールへ。チェックポイントで時間が延びます。</p>
     <div class="res" id="res"></div>
     <button id="go">スタート</button>
   </div>
 </div>
 <div id="pad">
-  <div class="grp"><div class="k" id="kL">◀</div><div class="k" id="kR">▶</div><div class="k" id="kH" role="button" aria-label="ヘッドライト">灯</div></div>
+  <div class="grp"><div class="k" id="kL">◀</div><div class="k" id="kR">▶</div><div class="k" id="kH" role="button" aria-label="ヘッドライト">灯</div><div class="k" id="kW" role="button" aria-label="ワイパー">ワ</div></div>
   <div class="grp"><div class="k" id="kB">B</div><div class="k" id="kA">A</div></div>
 </div>
-<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト</div>
+<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト　V ワイパー</div>
 <script>
 // ===== Engine: track, sprites, background, road renderer =====
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -66,7 +66,7 @@ const easeInOut=(a,b,p)=>a+(b-a)*(-Math.cos(p*Math.PI)/2+.5);
 const lastY=()=>segs.length?segs[segs.length-1].p2.world.y:0;
 function addSeg(curve,y){
   const n=segs.length;
-  segs.push({index:n,curve,sprites:[],dark:Math.floor(n/4)%2,
+  segs.push({index:n,curve,sprites:[],env:{},dark:Math.floor(n/4)%2,
     p1:{world:{y:lastY(),z:n*SEG},camera:{},screen:{}},
     p2:{world:{y:y,z:(n+1)*SEG},camera:{},screen:{}}});
 }
@@ -76,32 +76,117 @@ function addRoad(e,h,l,c,hill){
   for(let i=0;i<h;i++)addSeg(c,easeInOut(sy,ey,(e+i)/t));
   for(let i=0;i<l;i++)addSeg(easeInOut(c,0,i/l),easeInOut(sy,ey,(e+h+i)/t));
 }
-// course: [enter, hold, leave, curve, hill]  (mountain pass: hairpins, S-bends, crests)
-const PAT=[
- [20,30,20,3,0],[25,40,25,-4,30],[20,20,20,0,40],[18,30,18,-2,-25],
- [15,45,15,7,-20],[20,30,20,-3,15],[15,18,15,4,0],[15,18,15,-4,20],[15,22,15,5,-30],
- [30,40,30,0,50],[15,50,15,-7,-40],[20,25,20,3,25],[20,20,20,0,-35],
- [18,35,18,4,10],[16,16,16,-5,0],[16,24,16,6,-15],[25,30,25,-3,35],[20,30,20,0,-20]
-];
-addRoad(50,50,50,0,0);
-let pi=0;
-while(segs.length<3900){
-  const p=PAT[pi%PAT.length],flip=Math.floor(pi/PAT.length)%2?-1:1;
-  addRoad(p[0],p[1],p[2],p[3]*flip,p[4]);pi++;
-}
-addRoad(40,60,40,0,-10);
+// course: [enter, hold, leave, curve, hill]  curve bends the road, hill gains metres per segment
+const piece=(e,h,l,c,hill)=>{const s0=segs.length;addRoad(e,h,l,c,hill);return [s0,segs.length]};
+const mark=(r,f)=>{for(let i=r[0];i<r[1];i++)f(segs[i])};
+addRoad(50,50,50,0,0);                             // start straight
+piece(25,40,25,3,20);                              // fast opening right
+piece(20,25,20,0,35);                              // climb
+piece(18,26,18,5,20);                              // S: left
+piece(18,26,18,-5,20);                             // S: right
+piece(20,55,22,8,10);                              // hairpin, hard left
+piece(16,20,16,0,25);                              // short link
+piece(20,52,22,-8,15);                             // hairpin, hard right
+piece(18,24,18,-5,-30);                            // S downhill
+piece(18,24,18,5,-30);
+piece(20,30,20,2,45);                              // crest
+piece(20,40,20,0,-50);                             // blind descent
+piece(25,60,25,-4,-15);
+piece(30,70,30,3,0);                               // lake approach
+const lakeA0=piece(30,90,30,2,5);                  // lakeside sweep, water on the left
+const bayA=piece(25,70,25,-1.5,0);                 // bay bridge
+const lakeA1=piece(30,90,30,-2,5);
+piece(20,30,20,4,25);
+piece(16,22,16,6,25);                              // tight S climb
+piece(16,22,16,-6,25);
+piece(20,50,20,-9,20);                             // hairpin, uphill
+piece(20,40,20,0,40);                              // ridge
+piece(20,30,20,2,-20);
+const valleyB=piece(30,120,30,0,0);                // valley bridge, straight span
+piece(18,20,18,-5,30);                             // S climb out
+piece(18,20,18,5,30);
+piece(25,50,25,4,-40);
+piece(25,50,25,-4,-40);
+piece(14,14,14,7,0);                               // tight zigzag
+piece(14,14,14,-7,0);
+piece(14,14,14,7,0);
+piece(25,40,25,-3,45);
+piece(20,25,20,5,-25);                             // blind crest right
+piece(20,48,20,8,-20);                             // hairpin, left
+piece(18,22,18,-6,-30);
+piece(18,22,18,6,-30);
+piece(25,60,25,-3,-15);
+piece(30,70,30,2,-10);                             // second lake approach
+const lakeB0=piece(30,90,30,-2,0);                 // lakeside sweep, water on the right
+const bayB=piece(25,70,25,1.5,0);
+const lakeB1=piece(30,80,30,2,0);
+piece(20,30,20,-4,30);
+piece(25,60,25,3,-30);
+piece(16,20,16,-6,10);
+piece(16,20,16,6,10);
+piece(40,80,40,0,-10);                             // finish climb
+piece(40,40,40,0,0);
 const N=segs.length,TOTAL=N*SEG;
 const CPS=[Math.floor(N*0.25),Math.floor(N*0.5),Math.floor(N*0.75)];
+// water and bridge sections
+mark([lakeA0[0],lakeA1[1]],s=>s.env.water=-1);
+mark(bayA,s=>{s.env.water=2;s.env.bridge=true});
+mark(valleyB,s=>{s.env.water=2;s.env.bridge=true});
+mark([lakeB0[0],lakeB1[1]],s=>s.env.water=1);
+mark(bayB,s=>{s.env.water=2;s.env.bridge=true});
 // roadside trees (autumn palette)
 const LEAF=['#c0321c','#d9481c','#ee7a1f','#f2a62c','#e8c43c','#a3261a','#8c3a14'];
 for(let i=8;i<N-10;i+=2){
+  const w=segs[i].env.water;
   for(const side of[-1,1]){
+    if(w===2||w===side)continue;                 // nothing growing out in the lake
     if(rnd()<0.82){
       segs[i].sprites.push({x:side*(1.45+rnd()*3.2),h:1500+rnd()*1700,
         col:Math.floor(rnd()*LEAF.length),pine:rnd()<0.14,r:rnd()});
     }
   }
 }
+// ===== Obstacles on the pass: rocks, cones, barrier boards, leaf drifts, puddles =====
+const obstacles=[];
+const OBS_R={rock:.17,cone:.14,barrier:.20,leaves:.30,puddle:.26};
+function addObstacle(i,kind,x){
+  const o={kind,x,z:i*SEG+SEG*.5,r:OBS_R[kind]};
+  segs[i].sprites.push(o);obstacles.push(o);return o;
+}
+let lastOb=-99;
+for(let i=100;i<N-150;i++){
+  if(i-lastOb<52)continue;
+  const bend=Math.abs(segs[i].curve)+Math.abs(segs[i-2].curve)+Math.abs(segs[i+2].curve);
+  if(bend>9)continue;                             // keep the sharpest corners clean
+  if(rnd()>0.32)continue;
+  const q=rnd();let kind;
+  if(q<0.26)kind='rock';else if(q<0.5)kind='cone';else if(q<0.66)kind='barrier';
+  else if(q<0.84)kind='leaves';else kind='puddle';
+  let x=(rnd()*2-1)*0.6;
+  if(kind==='rock')x=(rnd()<0.5?-1:1)*(0.42+rnd()*0.36);      // rocks lie near the edge
+  if(kind==='barrier')x=(rnd()<0.5?-1:1)*(0.18+rnd()*0.45);
+  addObstacle(i,kind,x);lastOb=i;
+}
+// set pieces: a coned-off shoulder and damp patches along the lakeside
+function coneRow(i0,n,step,x0,dx){for(let k=0;k<n;k++)addObstacle(i0+k*step,'cone',x0+dx*k)}
+coneRow(bayA[0]-30,5,5,-0.84,0.03);
+coneRow(valleyB[0]-30,6,5,0.8,-0.03);
+addObstacle(valleyB[0]-6,'barrier',0.5);
+addObstacle(lakeA0[0]+26,'leaves',0.42);
+addObstacle(lakeB0[0]+14,'puddle',-0.34);
+addObstacle(lakeB0[0]+52,'puddle',0.3);
+addObstacle(bayB[0]+40,'leaves',-0.5);
+// boats out on the lake and a lakeside signpost at each shore road
+for(const r of [[lakeA0,-1],[lakeA1,-1],[lakeB0,1],[lakeB1,1]]){
+  for(let k=1;k<=3;k++){
+    const i=Math.floor(r[0][0]+(r[0][1]-r[0][0])*k/4);
+    segs[i].sprites.push({kind:'boat',x:r[1]*(2.7+k*1.1)});
+  }
+}
+segs[lakeA0[0]-8].sprites.push({kind:'sign',x:1.6,text:'湖岸線'});
+segs[lakeB0[0]-8].sprites.push({kind:'sign',x:1.6,text:'湖岸線'});
+segs[bayA[0]+8].sprites.push({kind:'sign',x:1.9,text:'湖上橋'});
+segs[valleyB[0]+8].sprites.push({kind:'sign',x:1.9,text:'渓谷橋'});
 // distant ridges for parallax
 function ridge(n,amp,f){const a=[];for(let i=0;i<=n;i++)a.push(amp*(Math.sin(i*f)+0.55*Math.sin(i*f*2.3+1.7)+0.3*Math.sin(i*f*5.1+.4)));return a}
 const RIDGES=[
@@ -110,16 +195,94 @@ const RIDGES=[
  {pts:ridge(120,28,.47),col:'#a5481f',y:HZ-10,k:.14}
 ];
 let bgOff=0;
+// ===== Sky, weather and time of day, blended along the course =====
+// p = progress through the course: golden hour at the start, night at the finish.
+const SKY_KEYS=[
+ {p:0,top:[79,134,181],mid:[159,195,214],low:[246,217,164],hor:[244,181,101],sun:1,amb:1,sunCol:[255,232,170]},
+ {p:.22,top:[64,110,152],mid:[146,178,200],low:[242,202,152],hor:[233,166,106],sun:.85,amb:.92,sunCol:[255,216,150]},
+ {p:.40,top:[52,82,124],mid:[124,146,168],low:[214,166,138],hor:[206,138,85],sun:.4,amb:.74,sunCol:[255,180,120]},
+ {p:.56,top:[44,61,82],mid:[90,106,122],low:[143,138,134],hor:[125,117,112],sun:.06,amb:.56,sunCol:[220,160,120]},
+ {p:.70,top:[27,36,56],mid:[51,65,90],low:[93,90,114],hor:[122,96,85],sun:0,amb:.44,sunCol:[0,0,0]},
+ {p:.78,top:[16,24,44],mid:[30,42,66],low:[58,60,82],hor:[80,68,70],sun:0,amb:.38,sunCol:[0,0,0]},
+ {p:.9,top:[8,14,30],mid:[13,24,48],low:[26,36,56],hor:[35,42,56],sun:0,amb:.26,sunCol:[0,0,0]},
+ {p:1,top:[7,12,26],mid:[11,22,44],low:[24,34,52],hor:[32,38,52],sun:0,amb:.23,sunCol:[0,0,0]}
+];
+const WX_KEYS=[
+ {p:0,rain:0,fog:.1,leaves:1},
+ {p:.14,rain:0,fog:.55,leaves:1.1},
+ {p:.26,rain:0,fog:.22,leaves:1.1},
+ {p:.34,rain:.15,fog:.14,leaves:.7},
+ {p:.46,rain:.9,fog:.16,leaves:.35},
+ {p:.64,rain:.4,fog:.12,leaves:.5},
+ {p:.76,rain:.04,fog:.07,leaves:.8},
+ {p:.9,rain:0,fog:.06,leaves:1.2},
+ {p:1,rain:0,fog:.06,leaves:1.5}
+];
+const TV={top:[0,0,0],mid:[0,0,0],low:[0,0,0],hor:[0,0,0],sunCol:[0,0,0],ground:[123,68,32],sun:1,amb:1,rain:0,fog:0,leaves:1,wet:0,night:0,label:'16:40　晴れ'};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smoothT=t=>t*t*(3-2*t);
+function mixc(a,b,t){return[Math.round(lerp(a[0],b[0],t)),Math.round(lerp(a[1],b[1],t)),Math.round(lerp(a[2],b[2],t))]}
+const rgb=c=>'rgb('+c[0]+','+c[1]+','+c[2]+')';
+const rgba=(c,a)=>'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';
+function sampleKey(keys,p){
+  if(p<=keys[0].p)return{A:keys[0],B:keys[0],t:0};
+  for(let i=0;i<keys.length-1;i++)if(p<=keys[i+1].p)return{A:keys[i],B:keys[i+1],t:(p-keys[i].p)/(keys[i+1].p-keys[i].p)};
+  const l=keys[keys.length-1];return{A:l,B:l,t:0};
+}
+function updateEnv(){
+  const p=Math.max(0,Math.min(1,st.dist));
+  const s=sampleKey(SKY_KEYS,p),t=smoothT(s.t);
+  TV.top=mixc(s.A.top,s.B.top,t);TV.mid=mixc(s.A.mid,s.B.mid,t);
+  TV.low=mixc(s.A.low,s.B.low,t);TV.hor=mixc(s.A.hor,s.B.hor,t);
+  TV.sunCol=mixc(s.A.sunCol,s.B.sunCol,t);
+  TV.sun=lerp(s.A.sun,s.B.sun,t);
+  TV.amb=lerp(s.A.amb,s.B.amb,t);
+  const w=sampleKey(WX_KEYS,p),wt=smoothT(w.t);
+  TV.rain=lerp(w.A.rain,w.B.rain,wt);
+  TV.fog=lerp(w.A.fog,w.B.fog,wt);
+  TV.leaves=lerp(w.A.leaves,w.B.leaves,wt);
+  TV.amb*=1-.16*TV.rain;
+  TV.wet=Math.min(1,TV.rain*1.15);
+  TV.night=Math.max(0,Math.min(1,(.72-TV.amb)/.55));
+  const gl=.3+.7*TV.amb;
+  TV.ground=[Math.round(123*gl),Math.round(68*gl),Math.round(32*gl)];
+  const mins=Math.floor(16*60+40+p*180);
+  const hh=Math.floor(mins/60),mm=mins%60;
+  const wn=TV.rain>.55?'雨':TV.rain>.18?'小雨':TV.fog>.62?'霧':TV.fog>.3?'霧が立ちこめ':'晴れ';
+  TV.label=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+'　'+wn;
+}
+// fixed star field, revealed as the light goes
+const STARS=[];
+for(let i=0;i<110;i++)STARS.push({x:rnd()*W,y:rnd()*HZ*.9,s:.6+rnd()*1.5,ph:rnd()*6.2832});
 function drawBackground(){
-  ctx.fillStyle='#7b4420';ctx.fillRect(0,HZ,W,H-HZ);
+  ctx.fillStyle=rgb(TV.ground);ctx.fillRect(0,HZ,W,H-HZ);
   let g=ctx.createLinearGradient(0,0,0,HZ+6);
-  g.addColorStop(0,'#4f86b5');g.addColorStop(.55,'#9fc3d6');g.addColorStop(.85,'#f6d9a4');g.addColorStop(1,'#f4b565');
+  g.addColorStop(0,rgb(TV.top));g.addColorStop(.55,rgb(TV.mid));g.addColorStop(.85,rgb(TV.low));g.addColorStop(1,rgb(TV.hor));
   ctx.fillStyle=g;ctx.fillRect(0,0,W,HZ+8);
-  // low autumn sun
-  const sx=W*0.7-bgOff*0.1,sy=HZ-62;
-  let sg=ctx.createRadialGradient(sx,sy,4,sx,sy,170);
-  sg.addColorStop(0,'rgba(255,248,220,1)');sg.addColorStop(.12,'rgba(255,232,170,.85)');sg.addColorStop(1,'rgba(255,200,120,0)');
-  ctx.fillStyle=sg;ctx.fillRect(0,0,W,HZ+8);
+  if(TV.night>.12){
+    const a=(TV.night-.12)/.88;
+    for(const s of STARS){
+      const tw=.55+.45*Math.sin(st.t*2+s.ph);
+      ctx.fillStyle='rgba(255,248,232,'+(a*tw*.85).toFixed(3)+')';
+      ctx.fillRect(s.x,s.y,s.s,s.s);
+    }
+    const mx=W*.24,my=HZ*.36;
+    const mg=ctx.createRadialGradient(mx,my,2,mx,my,70);
+    mg.addColorStop(0,'rgba(255,250,236,'+(.85*a)+')');
+    mg.addColorStop(.14,'rgba(238,240,226,'+(.5*a)+')');
+    mg.addColorStop(1,'rgba(214,226,240,0)');
+    ctx.fillStyle=mg;ctx.fillRect(mx-74,my-74,148,148);
+    ctx.fillStyle='rgba(255,252,238,'+(.95*a)+')';
+    ctx.beginPath();ctx.arc(mx,my,8,0,TAU);ctx.fill();
+  }
+  if(TV.sun>.02){
+    const sx=W*0.7-bgOff*0.1,sy=HZ-62;
+    let sg=ctx.createRadialGradient(sx,sy,4,sx,sy,170);
+    sg.addColorStop(0,'rgba(255,248,220,'+TV.sun+')');
+    sg.addColorStop(.12,'rgba(255,232,170,'+(.85*TV.sun)+')');
+    sg.addColorStop(1,rgba(TV.sunCol,0));
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,HZ+8);
+  }
   for(const r of RIDGES){
     ctx.fillStyle=r.col;ctx.beginPath();ctx.moveTo(0,HZ+10);
     const step=W/60,o=bgOff*r.k*40;
@@ -128,6 +291,60 @@ function drawBackground(){
       ctx.lineTo(i*step-(o%step),r.y-r.pts[idx]);
     }
     ctx.lineTo(W,HZ+10);ctx.closePath();ctx.fill();
+  }
+}
+// ----- lake water: bands drawn with the road so the surface follows the terrain -----
+// palette from the near bank (deep) to the far side (hazed into the evening sky)
+const WATER_PAL=['#0a2230','#0e2c3d','#13374b','#184259','#1e4f68','#265d76','#316d86','#3f7f95','#50919f','#69a3a8'];
+function waterBand(s,a,b,side,st){
+  const e1=a.x+side*a.w*1.02,e2=b.x+side*b.w*1.02;
+  const fx=side<0?-70:W+70;
+  const k=Math.max(0,Math.min(1,(s.p1.camera.z/SEG-30)/150));
+  const ci=Math.min(WATER_PAL.length-1,Math.floor(Math.pow(k,.8)*(WATER_PAL.length-1)));
+  // open water out to the edge of the view
+  quad(e1,a.y,fx,a.y,fx,b.y,e2,b.y,WATER_PAL[ci]);
+  // the autumn bank mirrored just past the kerb
+  quad(e1,a.y,e1+side*a.w*.34,a.y-0.4,e2+side*b.w*.34,b.y-0.4,e2,b.y,'rgba(140,64,26,.34)');
+  quad(e1+side*a.w*.34,a.y-0.4,e1+side*a.w*.8,a.y-0.6,e2+side*b.w*.8,b.y-0.6,e2+side*b.w*.34,b.y-0.4,'rgba(90,48,22,.16)');
+  // thin bright waterline where the bank meets the lake
+  quad(e1,a.y,e1+side*Math.max(1.5,a.w*.035),a.y,e2+side*Math.max(1.5,b.w*.035),b.y,e2,b.y,'rgba(255,238,198,.75)');
+  // the far water mirrors the sky, which is what makes a lake read as water
+  if(k>.55)quad(e1,a.y,fx,a.y,fx,b.y,e2,b.y,rgba(TV.mid,(k-.55)*.5));
+  // broken glints drifting with the time of day
+  if((s.index*7+Math.floor(st.t*9))%19<2){
+    const gx=e1+side*a.w*(0.7+((s.index*13)%5)*0.55),gx2=e2+side*b.w*(0.7+((s.index*13)%5)*0.55);
+    quad(gx-1.8,a.y,gx+1.8,a.y,gx2+1.8,b.y,gx2-1.8,b.y,'rgba(255,244,206,.55)');
+  }
+}
+// the far shore of the lake, sitting on the waterline at the vanishing distance
+function drawFarShore(sh){
+  const side=sh.side,x0=sh.x,y0=sh.y,dir=side<0?-1:1;
+  ctx.save();
+  ctx.beginPath();ctx.moveTo(x0,y0+30);ctx.lineTo(x0,y0+1);
+  const span=side<0?x0+30:W-x0+30,steps=16;
+  for(let i=1;i<=steps;i++){
+    const px=x0+dir*span*i/steps;
+    const hh=(16+13*Math.sin(i*1.9+1.1)+9*Math.sin(i*4.3+.6))*(1-i*.015);
+    ctx.lineTo(px,y0-hh);
+  }
+  ctx.lineTo(side<0?-40:W+40,y0+30);ctx.closePath();
+  ctx.fillStyle='#6e5f66';ctx.fill();
+  // a band of autumn colour at the foot of the far bank
+  ctx.fillStyle='rgba(166,74,32,.35)';
+  ctx.fillRect(side<0?0:x0,y0-6,Math.abs(W-x0)+20,7);
+  ctx.restore();
+}
+// bridge deck: steel fascia under both kerbs, expansion joints across the surface
+function bridgeDeck(s,a,b){
+  const d1=a.scale*300*H/2,d2=b.scale*300*H/2;
+  for(const side of[-1,1]){
+    const x1=a.x+side*a.w*1.02,x2=b.x+side*b.w*1.02;
+    quad(x1,a.y,x1,a.y+d1,x2,b.y+d2,x2,b.y,'#3b4045');
+    quad(x1-side*a.scale*55*W/2,a.y,x1,a.y,x2,b.y,x2-side*b.scale*55*W/2,b.y,'#828a8e');
+  }
+  if(s.index%10===0){
+    quad(a.x-a.w,a.y,a.x+a.w,a.y,a.x+a.w*.98,a.y-2.4,a.x-a.w*.98,a.y-2.4,'rgba(212,210,200,.55)');
+    quad(a.x-a.w,a.y-2.4,a.x+a.w*.98,a.y-2.4,a.x+a.w*.98,a.y-3.4,a.x-a.w,a.y-3.4,'rgba(24,20,18,.4)');
   }
 }
 function project(p,cx,cy,cz){
@@ -162,7 +379,117 @@ function drawTree(s,sc,sx,sy,clip){
   }
   ctx.restore();
 }
+function drawObstacle(o,sc,sx,sy,clip,rw){
+  if(o.kind==='boat')return drawBoat(o,sc,sx,sy,clip);
+  if(o.kind==='sign')return drawSign(o,sc,sx,sy,clip);
+  if(o.kind==='rock')return drawRock(o,sc,sx,sy,clip);
+  if(o.kind==='cone')return drawCone(o,sc,sx,sy,clip);
+  if(o.kind==='barrier')return drawBarrier(o,sc,sx,sy,clip);
+  if(o.kind==='leaves')return drawLeaves(o,sc,sx,sy,clip,rw);
+  return drawPuddle(o,sc,sx,sy,clip,rw);
+}
+function drawBoat(o,sc,sx,sy,clip){
+  const h=260*sc*H/2;if(h<1)return;const w=h*2.6;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='rgba(226,240,244,.35)';ctx.beginPath();ctx.ellipse(sx,sy+1,w*.85,h*.16,0,0,TAU);ctx.fill();
+  ctx.fillStyle='#eceade';ctx.beginPath();
+  ctx.moveTo(sx-w*.5,sy);ctx.lineTo(sx+w*.5,sy);ctx.lineTo(sx+w*.36,sy-h*.34);ctx.lineTo(sx-w*.36,sy-h*.34);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#9aa6ac';ctx.fillRect(sx-w*.3,sy-h*.58,w*.6,h*.24);
+  ctx.fillStyle='#d8e2e6';ctx.fillRect(sx-w*.3,sy-h*.6,w*.6,Math.max(.6,h*.03));
+  ctx.restore();
+}
+function drawSign(o,sc,sx,sy,clip){
+  const h=780*sc*H/2;if(h<2)return;const w=h*1.55;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='#5a5f63';
+  ctx.fillRect(sx-w*.34,sy-h*.5,Math.max(1,w*.07),h*.5);
+  ctx.fillRect(sx+w*.27,sy-h*.5,Math.max(1,w*.07),h*.5);
+  const g=ctx.createLinearGradient(0,sy-h,0,sy-h*.45);
+  g.addColorStop(0,'#2a6b45');g.addColorStop(1,'#164229');
+  ctx.fillStyle=g;ctx.fillRect(sx-w*.5,sy-h,w,h*.56);
+  ctx.strokeStyle='#eaf0e8';ctx.lineWidth=Math.max(.8,w*.022);ctx.strokeRect(sx-w*.5,sy-h,w,h*.56);
+  if(h>9){
+    ctx.fillStyle='#f4f8f2';ctx.font='700 '+(h*.33)+'px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(o.text,sx,sy-h*.71);
+  }
+  ctx.restore();
+}
+function drawRock(o,sc,sx,sy,clip){
+  const h=430*sc*H/2;if(h<1.2)return;const w=h*1.05;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='rgba(24,12,6,.42)';ctx.beginPath();ctx.ellipse(sx,sy+1,w*.55,h*.1,0,0,TAU);ctx.fill();
+  const g=ctx.createLinearGradient(sx-w*.5,sy-h,sx+w*.4,sy);
+  g.addColorStop(0,'#9b9287');g.addColorStop(.4,'#6d645a');g.addColorStop(1,'#38322c');
+  ctx.fillStyle=g;ctx.beginPath();
+  ctx.moveTo(sx-w*.56,sy+1);ctx.lineTo(sx-w*.46,sy-h*.5);ctx.lineTo(sx-w*.1,sy-h*.97);
+  ctx.lineTo(sx+w*.28,sy-h*.9);ctx.lineTo(sx+w*.5,sy-h*.34);ctx.lineTo(sx+w*.44,sy+1);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,196,120,.45)';ctx.lineWidth=Math.max(.8,h*.03);
+  ctx.beginPath();ctx.moveTo(sx-w*.1,sy-h*.97);ctx.lineTo(sx+w*.28,sy-h*.9);ctx.stroke();
+  ctx.strokeStyle='rgba(20,10,4,.5)';ctx.lineWidth=Math.max(.6,h*.02);
+  ctx.beginPath();ctx.moveTo(sx-w*.18,sy-h*.66);ctx.lineTo(sx+w*.06,sy-h*.3);ctx.stroke();
+  ctx.fillStyle='#574c40';
+  for(let k=0;k<3;k++){const r=h*.07*(1+k*.35);ctx.beginPath();ctx.ellipse(sx+(k%2?1:-1)*w*(.52+k*.12),sy+1,r,r*.5,0,0,TAU);ctx.fill()}
+  ctx.restore();
+}
+function drawCone(o,sc,sx,sy,clip){
+  const h=320*sc*H/2;if(h<1.2)return;const w=h*.34;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='rgba(24,12,6,.4)';ctx.beginPath();ctx.ellipse(sx,sy+1,w*1.1,h*.07,0,0,TAU);ctx.fill();
+  ctx.fillStyle='#e2591f';ctx.beginPath();ctx.moveTo(sx,sy-h);ctx.lineTo(sx+w*1.25,sy);ctx.lineTo(sx-w*1.25,sy);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#f4efe3';ctx.beginPath();
+  ctx.moveTo(sx-w*.3,sy-h*.6);ctx.lineTo(sx+w*.3,sy-h*.6);ctx.lineTo(sx+w*.62,sy-h*.32);ctx.lineTo(sx-w*.62,sy-h*.32);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle='#b8431a';ctx.fillRect(sx-w*1.5,sy-h*.07,w*3,h*.07);
+  ctx.restore();
+}
+function drawBarrier(o,sc,sx,sy,clip){
+  const h=430*sc*H/2;if(h<1.6)return;const w=h*.72;
+  if(sy-h>clip)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='rgba(24,12,6,.4)';ctx.beginPath();ctx.ellipse(sx,sy+1,w*.55,h*.06,0,0,TAU);ctx.fill();
+  ctx.strokeStyle='#6b7075';ctx.lineWidth=Math.max(1,h*.05);
+  ctx.beginPath();ctx.moveTo(sx-w*.4,sy);ctx.lineTo(sx-w*.26,sy-h*.66);ctx.moveTo(sx+w*.4,sy);ctx.lineTo(sx+w*.26,sy-h*.66);ctx.stroke();
+  const bx=sx-w*.52,by=sy-h*.98,bw=w*1.04,bh=h*.36;
+  ctx.fillStyle='#f0e9da';ctx.fillRect(bx,by,bw,bh);
+  ctx.fillStyle='#c8341f';
+  for(let k=0;k<6;k+=2){
+    ctx.beginPath();ctx.moveTo(bx+bw*k/6,by+bh);ctx.lineTo(bx+bw*(k+1)/6,by);
+    ctx.lineTo(bx+bw*(k+2)/6,by);ctx.lineTo(bx+bw*(k+1)/6,by+bh);ctx.closePath();ctx.fill();
+  }
+  ctx.fillStyle='#f0a23a';ctx.beginPath();ctx.arc(sx,by-h*.06,Math.max(1,bh*.16),0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawLeaves(o,sc,sx,sy,clip,rw){
+  const w=rw*o.r*2,h=Math.max(1.2,w*.3);
+  if(w<3)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  ctx.fillStyle='rgba(110,48,14,.5)';ctx.beginPath();ctx.ellipse(sx,sy,w*.5,h,0,0,TAU);ctx.fill();
+  ctx.fillStyle='rgba(190,96,28,.62)';ctx.beginPath();ctx.ellipse(sx-w*.08,sy-h*.12,w*.36,h*.62,0,0,TAU);ctx.fill();
+  const n=Math.min(14,Math.max(3,Math.round(w/7)));
+  for(let k=0;k<n;k++){
+    const a=k*2.7,d=((k*37)%10)/10;
+    ctx.fillStyle=LEAF[k%LEAF.length];
+    ctx.beginPath();ctx.ellipse(sx+Math.cos(a)*w*.42*d,sy+Math.sin(a)*h*.8*d,Math.max(1,w*.03),Math.max(.7,w*.016),a,0,TAU);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawPuddle(o,sc,sx,sy,clip,rw){
+  const w=rw*o.r*2,h=Math.max(1.2,w*.26);
+  if(w<3)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  const g=ctx.createLinearGradient(sx,sy-h,sx,sy+h);
+  g.addColorStop(0,'rgba(124,152,168,.72)');g.addColorStop(.45,'rgba(62,88,104,.72)');g.addColorStop(1,'rgba(24,36,46,.78)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx,sy,w*.5,h,0,0,TAU);ctx.fill();
+  ctx.strokeStyle='rgba(255,240,200,.35)';ctx.lineWidth=Math.max(.6,w*.01);ctx.stroke();
+  ctx.fillStyle='rgba(214,232,240,.3)';ctx.beginPath();ctx.ellipse(sx-w*.12,sy-h*.22,w*.16,h*.22,0,0,TAU);ctx.fill();
+  ctx.restore();
+}
 function drawRail(seg,side,clip){
+  if(seg.env.bridge)return bridgeRail(seg,side,clip);
   const a=seg.p1.screen,b=seg.p2.screen;
   const x1=a.x+side*a.w*1.14,x2=b.x+side*b.w*1.14;
   const hh1=a.scale*420*H/2,hh2=b.scale*420*H/2;
@@ -175,13 +502,36 @@ function drawRail(seg,side,clip){
   }
   ctx.restore();
 }
+function bridgeRail(seg,side,clip){
+  const a=seg.p1.screen,b=seg.p2.screen;
+  const x1=a.x+side*a.w*1.08,x2=b.x+side*b.w*1.08;
+  const hh1=a.scale*470*H/2,hh2=b.scale*470*H/2;
+  if(a.y<b.y)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,clip);ctx.clip();
+  const lw=Math.max(.6,a.scale*55*W/2);
+  // top chord of the truss
+  ctx.strokeStyle='#c3cbcd';ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,a.y-hh1);ctx.lineTo(x2,b.y-hh2);ctx.stroke();
+  // zig-zag web between Deack and chord
+  ctx.strokeStyle='rgba(186,196,198,.85)';ctx.lineWidth=Math.max(.5,lw*.8);
+  ctx.beginPath();
+  if(seg.index%2===0){ctx.moveTo(x1,a.y-hh1);ctx.lineTo(x2,b.y);}
+  else{ctx.moveTo(x1,a.y);ctx.lineTo(x2,b.y-hh2);}
+  ctx.stroke();
+  // posts every few segments
+  if(seg.index%6===0){ctx.strokeStyle='#d6dcdd';ctx.lineWidth=Math.max(.6,lw*1.4);
+    ctx.beginPath();ctx.moveTo(x1,a.y);ctx.lineTo(x1,a.y-hh1*1.04);ctx.stroke();}
+  // concrete kerb along the deck edge
+  quad(x1-side*a.scale*90*W/2,a.y,x1+side*a.scale*35*W/2,a.y,x2+side*b.scale*35*W/2,b.y,x2-side*b.scale*90*W/2,b.y,'#8f8d85');
+  ctx.restore();
+}
 function renderWorld(st){
   drawBackground();
   const base=segs[Math.floor(st.pos/SEG)%N];
   const bp=(st.pos%SEG)/SEG;
   const camX=st.x*RW+170;                       // right-hand-drive seat sits right of centre
   const camY=CAMH+base.p1.world.y+(base.p2.world.y-base.p1.world.y)*bp;
-  let x=0,dx=-(base.curve*bp),maxy=H;
+  let x=0,dx=-(base.curve*bp),maxy=H,shore=null;
   for(let n=0;n<DRAW;n++){
     const s=segs[(base.index+n)%N],loop=0;
     s.clip=maxy;
@@ -191,6 +541,12 @@ function renderWorld(st){
     if(s.p1.camera.z<=CAMD||s.p2.screen.y>=s.p1.screen.y||s.p2.screen.y>=maxy)continue;
     const a=s.p1.screen,b=s.p2.screen,g=GROUND[(Math.floor(s.index/40))%2][s.dark];
     ctx.fillStyle=g;ctx.fillRect(0,b.y,W,a.y-b.y);
+    if(s.env.water===2){waterBand(s,a,b,-1,st);waterBand(s,a,b,1,st)}
+    else if(s.env.water)waterBand(s,a,b,s.env.water,st);
+    if(s.env.water&&s.env.water!==2&&s.p1.camera.z>SEG*4){
+      const side=s.env.water,wy=a.y,wx=a.x+side*a.w*1.02;
+      if(!shore||wy<shore.y)shore={side,y:wy,x:wx};
+    }
     const rw1=a.w*1.06,rw2=b.w*1.06;
     quad(a.x-rw1,a.y,a.x+rw1,a.y,b.x+rw2,b.y,b.x-rw2,b.y,s.dark?'#dedfe0':'#b4392a');
     quad(a.x-a.w,a.y,a.x+a.w,a.y,b.x+b.w,b.y,b.x-b.w,b.y,s.dark?'#4b4a4d':'#525155');
@@ -200,21 +556,38 @@ function renderWorld(st){
     }
     quad(a.x-a.w*.96-a.w/60,a.y,a.x-a.w*.96+a.w/60,a.y,b.x-b.w*.96+b.w/60,b.y,b.x-b.w*.96-b.w/60,b.y,'#d8cfb6');
     quad(a.x+a.w*.96-a.w/60,a.y,a.x+a.w*.96+a.w/60,a.y,b.x+b.w*.96+b.w/60,b.y,b.x+b.w*.96-b.w/60,b.y,'#d8cfb6');
+    if(TV.wet>.02){
+      quad(a.x-a.w*.97,a.y,a.x+a.w*.97,a.y,b.x+b.w*.97,b.y,b.x-b.w*.97,b.y,'rgba(150,174,192,'+(TV.wet*.13).toFixed(3)+')');
+      quad(a.x-a.w*.30,a.y,a.x+a.w*.10,a.y,b.x+b.w*.10,b.y,b.x-b.w*.30,b.y,'rgba(228,238,242,'+(TV.wet*.07).toFixed(3)+')');
+    }
+    if(s.env.bridge)bridgeDeck(s,a,b);
     maxy=b.y;
   }
+  if(shore)drawFarShore(shore);
   for(let n=DRAW-1;n>0;n--){
     const s=segs[(base.index+n)%N];
     if(s.p1.camera.z<=CAMD)continue;
     drawRail(s,-1,s.clip);drawRail(s,1,s.clip);
     for(const sp of s.sprites){
-      const sc=s.p1.screen.scale,sx=s.p1.screen.x+sp.x*s.p1.screen.w,sy=s.p1.screen.y;
-      drawTree(sp,sc,sx,sy,s.clip);
+      const scr=s.p1.screen,sx=scr.x+sp.x*scr.w,sy=scr.y;
+      if(sp.kind)drawObstacle(sp,scr.scale,sx,sy,s.clip,scr.w);
+      else drawTree(sp,scr.scale,sx,sy,s.clip);
     }
   }
+  // the light falls away as the evening turns to night
+  if(TV.amb<1){ctx.fillStyle='rgba(5,8,18,'+((1-TV.amb)*.58).toFixed(3)+')';ctx.fillRect(0,0,W,H)}
   // atmospheric haze toward the horizon
   const hg=ctx.createLinearGradient(0,HZ-6,0,HZ+90);
-  hg.addColorStop(0,'rgba(246,205,150,.55)');hg.addColorStop(1,'rgba(246,205,150,0)');
-  ctx.fillStyle=hg;ctx.fillRect(0,HZ-6,W,96);
+  hg.addColorStop(0,rgba(TV.low,.14));hg.addColorStop(1,rgba(TV.low,0));
+  ctx.fillStyle=hg;ctx.fillRect(0,HZ-6,W,64);
+  // fog sitting in the valley
+  if(TV.fog>.02){
+    const fg=ctx.createLinearGradient(0,HZ-34,0,HZ+150);
+    fg.addColorStop(0,'rgba(200,203,203,'+Math.min(.78,TV.fog*.8).toFixed(3)+')');
+    fg.addColorStop(.5,'rgba(196,200,200,'+(TV.fog*.34).toFixed(3)+')');
+    fg.addColorStop(1,'rgba(192,198,198,0)');
+    ctx.fillStyle=fg;ctx.fillRect(0,HZ-34,W,190);
+  }
   return base;
 }
 // ===== Cockpit: right-hand-drive open 2-seater, driver's eye view =====
@@ -255,16 +628,17 @@ function drawPods(st){
 function drawBeams(st){
   const a=Math.min(st.lampL,st.lampR);
   if(!st.lightOn||a<.6)return;
+  const boost=1+TV.night*.85+TV.fog*.3;
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const px of[244,552]){
     const x=px+st.roll*10,vx=480+(px-480)*.2;
     const g=ctx.createLinearGradient(0,356,0,238);
-    g.addColorStop(0,'rgba(255,232,170,.3)');g.addColorStop(.6,'rgba(255,232,170,.14)');g.addColorStop(1,'rgba(255,232,170,0)');
+    g.addColorStop(0,'rgba(255,232,170,'+(.24*boost)+')');g.addColorStop(.6,'rgba(255,232,170,'+(.10*boost)+')');g.addColorStop(1,'rgba(255,232,170,0)');
     ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x-30,356);ctx.lineTo(x+30,356);ctx.lineTo(vx+150,238);ctx.lineTo(vx-150,238);ctx.closePath();ctx.fill();
   }
   // wide wash across the road just ahead of the nose
   const pool=ctx.createRadialGradient(W/2-20,330,10,W/2-20,330,330);
-  pool.addColorStop(0,'rgba(255,230,165,.16)');pool.addColorStop(1,'rgba(255,230,165,0)');
+  pool.addColorStop(0,'rgba(255,230,165,'+(.12*boost)+')');pool.addColorStop(1,'rgba(255,230,165,0)');
   ctx.fillStyle=pool;ctx.fillRect(0,236,W,124);
   ctx.restore();
 }
@@ -323,6 +697,32 @@ function drawPillars(st){
   ctx.fillStyle=mg;ctx.beginPath();ctx.roundRect(382,40,102,26,5);ctx.fill();
   ctx.fillStyle='rgba(180,70,20,.65)';ctx.fillRect(382,48,102,8);
   ctx.restore();
+}
+function drawWipers(st){
+  const a0=Math.PI*1.02;                       // parked along the cowl
+  const k=.5-.5*Math.cos(st.wipePhase*TAU);
+  const swing=k*st.wipeBlend;
+  const arms=[[622,344,186,Math.PI*1.30],[334,340,166,Math.PI*1.34]];
+  for(const w of arms){
+    const px=w[0]+st.roll*4,py=w[1]+st.pitch*.4,L=w[2];
+    const ang=a0+(w[3]-a0)*swing;
+    const tx=px+Math.cos(ang)*L,ty=py+Math.sin(ang)*L;
+    ctx.save();
+    // the strip of glass the blade has just swept looks a little clearer
+    if(st.wipeBlend>.1&&TV.rain>.05){
+      ctx.strokeStyle='rgba(228,238,242,'+(.07*st.wipeBlend*Math.min(1,TV.rain)).toFixed(3)+')';
+      ctx.lineWidth=16;ctx.beginPath();ctx.arc(px,py,L*.9,ang-.30,ang);ctx.stroke();
+    }
+    // arm: thin metal, then the blade itself as a heavier bar
+    ctx.strokeStyle='rgba(18,15,12,.92)';ctx.lineWidth=3.4;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+(tx-px)*.3,py+(ty-py)*.3);ctx.stroke();
+    ctx.strokeStyle='rgba(10,9,8,.96)';ctx.lineWidth=5;
+    ctx.beginPath();ctx.moveTo(px+(tx-px)*.26,py+(ty-py)*.26);ctx.lineTo(tx,ty);ctx.stroke();
+    ctx.strokeStyle='rgba(206,212,212,.30)';ctx.lineWidth=1.1;
+    ctx.beginPath();ctx.moveTo(px+(tx-px)*.26,py+(ty-py)*.26-1);ctx.lineTo(tx,ty-1);ctx.stroke();
+    ctx.fillStyle='#15100d';ctx.beginPath();ctx.arc(px,py,5.5,0,TAU);ctx.fill();
+    ctx.restore();
+  }
 }
 function gauge(cx,cy,r,v,o){
   // face
@@ -424,10 +824,12 @@ function drawDoors(st){
 }
 // falling leaves drift toward the camera as the car moves
 const leaves=[];
-for(let i=0;i<70;i++)leaves.push({x:(rnd()-.5)*10,y:rnd()*5-1.2,z:2+rnd()*38,rot:rnd()*TAU,vr:(rnd()-.5)*3,col:Math.floor(rnd()*LEAF.length),sz:.05+rnd()*.06,ph:rnd()*TAU});
+for(let i=0;i<150;i++)leaves.push({x:(rnd()-.5)*10,y:rnd()*5-1.2,z:2+rnd()*38,rot:rnd()*TAU,vr:(rnd()-.5)*3,col:Math.floor(rnd()*LEAF.length),sz:.05+rnd()*.06,ph:rnd()*TAU});
 function drawLeaves(st,dt){
   const v=st.speed/444; // metres per second
-  for(const l of leaves){
+  const nShow=Math.round(leaves.length*Math.min(1,Math.max(.18,TV.leaves)));
+  for(let li=0;li<nShow;li++){
+    const l=leaves[li];
     l.z-=v*dt;l.y-=0.35*dt;l.x+=Math.sin(l.ph+st.t*1.3)*dt*.4;l.rot+=l.vr*dt;
     if(l.z<.8||l.y<-1.4){l.z=30+rnd()*14;l.y=rnd()*4-.4;l.x=(rnd()-.5)*10;}
     const f=403/l.z,sx=W/2+l.x*f,sy=HZ-l.y*f;
@@ -441,6 +843,7 @@ function drawLeaves(st,dt){
 function drawCockpit(st,dt){
   drawLeaves(st,dt);
   drawBeams(st);
+  drawWipers(st);
   drawHood(st);
   drawMirrors(st);
   drawPillars(st);
@@ -455,12 +858,13 @@ function drawCockpit(st,dt){
 // ===== Game state, input, physics, sound, HUD, main loop =====
 const GEAR_MAX=[48,88,128,166,200];
 const st={pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,vib:0,reflect:0,t:0,dist:0,distM:0,
-  lampL:0,lampR:0,lightOn:false,
-  time:45,state:'ready',scrape:0,msg:'',msgT:0,cps:[false,false,false],best:0};
+  lampL:0,lampR:0,lightOn:false,hit:0,wiper:1,wipePhase:0,wipeBlend:0,
+  time:55,state:'ready',scrape:0,msg:'',msgT:0,cps:[false,false,false],best:0};
 const keys={left:false,right:false,up:false,down:false,space:false};
 const KM={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'space'};
 addEventListener('keydown',e=>{
   if(e.code==='KeyH'){if(!e.repeat)st.lightOn=!st.lightOn;e.preventDefault();return}
+  if(e.code==='KeyV'){if(!e.repeat)st.wiper=st.wiper?0:1;e.preventDefault();return}
   const k=KM[e.code];if(k){keys[k]=true;e.preventDefault()}});
 addEventListener('keyup',e=>{const k=KM[e.code];if(k){keys[k]=false;e.preventDefault()}});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
@@ -472,6 +876,7 @@ for(const [id,k] of[['kL','left'],['kR','right'],['kA','up'],['kB','down']]){
   el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off);
 }
 document.getElementById('kH').addEventListener('pointerdown',e=>{st.lightOn=!st.lightOn;e.preventDefault()});
+document.getElementById('kW').addEventListener('pointerdown',e=>{st.wiper=st.wiper?0:1;e.currentTarget.classList.toggle('on',!!st.wiper);e.preventDefault()});
 // ----- sound: engine (4-cylinder note), wind, rail scrape -----
 let ac=null,au=null;
 function startAudio(){
@@ -485,9 +890,9 @@ function startAudio(){
       const nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=nb.getChannelData(0);
       for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
       const mk=(f,q)=>{const s=ac.createBufferSource();s.buffer=nb;s.loop=true;const b=ac.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;const g=ac.createGain();g.gain.value=0;s.connect(b);b.connect(g);g.connect(master);s.start();return g};
-      const wind=mk(700,.6),scr=mk(2200,1.2);
+      const wind=mk(700,.6),scr=mk(2200,1.2),rain=mk(5200,.7);
       o1.start();o2.start();
-      au={o1,o2,lp,eg,wind,scr};
+      au={o1,o2,lp,eg,wind,scr,rain};
     }
     if(ac.state==='suspended')ac.resume();
   }catch(e){ac=null;au=null}
@@ -500,10 +905,11 @@ function updateAudio(){
   au.eg.gain.setTargetAtTime(on*(.05+(keys.up?.07:.02)),tn,.05);
   au.wind.gain.setTargetAtTime(sp*sp*.16,tn,.1);
   au.scr.gain.setTargetAtTime(st.scrape>0?.22:0,tn,.04);
+  au.rain.gain.setTargetAtTime(TV.rain*.07,tn,.25);
 }
 // ----- driving model -----
 function reset(){
-  Object.assign(st,{pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,distM:0,time:45,scrape:0,msg:'',msgT:0,cps:[false,false,false],state:'run'});
+  Object.assign(st,{pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,distM:0,time:55,scrape:0,msg:'',msgT:0,cps:[false,false,false],state:'run',hit:0,wipePhase:0,wipeBlend:0});
   document.getElementById('overlay').hidden=true;
   startAudio();
 }
@@ -517,6 +923,32 @@ function endRun(kind){
   document.getElementById('go').textContent='もう一度';
   o.hidden=false;
 }
+// ----- obstacle contact -----
+function thud(kind){
+  if(!ac)return;
+  try{
+    const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();
+    o.type='triangle';
+    o.frequency.setValueAtTime(kind==='rock'?78:kind==='barrier'?96:130,t);
+    o.frequency.exponentialRampToValueAtTime(40,t+.2);
+    g.gain.setValueAtTime(kind==='rock'?.45:.22,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+.28);
+    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.3);
+  }catch(e){}
+}
+function hitObstacle(o){
+  const k=o.kind;
+  let spray='255,180,90';
+  if(k==='rock'){st.speed*=.5;st.hit=1;st.msg='落石にヒット！'}
+  else if(k==='cone'){st.speed*=.86;st.hit=.55;st.msg='パイロンに接触'}
+  else if(k==='barrier'){st.speed*=.62;st.hit=.85;st.msg='バリケードに接触！'}
+  else if(k==='puddle'){st.speed*=.9;st.hit=.4;st.x+=(st.x>0?1:-1)*.12;st.msg='水しぶき';spray='200,225,235'}
+  else{st.speed*=.94;st.hit=.3;st.x+=(st.x>0?1:-1)*.06;st.msg='落ち葉で滑る';spray='230,150,60'}
+  st.msgT=1.7;
+  thud(k);
+  for(let i=0;i<12;i++)sparks.push({x:W/2+(Math.random()-.5)*180,y:400+Math.random()*60,
+    vx:(Math.random()-.5)*260,vy:-40-Math.random()*200,l:.3+Math.random()*.25,c:spray});
+}
 function update(dt){
   st.t+=dt;
   // pop-up lamps: the two motors run at slightly different speeds
@@ -527,6 +959,7 @@ function update(dt){
   if(Math.abs(lt-st.lampR)<.01)st.lampR=lt;
   const base=segs[Math.floor(st.pos/SEG)%N],sp=st.speed/MAXV;
   const live=st.state==='run';
+  if(st.hit>0)st.hit=Math.max(0,st.hit-dt*1.8);
   const thr=live&&keys.up,brk=live&&keys.down,hb=live&&keys.space;
   const tgt=live?(keys.right?1:0)-(keys.left?1:0):0;
   st.steer+=(tgt-st.steer)*Math.min(1,dt*(tgt?7:10));
@@ -547,7 +980,13 @@ function update(dt){
     st.scrape=.15;
   }
   st.speed=Math.max(0,Math.min(MAXV,st.speed));
+  const prevPos=st.pos;
   st.pos+=dt*st.speed;
+  if(live){
+    for(const o of obstacles){
+      if(o.z>prevPos&&o.z<=st.pos&&Math.abs(st.x-o.x)<o.r+.09)hitObstacle(o);
+    }
+  }
   st.kmh=st.speed/MAXV*198;
   st.distM+=st.kmh/3.6*dt;
   st.dist=Math.min(1,st.pos/TOTAL);
@@ -563,10 +1002,21 @@ function update(dt){
   st.vib=Math.sin(st.t*90)*(.25+st.rpm/8000*.5)*(1+sp*.6)+(st.scrape>0?Math.sin(st.t*160)*2.5:0);
   st.reflect=-st.steer*40+Math.sin(st.pos/3000)*60;
   bgOff+=base.curve*sp*dt*18;
+  // wipers: they come up with the rain, park again when it clears
+  const wet=TV.rain>.1&&st.wiper;
+  if(wet){
+    st.wipeBlend=Math.min(1,st.wipeBlend+dt*3.4);
+    st.wipePhase=(st.wipePhase+dt*(1.05+Math.min(1,st.speed/MAXV)*1.15))%1;
+  }else{
+    st.wipeBlend=Math.max(0,st.wipeBlend-dt*1.6);
+    const tgt=st.wipePhase>.5?1:0;
+    st.wipePhase=st.wipePhase+Math.sign(tgt-st.wipePhase)*Math.min(Math.abs(tgt-st.wipePhase),dt*1.5);
+  }
+  updateEnv();
   if(live){
     st.time-=dt;
     const idx=base.index;
-    for(let i=0;i<3;i++)if(!st.cps[i]&&idx>=CPS[i]){st.cps[i]=true;st.time+=22;st.msg='チェックポイント　+22秒';st.msgT=2.4}
+    for(let i=0;i<3;i++)if(!st.cps[i]&&idx>=CPS[i]){st.cps[i]=true;st.time+=25;st.msg='チェックポイント　+25秒';st.msgT=2.4}
     st.msgT=Math.max(0,st.msgT-dt);
     if(st.pos>=TOTAL-SEG*8)endRun('finish');
     else if(st.time<=0){st.time=0;endRun('over')}
@@ -583,13 +1033,42 @@ function drawSparks(dt){
   for(let i=sparks.length-1;i>=0;i--){
     const s=sparks[i];s.l-=dt;if(s.l<=0){sparks.splice(i,1);continue}
     s.vy+=520*dt;const nx=s.x+s.vx*dt,ny=s.y+s.vy*dt;
-    ctx.strokeStyle='rgba(255,'+(170+Math.random()*60|0)+',80,'+Math.min(1,s.l*3)+')';ctx.lineWidth=2;
+    const al=Math.min(1,s.l*3);
+    ctx.strokeStyle=s.c?'rgba('+s.c+','+al+')':'rgba(255,'+(170+Math.random()*60|0)+',80,'+al+')';
+    ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(nx,ny);ctx.stroke();s.x=nx;s.y=ny;
   }
 }
 function panel(x,y,w,h){ctx.fillStyle='rgba(13,10,8,.62)';ctx.beginPath();ctx.roundRect(x,y,w,h,5);ctx.fill()}
+// ----- weather: rain in the air and a damp film on the glass -----
+const rainDrops=[];
+for(let i=0;i<130;i++)rainDrops.push({x:Math.random()*W*1.2,y:Math.random()*H-40,v:520+Math.random()*780,l:12+Math.random()*34,a:.1+Math.random()*.22});
+function drawWeather(dt){
+  if(TV.rain>.02){
+    const sp=Math.min(1,st.speed/MAXV);
+    ctx.save();ctx.lineCap='round';
+    const n=Math.round(rainDrops.length*Math.min(1,TV.rain*1.15));
+    for(let i=0;i<n;i++){
+      const d=rainDrops[i];
+      d.y+=d.v*dt*(1+sp*.7);d.x-=d.v*dt*.26;
+      if(d.y>H+20){d.y=-30;d.x=Math.random()*W*1.25}
+      if(d.x<-50)d.x=W+40;
+      const len=d.l*(.55+.9*sp);
+      ctx.strokeStyle='rgba(206,220,232,'+(d.a*TV.rain).toFixed(3)+')';
+      ctx.lineWidth=1.1;
+      ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-len*.26,d.y+len);ctx.stroke();
+    }
+    ctx.restore();
+    // damp film over the upper glass
+    const g=ctx.createLinearGradient(0,24,0,340);
+    g.addColorStop(0,'rgba(214,226,232,'+(TV.rain*.06).toFixed(3)+')');
+    g.addColorStop(1,'rgba(206,220,228,'+(TV.rain*.025).toFixed(3)+')');
+    ctx.fillStyle=g;ctx.fillRect(0,24,W,316);
+  }
+}
 function drawHUD(){
   ctx.textBaseline='alphabetic';
+  if(st.hit>0){ctx.fillStyle='rgba(190,40,20,'+(st.hit*.16)+')';ctx.fillRect(0,0,W,H)}
   panel(14,34,148,52);
   ctx.fillStyle='#a08c76';ctx.font='11px "Zen Kaku Gothic New",sans-serif';ctx.textAlign='left';ctx.fillText('残り時間',26,52);
   ctx.fillStyle=st.time<8?'#ff6a4a':'#f2e6d4';ctx.font='26px "Share Tech Mono",monospace';
@@ -600,6 +1079,16 @@ function drawHUD(){
   ctx.fillStyle='#3a2d24';ctx.fillRect(W-184,64,158,6);
   ctx.fillStyle='#f0a23a';ctx.fillRect(W-184,64,158*st.dist,6);
   for(const c of CPS){ctx.fillStyle='#f2e6d4';ctx.fillRect(W-184+158*c/N-1,60,2,14)}
+  // clock and weather along the pass
+  panel(W/2-86,34,172,52);
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#f2e6d4';ctx.font='13px "Share Tech Mono",monospace';ctx.fillText(TV.label,W/2,54);
+  const note=(TV.night>.42&&!st.lightOn)?'ライト点灯 H':(st.wiper&&TV.rain>.1?'ワイパー作動中':'');
+  if(note){
+    const bl=.55+.45*Math.sin(st.t*5);
+    ctx.fillStyle=note[0]==='ラ'?'rgba(255,180,90,'+bl.toFixed(2)+')':'#a08c76';
+    ctx.font='10px "Zen Kaku Gothic New",sans-serif';ctx.fillText(note,W/2,71);
+  }
   if(st.msgT>0){
     ctx.globalAlpha=Math.min(1,st.msgT);ctx.textAlign='center';
     ctx.fillStyle='rgba(13,10,8,.7)';ctx.beginPath();ctx.roundRect(W/2-150,118,300,42,6);ctx.fill();
@@ -610,9 +1099,14 @@ function drawHUD(){
 // ----- main loop -----
 let last=performance.now();
 function frame(now){
-  const dt=Math.min(.05,(now-last)/1000);last=now;
+  const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   update(dt);
+  const sh=st.hit>0?st.hit*10:0;
+  ctx.save();
+  if(sh)ctx.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh*.7);
   renderWorld(st);
+  ctx.restore();
+  drawWeather(dt);
   drawCockpit(st,dt);
   drawSparks(dt);
   drawHUD();

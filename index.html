@@ -2394,14 +2394,14 @@ function drawDocOverlay(dt){
   if(a>.02){
     ctx.globalCompositeOperation='lighter';
     const L=H*1.25;
-    for(let i=0;i<6;i++){
-      const ang=-Math.PI/2+Math.sin(st.t*1.05+i*1.07)*.86;
-      const dx=Math.cos(ang),dy=Math.sin(ang),w2=16+6*Math.sin(st.t*2+i);
+    for(let i=0;i<7;i++){
+      const ang=-Math.PI/2+Math.sin(st.t*1.05+i*.92)*.86;
+      const dx=Math.cos(ang),dy=Math.sin(ang),w2=20+7*Math.sin(st.t*2+i);
       const ex=DOC_POLE+dx*L,ey=-8+dy*L;
       const hue=(i*58+st.t*46)%360;
       const bg=ctx.createLinearGradient(DOC_POLE,-8,ex,ey);
-      bg.addColorStop(0,'hsla('+hue.toFixed(0)+',100%,74%,'+(.24*a).toFixed(3)+')');
-      bg.addColorStop(.55,'hsla('+hue.toFixed(0)+',100%,64%,'+(.10*a).toFixed(3)+')');
+      bg.addColorStop(0,'hsla('+hue.toFixed(0)+',100%,74%,'+(.34*a).toFixed(3)+')');
+      bg.addColorStop(.55,'hsla('+hue.toFixed(0)+',100%,64%,'+(.14*a).toFixed(3)+')');
       bg.addColorStop(1,'hsla('+hue.toFixed(0)+',100%,60%,0)');
       ctx.fillStyle=bg;
       ctx.beginPath();ctx.moveTo(DOC_POLE-3,-8);ctx.lineTo(DOC_POLE+3,-8);

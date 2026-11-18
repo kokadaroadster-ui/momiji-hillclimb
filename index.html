@@ -626,7 +626,7 @@ function carFront(c,w,h,sx,sy,top,pods,amt,lamp){
   for(const s of[-1,1]){
     const px=sx+s*w*.345,base=sy-h*.538;
     if(pods&&amt>0.03){
-      const rise=h*.095*amt;
+      const rise=h*.062*amt;
       if(lamp){
         const g=ctx.createRadialGradient(px,base-rise,0,px,base-rise,Math.max(3,w*.55));
         g.addColorStop(0,'rgba(255,244,200,.75)');
@@ -651,8 +651,8 @@ function carFront(c,w,h,sx,sy,top,pods,amt,lamp){
   }
   // bumper, the small oval mouth, indicators and the plate
   ctx.fillStyle=shade(c,.40);ctx.fillRect(sx-w*.50,sy-h*.09,w,h*.09);
-  ctx.fillStyle='#100d0c';ctx.beginPath();ctx.ellipse(sx,sy-h*.245,w*.145,h*.048,0,0,TAU);ctx.fill();
-  ctx.fillStyle='rgba(255,236,196,.22)';ctx.beginPath();ctx.ellipse(sx,sy-h*.267,w*.115,h*.012,0,0,TAU);ctx.fill();
+  ctx.fillStyle='#100d0c';ctx.beginPath();ctx.ellipse(sx,sy-h*.225,w*.125,h*.038,0,0,TAU);ctx.fill();
+  ctx.fillStyle='rgba(255,236,196,.22)';ctx.beginPath();ctx.ellipse(sx,sy-h*.242,w*.10,h*.010,0,0,TAU);ctx.fill();
   for(const s of[-1,1]){
     ctx.fillStyle='#e8962e';
     ctx.beginPath();ctx.roundRect(sx+s*w*.41-w*.042,sy-h*.215,w*.084,h*.030,Math.max(1,h*.008));ctx.fill();

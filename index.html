@@ -1663,6 +1663,7 @@ function playFanfare(){
 }
 function endRun(kind){
   st.state=kind;
+  st.msgT=0;st.msg='';
   const pct=Math.min(100,Math.round(st.pos/FIN*100));
   const o=document.getElementById('overlay');
   o.querySelector('h1').textContent=kind==='finish'?'ゴール':'タイムアップ';

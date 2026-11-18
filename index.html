@@ -38,7 +38,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 #wakaba{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:7px;padding:5px 13px 5px 5px;
   background:rgba(13,10,8,.66);border:1.5px solid rgba(242,230,212,.42);border-radius:999px;
   box-shadow:0 3px 10px rgba(0,0,0,.45);cursor:pointer;letter-spacing:0;font-weight:700;
-  touch-action:manipulation;-webkit-tap-highlight-color:transparent;opacity:0;pointer-events:none;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;opacity:0;pointer-events:none;
   transition:transform .08s,background .15s,border-color .15s,opacity .35s}
 body.running #wakaba{opacity:1;pointer-events:auto}
 #wakaba .m{display:flex;align-items:center;justify-content:center;width:clamp(28px,5.6vw,34px);height:clamp(28px,5.6vw,34px);
@@ -49,6 +49,13 @@ body.running #wakaba{opacity:1;pointer-events:auto}
 #wakaba:active{transform:scale(.93);background:rgba(240,162,58,.34)}
 #wakaba:active .m{background:#ffd76a}
 body.running #wakaba{animation:wakabaGlow 2.6s ease-in-out infinite}
+/* 長押し: the button warms up while a thumb stays on it */
+body.running #wakaba.hold{border-color:rgba(255,150,190,.92);background:rgba(52,14,26,.82);animation:none;
+  box-shadow:0 0 0 4px rgba(255,140,190,.22),0 0 18px rgba(255,120,180,.55),0 3px 10px rgba(0,0,0,.45)}
+body.running #wakaba.hold .m{background:linear-gradient(180deg,#ffe3ef,#ff9dc2)}
+body.running #wakaba.giant{border-color:rgba(255,222,140,.95);background:rgba(48,26,8,.82);animation:none;
+  box-shadow:0 0 0 6px rgba(255,210,120,.28),0 0 26px rgba(255,190,90,.72),0 3px 10px rgba(0,0,0,.45)}
+#pad .k.hold{background:rgba(255,150,190,.6);color:#2a0812}
 @keyframes wakabaGlow{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.45),0 0 0 0 rgba(240,162,58,0)}50%{box-shadow:0 3px 10px rgba(0,0,0,.45),0 0 0 5px rgba(240,162,58,.16)}}
 /* the third press of the combo: the button turns to ozone blue */
 #wakaba.combo{border-color:rgba(130,225,255,.85);box-shadow:0 0 0 4px rgba(110,210,255,.30),0 3px 10px rgba(0,0,0,.45)}
@@ -63,12 +70,12 @@ body.bttf #wakaba .t{color:#d8f6ff}
 
 <div id="wrap">
   <canvas id="c" width="960" height="540" aria-label="ドライバー視点の走行画面"></canvas>
-  <button id="wakaba" type="button" title="Wボタン：1回でスピン＆コースアウト／3回連続でタイムトラベル／10回連打でドク登場" aria-label="Wボタン。1回でスピンしてコースアウト、3回連続でバック・トゥ・ザ・フューチャー風のタイムトラベル、10回連打でドクがポールダンスで登場">
+  <button id="wakaba" type="button" title="Wボタン：1回でスピン＆コースアウト／3回連続でタイムトラベル／10回連打でドク登場／長押しで巨大化" aria-label="Wボタン。1回でスピンしてコースアウト、3回連続でバック・トゥ・ザ・フューチャー風のタイムトラベル、10回連打でドクがポールダンスで登場、長押しでキャラクターが巨大化して登場">
     <span class="m" aria-hidden="true">W</span><span class="t">スピン</span>
   </button>
   <div id="overlay">
     <h1>紅葉ヒルクライム</h1>
-    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夜明け前の暗さから霧と雨を抜け、たどり着くのは晴れた早朝。落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。<br>走行中に画面左下のWボタンを押すと、スピンしてコースアウトします。3回連続で押すと……何かが起こります。10回連打すると、博士が飛んできます。</p>
+    <p>嵐山・清滝口から小倉山、保津峡、菖蒲谷池を抜けて高雄大駐車場へ。嵐山-高雄パークウェイを思わせる秋の山道を、オープン2シーターの運転席から。夜明け前の暗さから霧と雨を抜け、たどり着くのは晴れた早朝。落石やパイロンをかわして走り切ろう。チェックポイントで時間が延びます。<br>走行中に画面左下のWボタンを押すと、スピンしてコースアウトします。3回連続で押すと……何かが起こります。10回連打すると、博士が飛んできます。長押し（0.6秒）すると、あの人がキノコでも食べたみたいに巨大化して現れます。</p>
     <div class="res" id="res"></div>
     <button id="go">スタート</button>
   </div>
@@ -77,7 +84,7 @@ body.bttf #wakaba .t{color:#d8f6ff}
   <div class="grp"><div class="k" id="kL">◀</div><div class="k" id="kR">▶</div><div class="k" id="kH" role="button" aria-label="ヘッドライト">灯</div><div class="k" id="kW" role="button" aria-label="ワイパー">ワ</div></div>
   <div class="grp"><div class="k" id="kY" role="button" aria-label="Wボタン（1回でスピン、3回連続でタイムトラベル、10回連打でドク登場）">W</div><div class="k" id="kB">B</div><div class="k" id="kA">A</div></div>
 </div>
-<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト　V ワイパー　画面のWボタンでスピン＆コースアウト（3回連続でタイムトラベル、10回連打でドク登場）</div>
+<div id="hint">← → / A D ハンドル　↑ / W アクセル　↓ / S ブレーキ　Space ハンドブレーキ　H リトラクタブルヘッドライト　V ワイパー　画面のWボタンでスピン＆コースアウト（3回連続でタイムトラベル、10回連打でドク登場、長押しで巨大化）</div>
 <script>
 // ===== Engine: track, sprites, background, road renderer =====
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -1638,7 +1645,7 @@ const st={pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,vib:0,re
   time:55,state:'ready',scrape:0,msg:'',msgT:0,cps:[false,false,false],best:0,
   spinPhase:'none',spinT:0,spinSide:1,spinAng:0,spinAngV:0,spinCool:0,fx:0,fxMax:1.9,dustT:0,
   ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0,
-  docPhase:'none',docT:0,docFlash:0,docGlitterT:0};
+  docPhase:'none',docT:0,docFlash:0,docGlitterT:0,giantPhase:'none',giantT:0,giantFlash:0,giantShake:0,giantSparkT:0};
 const keys={left:false,right:false,up:false,down:false,space:false};
 const KM={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'space'};
 addEventListener('keydown',e=>{
@@ -1656,11 +1663,44 @@ for(const [id,k] of[['kL','left'],['kR','right'],['kA','up'],['kB','down']]){
 }
 document.getElementById('kH').addEventListener('pointerdown',e=>{st.lightOn=!st.lightOn;e.preventDefault()});
 document.getElementById('kW').addEventListener('pointerdown',e=>{st.wiper=st.wiper?0:1;e.currentTarget.classList.toggle('on',!!st.wiper);e.preventDefault()});
-// the W button: pressed with a mouse on a PC, a thumb on a phone
-document.getElementById('kY').addEventListener('pointerdown',e=>{e.preventDefault();triggerWakaba();e.currentTarget.classList.add('on');setTimeout(()=>document.getElementById('kY').classList.remove('on'),150)});
-{const wb=document.getElementById('wakaba');
-  wb.addEventListener('pointerdown',e=>{e.preventDefault();triggerWakaba()});
+// the W button: a tap spins the car; a 0.6s long press belongs to the giant, not to the spin
+{
+  const wb=document.getElementById('wakaba'),kY=document.getElementById('kY');
+  const bindPress=(el,touch)=>{
+    el.addEventListener('pointerdown',e=>{e.preventDefault();if(touch)el.classList.add('on');wakabaHoldStart(el)});
+    el.addEventListener('pointerup',e=>{e.preventDefault();if(touch)el.classList.remove('on');wakabaHoldEnd(el,true)});
+    el.addEventListener('pointercancel',e=>{if(touch)el.classList.remove('on');wakabaHoldEnd(el,false)});
+    el.addEventListener('pointerleave',e=>{if(touch)el.classList.remove('on');wakabaHoldEnd(el,false)});
+  };
+  bindPress(wb,false);bindPress(kY,true);
+  wb.addEventListener('contextmenu',e=>e.preventDefault());   // a long press on a phone should not open the menu
   wb.addEventListener('click',e=>{e.preventDefault();if(e.detail===0)triggerWakaba()}); // keyboard only, so one press counts once
+}
+const W_HOLD_MS=600;                    // ms — press and hold this long and the giant comes out
+function wakabaHoldStart(el){
+  clearTimeout(el._holdT);el._holdT=null;el._holdFired=false;
+  if(st.state!=='run'||st.giantPhase!=='none')return;   // only out on the road, and one at a time
+  el.classList.add('hold');
+  el._holdT=setTimeout(()=>{
+    el._holdT=null;el.classList.remove('hold');
+    if(st.state!=='run'||st.giantPhase!=='none')return;
+    el._holdFired=true;                // this press became the giant's — the spin never happens
+    el.classList.add('giant');setTimeout(()=>el.classList.remove('giant'),640);
+    startGiant();
+  },W_HOLD_MS);
+}
+function wakabaHoldEnd(el,fire){
+  if(el._holdT){clearTimeout(el._holdT);el._holdT=null}
+  el.classList.remove('hold');
+  if(!el._holdFired&&fire)triggerWakaba();   // a short press is still the spin / the combos
+  el._holdFired=false;
+}
+function wakabaHoldReset(){
+  for(const id of['wakaba','kY']){
+    const el=document.getElementById(id);if(!el)continue;
+    clearTimeout(el._holdT);el._holdT=null;el._holdFired=false;
+    el.classList.remove('hold','giant','on');
+  }
 }
 // ----- sound: engine (4-cylinder note), wind, rail scrape -----
 let ac=null,au=null;
@@ -1706,8 +1746,10 @@ function reset(){
   Object.assign(st,{pos:0,x:0,speed:0,steer:0,kmh:0,rpm:900,gear:0,roll:0,pitch:0,distM:0,time:55,scrape:0,msg:'',msgT:0,cps:[false,false,false],state:'run',hit:0,wipePhase:0,wipeBlend:0,
     spinPhase:'none',spinT:0,spinAng:0,spinAngV:0,spinCool:0,fx:0,fxLabel:'',dustT:0,
     ttPhase:'none',ttT:0,ttMph:18,ttFlash:0,ttShake:0,ttBurn:0,ttEmberT:0,ttArcT:0,ttJolt:0,
-    docPhase:'none',docT:0,docFlash:0,docGlitterT:0});
-  dustPuffs.length=0;ttEmbers.length=0;wakabaPresses.length=0;docPresses.length=0;docGlitter.length=0;
+    docPhase:'none',docT:0,docFlash:0,docGlitterT:0,
+    giantPhase:'none',giantT:0,giantFlash:0,giantShake:0,giantSparkT:0});
+  dustPuffs.length=0;ttEmbers.length=0;wakabaPresses.length=0;docPresses.length=0;docGlitter.length=0;giantSparks.length=0;
+  wakabaHoldReset();
   document.body.classList.remove('bttf');
   const ov=document.getElementById('overlay');ov.hidden=true;ov.style.background='';
   document.body.classList.add('running');
@@ -1900,6 +1942,7 @@ const TT={charge:1.45,flash:.40,travel:2.9,back:1.35};
 const wakabaPresses=[];                 // recent press times, for the combo
 const ttEmbers=[];                      // embers rising off the burning tyres
 function triggerWakaba(){
+  if(st.giantPhase!=='none')return;     // he is on screen; the press waits its turn
   const now=performance.now();
   // ten taps inside the window call the doctor out — counted before the spin, so the tenth tap is his, not another slide
   if(st.state==='run'){
@@ -2012,6 +2055,7 @@ function update(dt){
   st.t+=dt;
   updateTimeTravel(dt);
   updateDoc(dt);
+  updateGiant(dt);
   // pop-up lamps: the two motors run at slightly different speeds
   const lt=st.lightOn?1:0;
   st.lampL+=(lt-st.lampL)*Math.min(1,dt*(lt?7:6));
@@ -2565,9 +2609,196 @@ function docAudioPoleDance(){
     stab(t+beat*8,[587.33,739.99,880],.5,.045);
   }catch(e){}
 }
+// ===== Wボタン長押し: あの人がキノコを食べたときみたいに巨大化して、フロントガラスの前に立つ =====
+const GIANT={in:.66,hold:1.9,out:.6};     // grow, stand there, fade back to the road
+GIANT.total=GIANT.in+GIANT.hold+GIANT.out;
+const GIANT_AR=540/806;                    // giant_char.png の幅 / 高さ
+const giantImg=new Image();giantImg.decoding='async';giantImg.src='giant_char.png';
+const giantSparks=[];
+function cancelSpinForGiant(){
+  // the slide the press would have started is called off on the spot
+  st.spinPhase='none';st.spinT=0;st.spinAng=0;st.spinAngV=0;st.spinCool=.3;st.dustT=0;
+  st.fx=0;st.fxLabel='';st.msg='';st.msgT=0;
+  st.x+=(0-st.x)*.3;
+  dustPuffs.length=0;
+}
+function startGiant(){
+  if(st.state!=='run'||st.giantPhase!=='none')return false;
+  cancelSpinForGiant();
+  wakabaPresses.length=0;docPresses.length=0;   // the tap counts start over
+  st.giantPhase='in';st.giantT=0;st.giantFlash=1;st.giantShake=1;st.giantSparkT=0;
+  giantSparks.length=0;
+  giantAudio();
+  return true;
+}
+function updateGiant(dt){
+  if(st.giantPhase==='none'){
+    if(st.giantFlash>0)st.giantFlash=Math.max(0,st.giantFlash-dt*2.3);
+    if(giantSparks.length)giantSparks.length=0;
+    return;
+  }
+  st.giantT+=dt;
+  const t=st.giantT;
+  st.giantFlash=Math.max(0,st.giantFlash-dt*2.3);
+  st.giantShake=Math.max(0,st.giantShake-dt*(t>GIANT.in?.95:1.7));
+  // the sparks flying off him while he stands there
+  if(t>GIANT.in*.5&&t<GIANT.total-GIANT.out*.5){
+    st.giantSparkT-=dt;
+    if(st.giantSparkT<=0){
+      st.giantSparkT=.035;
+      const ang=Math.random()*TAU,r=W*(.10+Math.random()*.34);
+      giantSparks.push({x:W*.5+Math.cos(ang)*r*1.15,y:H*.52+Math.sin(ang)*r*.95,
+        vx:Math.cos(ang)*(60+Math.random()*150),vy:Math.sin(ang)*(55+Math.random()*140)-20,
+        r:1.6+Math.random()*3.4,life:0,max:.5+Math.random()*.7,
+        c:['255,236,150','255,255,255','255,180,120','255,150,200','170,235,255'][(Math.random()*5)|0]});
+    }
+  }
+  for(let i=giantSparks.length-1;i>=0;i--){
+    const p=giantSparks[i];p.life+=dt;
+    if(p.life>=p.max){giantSparks.splice(i,1);continue}
+    p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=(1-dt*1.6);p.vy*=(1-dt*1.6);
+  }
+  if(t>=GIANT.total){
+    st.giantPhase='none';st.giantT=0;st.giantFlash=0;st.giantShake=0;giantSparks.length=0;
+  }
+}
+function drawGiantOverlay(){
+  const on=st.giantPhase!=='none',t=st.giantT;
+  if(!on&&st.giantFlash<=.012&&giantSparks.length===0)return;
+  const tOut=GIANT.total-GIANT.out;
+  const a=on?Math.min(1,t/.14)*(t>tOut?Math.max(0,(GIANT.total-t)/GIANT.out):1):0;
+  // grow past his size and settle, with a little hop at the top
+  const p=on?Math.min(1,t/GIANT.in):1;
+  const c1=1.9,c3=c1+1;
+  const s=.045+.955*Math.max(0,1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2));
+  const hop=-Math.abs(Math.sin(p*Math.PI*1.5))*(1-p)*20;
+  const bob=t>GIANT.in?Math.sin((t-GIANT.in)*3.1)*2.6:0;
+  const cx=W*.5,cy=H*.52;
+  ctx.save();
+  // ---- the light he arrives in, the rays turning behind him, the 集中線 ahead of him
+  ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;
+  const rg=ctx.createRadialGradient(cx,cy,W*.03,cx,cy,W*.78);
+  rg.addColorStop(0,'rgba(255,236,175,.55)');
+  rg.addColorStop(.42,'rgba(255,160,95,.20)');
+  rg.addColorStop(1,'rgba(255,120,60,0)');
+  ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(t*.42);
+  for(let i=0;i<18;i++){
+    const ang=i/18*TAU,sp=.05+.028*(1+Math.sin(t*6+i*1.7));
+    ctx.beginPath();ctx.moveTo(0,0);
+    ctx.lineTo(Math.cos(ang-sp)*W*1.15,Math.sin(ang-sp)*W*1.15);
+    ctx.lineTo(Math.cos(ang+sp)*W*1.15,Math.sin(ang+sp)*W*1.15);
+    ctx.closePath();
+    ctx.fillStyle='rgba(255,232,170,'+(.05+.04*Math.sin(t*7+i)).toFixed(3)+')';
+    ctx.fill();
+  }
+  ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,.62)';
+  for(let i=0;i<56;i++){
+    const ang=i/56*TAU+Math.sin(i*7.3)*.09+t*.1;
+    const r0=W*(.30+.055*Math.sin(t*11+i*2.1));
+    const r1=r0+W*(.10+.26*Math.abs(Math.sin(i*13.1+t*2.6)));
+    ctx.lineWidth=(i%4===0)?2.2:1.1;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(ang)*r0,cy+Math.sin(ang)*r0*.92);
+    ctx.lineTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1*.92);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation='source-over';
+  // ---- the figure: feet below the dash, filling the screen as he lands
+  if(a>.02&&giantImg.complete&&giantImg.naturalWidth>0){
+    const gh=H*.98*s,gw=gh*GIANT_AR;
+    ctx.globalAlpha=a;
+    ctx.drawImage(giantImg,cx-gw/2,H*1.015-gh+hop+bob,gw,gh);
+  }
+  // ---- sparks and the shockwave at his feet
+  ctx.globalCompositeOperation='lighter';
+  for(const q of giantSparks){
+    const k=1-q.life/q.max,r=q.r*k;
+    ctx.globalAlpha=k*a*.95;
+    ctx.fillStyle='rgba('+q.c+',1)';
+    ctx.beginPath();ctx.arc(q.x,q.y,r,0,TAU);ctx.fill();
+    if(q.r>3){
+      ctx.beginPath();
+      ctx.moveTo(q.x,q.y-r*3.2);ctx.lineTo(q.x+r*.5,q.y-r*.5);
+      ctx.lineTo(q.x+r*3.2,q.y);ctx.lineTo(q.x+r*.5,q.y+r*.5);
+      ctx.lineTo(q.x,q.y+r*3.2);ctx.lineTo(q.x-r*.5,q.y+r*.5);
+      ctx.lineTo(q.x-r*3.2,q.y);ctx.lineTo(q.x-r*.5,q.y-r*.5);
+      ctx.closePath();ctx.fill();
+    }
+  }
+  if(on&&t<.5){
+    const k=t/.5;
+    ctx.globalAlpha=a;
+    ctx.strokeStyle='rgba(255,240,200,'+(.5*(1-k)).toFixed(3)+')';
+    ctx.lineWidth=4*(1-k)+1;
+    ctx.beginPath();ctx.ellipse(cx,H*1.0,W*(.12+.55*k),H*(.03+.1*k),0,0,TAU);ctx.stroke();
+  }
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  // ---- the white pop
+  if(st.giantFlash>.012){
+    ctx.fillStyle='rgba(255,248,232,'+Math.min(.88,st.giantFlash*.85).toFixed(3)+')';
+    ctx.fillRect(0,0,W,H);
+  }
+  ctx.restore();
+}
+// ----- the power-up: an 8-bit scale tumbling upward over a swelling thump and a bright chord -----
+function giantAudio(){
+  if(!ac)return;
+  try{
+    if(ac.state==='suspended')ac.resume();
+    const t=ac.currentTime,out=ac.createGain();out.gain.value=.5;out.connect(ac.destination);
+    const tone=(at,f,dur,amp,type)=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type=type||'square';o.frequency.setValueAtTime(f,at);
+      g.gain.setValueAtTime(.0001,at);
+      g.gain.exponentialRampToValueAtTime(amp,at+.007);
+      g.gain.exponentialRampToValueAtTime(.0006,at+dur);
+      o.connect(g);g.connect(out);o.start(at);o.stop(at+dur+.02);
+    };
+    // the thump: the low blip that swells as he grows
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type='triangle';
+    o.frequency.setValueAtTime(80,t);
+    o.frequency.exponentialRampToValueAtTime(300,t+.14);
+    o.frequency.exponentialRampToValueAtTime(110,t+.40);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.30,t+.04);
+    g.gain.exponentialRampToValueAtTime(.0006,t+.44);
+    o.connect(g);g.connect(out);o.start(t);o.stop(t+.46);
+    // the climb: a major scale running up twice, the second time an octave higher
+    const sc=[523.25,587.33,659.25,698.46,783.99,880.00,987.77,1046.50];
+    let at=t+.03;
+    for(let rep=0;rep<2;rep++){
+      for(let i=0;i<sc.length;i++){tone(at,sc[i]*(rep?2:1),.06,.14,'square');at+=.047}
+    }
+    // the top: a bright chord ringing out over the figure
+    const ch=[1046.50,1318.51,1567.98,2093.00];
+    for(let i=0;i<ch.length;i++){
+      const o2=ac.createOscillator(),g2=ac.createGain();
+      o2.type=i<2?'square':'triangle';o2.frequency.setValueAtTime(ch[i],t+.86);
+      g2.gain.setValueAtTime(.0001,t+.86);
+      g2.gain.exponentialRampToValueAtTime(.085,t+.90);
+      g2.gain.setValueAtTime(.085,t+1.5);
+      g2.gain.exponentialRampToValueAtTime(.0005,t+2.35);
+      o2.connect(g2);g2.connect(out);o2.start(t+.86);o2.stop(t+2.4);
+    }
+    // the air rushing in behind it
+    const nb=noiseBuf(.6),s=ac.createBufferSource();s.buffer=nb;
+    const bp=ac.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.1;
+    bp.frequency.setValueAtTime(420,t);bp.frequency.exponentialRampToValueAtTime(4600,t+.55);
+    const g3=ac.createGain();
+    g3.gain.setValueAtTime(.0001,t);g3.gain.exponentialRampToValueAtTime(.11,t+.16);
+    g3.gain.exponentialRampToValueAtTime(.0005,t+.62);
+    s.connect(bp);bp.connect(g3);g3.connect(out);s.start(t);s.stop(t+.65);
+    // little glints while he stands there
+    const gl=[2637.02,3135.96,2349.32,2793.83,3520.00,2093.00];
+    for(let i=0;i<gl.length;i++)tone(t+1.1+i*.26,gl[i],.13,.035,'sine');
+  }catch(e){}
+}
 // ----- the W button's moment on screen: the spin called out over the road -----
 function drawWakabaFX(){
   if(st.docPhase!=='none')return;   // the doctor's cut-in takes the screen while he dances
+  if(st.giantPhase!=='none')return;// and the giant fills it while he stands there
   if(st.fx<=0)return;
   const a=Math.min(1,st.fx*1.9);
   const age=Math.max(0,(st.fxMax||1.9)-st.fx);
@@ -2608,7 +2839,7 @@ let last=performance.now();
 function frame(now){
   const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   update(dt);
-  const sh=(st.hit>0?st.hit*10:0)+(st.ttShake||0)*9;
+  const sh=(st.hit>0?st.hit*10:0)+(st.ttShake||0)*9+(st.giantShake||0)*8;
   ctx.save();
   if(sh)ctx.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh*.7);
   // the world rolls around the driver as the car spins on the shoulder
@@ -2630,6 +2861,7 @@ function frame(now){
   drawDocOverlay(dt);
   drawHUD();
   drawBTTHUD();
+  drawGiantOverlay();
   drawWakabaFX();
   updateAudio();
   requestAnimationFrame(frame);

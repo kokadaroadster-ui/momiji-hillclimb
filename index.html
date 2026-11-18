@@ -32,7 +32,8 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 #pad{display:none;width:100%;max-width:720px;justify-content:space-between;gap:10px}
 #pad .grp{display:flex;gap:10px}
 #pad .k{width:clamp(40px,11.5vw,88px);height:clamp(40px,11vw,64px);display:flex;align-items:center;justify-content:center;
-  background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:22px;color:var(--fg);touch-action:none}
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:22px;color:var(--fg);touch-action:none;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #pad .k.on{background:var(--accent)}
 /* 画面のWボタン: the spin button a fresh driver always finds */
 #wakaba{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:7px;padding:5px 13px 5px 5px;
@@ -1673,7 +1674,7 @@ document.getElementById('kW').addEventListener('pointerdown',e=>{st.wiper=st.wip
     el.addEventListener('pointerleave',e=>{if(touch)el.classList.remove('on');wakabaHoldEnd(el,false)});
   };
   bindPress(wb,false);bindPress(kY,true);
-  wb.addEventListener('contextmenu',e=>e.preventDefault());   // a long press on a phone should not open the menu
+  for(const el of[wb,kY])el.addEventListener('contextmenu',e=>e.preventDefault()); // a long press on a phone should not open a menu
   wb.addEventListener('click',e=>{e.preventDefault();if(e.detail===0)triggerWakaba()}); // keyboard only, so one press counts once
 }
 const W_HOLD_MS=600;                    // ms — press and hold this long and the giant comes out

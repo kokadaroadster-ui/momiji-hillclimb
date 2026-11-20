@@ -593,6 +593,17 @@ const Sfx={
     this.tone(311,.4,'triangle',.06,140,.03);
     this.noise(.3,.06,420,1.1,0,140);
   },
+  /* ハート弾・キスの投げキッス音 */
+  kiss(){
+    this.tone(880,.16,'triangle',.06,1760);
+    this.tone(1320,.12,'sine',.04,2100,.04);
+    this.noise(.10,.03,5200,2.2,0,7600);
+  },
+  /* ポールダンスのきらめき（キラキラ） */
+  sparkle(){
+    this.tone(1568,.32,'triangle',.035,3136);
+    this.tone(2093,.28,'sine',.028,4186,.05);
+  },
   signSlam(){
     this.noise(.30,.20,260,.7,0,90);
     this.tone(130,.28,'square',.10,60);
@@ -834,33 +845,65 @@ function playCampBossStep(i,when){
   if(s===4||s===12)msnare(when);
   if(bar%4===3&&s>=12)mnoise(.07,.03,2600,.9,when);
 }
-/* ===== ステージ4: 屋台横丁（和風まつり・太鼓と三味線） ===== */
+/* ===== ステージ4: 屋台横丁（コテコテの関西風・ちんどん屋＋三味線＋ブラス合いの手） ===== */
 const MYATAI={
-  bpm:142,
-  roots:[50,50,48,45],
-  scale:[[62,64,67,69,74],[62,64,67,69,74],[60,62,65,67,72],[57,60,62,65,69]],
+  bpm:158,
+  roots:[50,50,48,50,53,52,50,45],
+  /* ヨナ抜き（レミソラド）の屋台メロディ：跳ねる8分と合いの手 */
   mel:[
-    [74,null,72,null,69,null,67,null,69,null,72,null,74,null,null,null],
-    [74,null,76,null,74,null,72,null,69,null,null,null,67,null,69,null],
-    [72,null,69,null,67,null,65,null,67,null,72,null,69,null,null,null],
-    [69,null,67,null,65,null,62,null,65,null,69,null,74,null,null,null]
-  ]
+    [74,null,72,69,null,72,74,null,76,null,74,72,null,69,null,null],
+    [74,null,72,69,null,72,74,null,79,null,76,74,null,72,null,null],
+    [71,null,69,67,null,69,71,null,72,null,71,67,null,65,null,null],
+    [74,null,72,69,null,72,74,null,76,null,74,72,null,69,null,null],
+    [77,null,76,74,null,76,77,null,81,null,79,77,null,76,null,null],
+    [76,null,74,72,null,74,76,null,77,null,76,72,null,69,null,null],
+    [74,null,72,69,null,72,74,null,76,null,74,72,null,69,null,null],
+    [69,null,67,64,null,67,69,null,72,null,71,69,null,67,null,null]
+  ],
+  /* 三味線のベンベン（バーごとの16分の型） */
+  shami:[[0,1,2,1,0,1,2,3],[0,2,3,4,3,2,1,0],[0,1,2,3,2,1,0,-1],[0,2,3,2,0,2,4,5]],
+  /* ブラス合いの手の和音 */
+  brass:[[0,4,7,12],[0,3,7,12],[0,4,7,10],[0,5,7,12]]
 };
 function playYataiStep(i,when){
-  const bar=Math.floor(i/16)%4, s=i%16, root=MYATAI.roots[bar];
-  /* 太鼓 */
-  if(s===0||s===6||s===8||s===11)mkick(when);
+  const bar=Math.floor(i/16)%8, s=i%16, root=MYATAI.roots[bar];
+  /* 大太鼓ドドン！ */
+  if(s===0||s===3||s===8||s===11)mkick(when);
+  if(s===6||s===14)mnoise(.15,.052,150,1.25,when);
+  /* 締め太鼓と手拍子 */
   if(s===4||s===12)msnare(when);
-  if(s===14&&bar%2===1)mnoise(.09,.05,420,.8,when);
-  /* 三味線のかき鳴らし */
+  if(s===10)mnoise(.05,.028,2900,1.7,when);
+  /* カネ（チャン・チャン） */
+  if(s%2===0)mnoise(.085,.017,6600,3.4,when);
+  /* チューバ風の跳ねるベース */
   if(s%2===0){
-    const sc=MYATAI.scale[bar];
-    mnote(mtof(sc[(s>>1)%5]),.11,'sawtooth',.020,when);
+    const bn=root+((s%8===6)?7:0);
+    mnote(mtof(bn-12),.17,'triangle',.052,when);
   }
-  if(s%4===0)mnote(mtof(root),.26,'triangle',.045,when);
-  /* 笛の旋律 */
+  /* 三味線のベンベン（ベタベタと刻む） */
+  if(s%2===0){
+    const sc=MYATAI.shami[bar%4], idx=sc[(s>>1)%8];
+    if(idx>=0)mnote(mtof(62+[0,2,5,7,9,12,14,17][idx%8]),.08,'sawtooth',.015,when);
+  }
+  /* ブラスの合いの手：チャンチャカチャン！ */
+  if(s===7){
+    const ch=MYATAI.brass[bar%4];
+    for(let k=0;k<ch.length;k++)mnote(mtof(root+24+ch[k]),.12,'sawtooth',.018-k*.002,when);
+  }
+  if(bar%2===1&&s>=12){
+    const run=[12,7,4], kk=s-12;
+    if(kk<3)mnote(mtof(root+24+run[kk]),.09,'square',.024,when);
+    else{
+      for(let k=0;k<3;k++)mnote(mtof(root+24+[0,4,7][k]),.24,'sawtooth',.020,when);
+      mnoise(.20,.050,2800,1.2,when);
+    }
+  }
+  /* 笛のメロディ（ちんどん屋のクラリネット） */
   const m=MYATAI.mel[bar];
-  if(m[s]!=null)mnote(mtof(m[s]),.20,'square',.022,when);
+  if(m[s]!=null){
+    mnote(mtof(m[s]),.17,'square',.024,when);
+    if(s%4===0)mnote(mtof(m[s]+12),.13,'triangle',.008,when);
+  }
 }
 /* ===== ステージ4ボス: 鉄板の大将（熱気の和風ロック） ===== */
 const MYATAIBOSS={
@@ -880,57 +923,125 @@ function playYataiBossStep(i,when){
   if(s===4||s===12)msnare(when);
   if(s===6||s===14)mnoise(.10,.05,380,.8,when);
 }
-/* ===== ステージ5: 星空の魔王城（荘厳なイントロ・聖歌とベル） ===== */
+/* ===== ステージ5: 星空の魔王城（じわじわ不安を煽る・不協和音と鼓動と時計） ===== */
 const MCASTLE={
-  bpm:96,
-  roots:[38,34,36,33],
-  chords:[[62,65,69],[58,62,65],[60,64,67],[57,60,64]],
+  bpm:84,
+  roots:[33,33,34,33,32,33,35,34],
+  /* 短2度・トライトーンを重ねた不穏なオルガン（半音のぶつかり） */
+  organ:[[0,1,6,12],[0,1,7,13],[0,6,7,12],[0,1,6,11]],
+  /* 揺れる高音シンセ（半音違いでうなる） */
+  wail:[
+    [81,null,null,null,null,null,null,null,82,null,null,null,null,null,null,null],
+    [81,null,null,null,null,null,null,null,80,null,null,null,null,null,null,null],
+    [84,null,null,null,null,null,null,null,83,null,null,null,null,null,null,null],
+    [82,null,null,null,null,null,null,null,81,null,null,null,null,null,null,null],
+    [79,null,null,null,null,null,null,null,80,null,null,null,null,null,null,null],
+    [85,null,null,null,null,null,null,null,84,null,null,null,null,null,null,null],
+    [86,null,null,null,null,null,null,null,85,null,null,null,null,null,null,null],
+    [80,null,null,null,null,null,null,null,79,null,null,null,null,null,null,null]
+  ],
+  /* 遠くの鐘（規則的に鳴るほど不気味） */
   bell:[
-    [86,null,null,null,81,null,null,null,77,null,null,null,81,null,null,null],
-    [82,null,null,null,77,null,null,null,74,null,null,null,77,null,null,null],
-    [84,null,null,null,79,null,null,null,76,null,null,null,79,null,null,null],
-    [81,null,null,null,76,null,null,null,72,null,null,null,76,null,null,null]
+    [86,null,null,null,85,null,null,null,81,null,null,null,85,null,null,null],
+    [82,null,null,null,83,null,null,null,77,null,null,null,82,null,null,null],
+    [84,null,null,null,83,null,null,null,79,null,null,null,84,null,null,null],
+    [81,null,null,null,80,null,null,null,76,null,null,null,81,null,null,null],
+    [79,null,null,null,80,null,null,null,75,null,null,null,79,null,null,null],
+    [83,null,null,null,82,null,null,null,78,null,null,null,83,null,null,null],
+    [86,null,null,null,87,null,null,null,82,null,null,null,86,null,null,null],
+    [80,null,null,null,79,null,null,null,74,null,null,null,80,null,null,null]
   ]
 };
 function playCastleStep(i,when){
-  const bar=Math.floor(i/16)%4, s=i%16, root=MCASTLE.roots[bar];
+  const bar=Math.floor(i/16)%8, s=i%16, root=MCASTLE.roots[bar];
+  /* 低いドローン＋不協和なオルガン和音（じわじわと圧迫） */
   if(s===0){
-    mnote(mtof(root-12),2.2,'sine',.060,when);
-    for(const n of MCASTLE.chords[bar]){
-      mnote(mtof(n),2.0,'sawtooth',.013,when);
-      mnote(mtof(n+12),1.8,'triangle',.008,when);
-    }
+    mnote(mtof(root-12),2.7,'sine',.062,when);
+    mnote(mtof(root),2.5,'sawtooth',.026,when);
+    const org=MCASTLE.organ[bar%4];
+    for(let k=0;k<org.length;k++)mnote(mtof(root+12+org[k]),2.3,'sawtooth',.013,when);
   }
-  if(s===0||s===8)mkick(when);
-  if(s===4||s===12)mnoise(.16,.018,1800,1.2,when);
-  if(s%8===0)mnoise(.5,.012,140,.7,when);
+  /* 心臓の鼓動（ドクン・ドクン…ときどき不規則に速まる） */
+  if(s===0||s===2)mkick(when);
+  if(s===10)mkick(when);
+  if(s===2)mnoise(.12,.026,95,.9,when);
+  if(s===0)mnoise(.55,.013,120,.7,when);
+  /* 時計の針（チッ・チッ・チッ） */
+  if(s%4===1)mnoise(.022,.017,7800,4.2,when);
+  if(s%8===6)mnoise(.016,.010,9400,4.6,when);
+  /* 半音でぶつかる教会の鐘 */
   const b=MCASTLE.bell[bar];
-  if(b[s]!=null)mnote(mtof(b[s]),.85,'triangle',.020,when);
+  if(b[s]!=null){
+    mnote(mtof(b[s]),1.0,'triangle',.018,when);
+    mnote(mtof(b[s]+1),.9,'triangle',.008,when);
+  }
+  /* 揺れる高音シンセ */
+  const w=MCASTLE.wail[bar];
+  if(w[s]!=null){
+    mnote(mtof(w[s]),.8,'triangle',.010,when);
+    mnote(mtof(w[s]+1),.75,'sine',.008,when);
+  }
+  /* 2小節ごとに忍び寄る増4度のうねり */
+  if(s===8&&bar%2===1){
+    mnote(mtof(root+18),1.4,'sawtooth',.015,when);
+    mnote(mtof(root+24),1.3,'sawtooth',.010,when);
+    mnoise(.9,.015,240,1.1,when);
+  }
+  /* 遠くの雷鳴 */
+  if(bar%4===3&&s===14)mnoise(.6,.020,140,.6,when);
 }
-/* ===== 最後のボス: スター魔王（クライマックス） ===== */
+/* ===== 最後のボス: スター魔王（ズンズン ポールダンスショー） ===== */
 const MFINALBOSS={
-  bpm:188,
-  roots:[36,36,38,36,41,40,38,37],
-  riff:[0,1,5,8,7,5,1,0]
+  bpm:128,
+  roots:[33,33,36,33,31,33,38,36],
+  /* 8分のシンセリフ（バーごとに展開） */
+  lead:[
+    [69,null,69,72,null,76,null,72,69,null,72,null,76,null,79,null],
+    [69,null,69,72,null,76,null,72,67,null,71,null,74,null,71,null],
+    [72,null,72,76,null,79,null,76,72,null,76,null,79,null,84,null],
+    [69,null,69,72,null,76,null,72,69,null,72,null,76,null,79,null],
+    [67,null,67,71,null,74,null,71,67,null,71,null,74,null,79,null],
+    [69,null,69,72,null,76,null,72,74,null,77,null,81,null,77,null],
+    [74,null,74,77,null,81,null,77,74,null,77,null,81,null,86,null],
+    [72,null,72,76,null,79,null,76,72,null,76,null,79,null,84,null]
+  ],
+  /* ディスコ風ブラススタブの和音 */
+  chord:[[0,4,7,12],[0,4,7,12],[0,3,7,12],[0,4,7,12],[0,3,7,10],[0,4,7,12],[0,4,7,14],[0,4,7,12]]
 };
 function playFinalBossStep(i,when){
   const bar=Math.floor(i/16)%8, s=i%16, root=MFINALBOSS.roots[bar];
-  if(s%2===0){
-    mnote(mtof(root),.10,'sawtooth',.058,when);
-    mnote(mtof(root+6),.09,'square',.018,when);
-    mnoise(.026,.018,8000,1.6,when);
+  /* ズン・ズン・ズン・ズン！（重低音の4つ打ち） */
+  if(s%4===0)mkick(when);
+  /* 2拍・4拍のクラップ＆スネア */
+  if(s===4||s===12){msnare(when);mnoise(.16,.055,1500,.9,when);}
+  /* ハイハット */
+  if(s%2===0)mnoise(.03,.012,9800,2.4,when);
+  if(s===6||s===14)mnoise(.09,.017,8200,1.5,when);
+  /* グルーヴィーなベース（シンコペーション） */
+  if(s===0||s===3||s===6||s===8||s===11||s===14){
+    const bn=root+((s===6||s===14)?12:((s===3||s===11)?7:0));
+    mnote(mtof(bn),.15,'sawtooth',.060,when);
+    mnote(mtof(bn+12),.11,'square',.012,when);
   }
-  if(s%4===0){
-    const n=root+24+MFINALBOSS.riff[(s>>2)%8];
-    mnote(mtof(n),.20,'square',.032,when);
-    mnote(mtof(n+12),.16,'square',.012,when);
+  /* ディスコ風ブラススタブ */
+  if(s===0||s===7||s===10){
+    const ch=MFINALBOSS.chord[bar];
+    for(let k=0;k<ch.length;k++)mnote(mtof(root+24+ch[k]),.15,'sawtooth',.019-k*.003,when);
   }
-  if(s===0||s===6){
-    [0,3,7,12].forEach((iv,k)=>mnote(mtof(root+24+iv),.30,'sawtooth',.020-k*.003,when));
+  /* シンセリフ */
+  const l=MFINALBOSS.lead[bar];
+  if(l[s]!=null){
+    mnote(mtof(l[s]),.16,'square',.026,when);
+    mnote(mtof(l[s]+12),.13,'triangle',.007,when);
   }
-  if(s===0||s===3||s===8||s===11||s===14)mkick(when);
-  if(s===4||s===12)msnare(when);
-  if(bar%4===3&&s>=12)mnoise(.12,.05,300,.7,when);
+  /* 4小節ごとのライザー（ショーの盛り上げ） */
+  if(bar%4===3&&s>=8){
+    const up=Math.round(12*(s-8)/8);
+    mnote(mtof(root+24+up),.10,'sawtooth',.015,when);
+    mnoise(.05,.018,3000+up*420,2.2,when);
+  }
+  /* 合いの手（ハッ！）の短いスタブ */
+  if(s===14&&bar%2===1)mnoise(.07,.045,1200,1.0,when);
 }
 const MUS_BPM={run:MRUN.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
   camp:MCAMP.bpm,camp_boss:MCAMPBOSS.bpm,yatai:MYATAI.bpm,yatai_boss:MYATAIBOSS.bpm,
@@ -1762,7 +1873,7 @@ function startBoss(){
   st.telopBoss=0;
   if(k==='final'){
     st.telop='最後のボス 降臨!!';st.telopT=4.2;
-    st.telopSub='スター魔王「よくぞ ここまで のぼってきた…」';
+    st.telopSub='スター魔王「ポールダンス・ショーの 開幕だ」';
     st.shake=2.2;st.flash=1.2;st.flashCol='255,230,150';
     st.bossEntrance=3.2;
   }else if(k==='chick'){
@@ -1960,6 +2071,35 @@ function fireStarRain(n){
   }
   Sfx.wave();
 }
+/* --- スター魔王のポールダンスショーの技（ハート弾幕・ネオンウェーブ・回転リング） --- */
+function fireHeartFan(n){
+  const m=1+0.24*BOSS.rage;
+  const ang0=Math.atan2((P.y-58)-(BOSS.y-120),P.x-BOSS.x);
+  for(let i=0;i<n;i++){
+    const ang=ang0+(i-(n-1)/2)*0.22;
+    BOSS.shots.push({kind:'heart',x:BOSS.x,y:BOSS.y-120,vx:Math.cos(ang)*266*m,vy:Math.sin(ang)*266*m,t:0,delay:.38+i*.06,life:3.8,r:15,ang,spin:rr(-4,4),seed:Math.random()*9});
+  }
+  Sfx.kiss();
+}
+function firePoleRing(n){
+  const cnt=n||8;
+  const m=1+0.18*BOSS.rage;
+  const off=rr(0,6.283);
+  for(let i=0;i<cnt;i++){
+    const ang=off+i*6.283/cnt;
+    const heartly=(i%2===0);
+    BOSS.shots.push({kind:heartly?'heart':'star',x:BOSS.x,y:BOSS.y-150,vx:Math.cos(ang)*196*m,vy:Math.sin(ang)*196*m,t:0,delay:.3+ (i%4)*.04,life:4.2,r:14,ang,spin:rr(-6,6),seed:Math.random()*9});
+  }
+  Sfx.kiss();
+  st.shake=Math.max(st.shake,.3);
+}
+function fireNeonWave(dir){
+  const d=dir||((P.x<BOSS.x)?-1:1);
+  const m=1+0.3*BOSS.rage;
+  BOSS.shots.push({kind:'neon',x:BOSS.x+d*26,y:groundY-12,vx:d*338*m,t:0,delay:0,life:4.0,r:27,seed:Math.random()*9});
+  Sfx.wave();
+  st.shake=Math.max(st.shake,.28);
+}
 function defeatBoss(){
   const k=bossKind();
   const dun=k==='dungeon';
@@ -1977,7 +2117,7 @@ function defeatBoss(){
     st.telopSub='鉄板の大将は コテを しまった… ゴールへ突入!!';
   }else if(k==='final'){
     st.telop='全5面 制覇!!';st.telopT=4.4;
-    st.telopSub='スター魔王は 星になって 消えていった…';
+    st.telopSub='スター魔王は 最後のポーズを決めて 星になって消えていった…';
   }else{
     st.telop='GREAT SCOTT!!';st.telopT=3.2;
     st.telopSub='ドクは改心した！ ゴールへ突入!!';
@@ -2050,12 +2190,14 @@ function bossAttack(){
     if(r>=1&&Math.random()<.12)bossDash();
   }else if(k==='final'){
     const pick=Math.random();
-    if(r>=2&&pick<.18)fireStarRain(5);
-    else if(r>=1&&pick<.40)fireStarFan(5);
-    else if(pick<.60){fireShockwave(-1);fireShockwave(1);}
-    else if(pick<.78)bossDash();
-    else fireStarFan(3);
-    if(r>=2&&Math.random()<.36)fireStarFan(3);
+    /* セクシーなポールダンスショー：ハートと星をまき散らし、ポーズを決めてから急降下 */
+    if(r>=2&&pick<.16)firePoleRing(10);
+    else if(r>=1&&pick<.38)fireHeartFan(4);
+    else if(pick<.55)fireStarFan(3);
+    else if(pick<.70){fireNeonWave(-1);fireNeonWave(1);}
+    else if(pick<.84)bossDash();
+    else fireHeartFan(3);
+    if(r>=1&&Math.random()<.26)firePoleRing(6);
   }else{
     const pick=Math.random();
     if(r>=2&&pick<.24)bossDash();
@@ -2068,11 +2210,12 @@ function bossAttack(){
 function bossDash(){
   if(BOSS.dash>0)return;
   const k=bossKind();
-  BOSS.dash=.62;BOSS.dashFrom=BOSS.x;BOSS.dashDir=(P.x<BOSS.x)?-1:1;
+  BOSS.dashTotal=(k==='final'?0.9:0.62);
+  BOSS.dash=BOSS.dashTotal;BOSS.dashFrom=BOSS.x;BOSS.dashDir=(P.x<BOSS.x)?-1:1;
   BOSS.dashReach=(k==='final'?310:210);
   Sfx.bossDash();
   st.shake=Math.max(st.shake,.5);
-  msg(BOSS.def.short+'の '+(k==='final'?'急降下突進':'突進')+'！ ジャンプで よけろ！');
+  msg(BOSS.def.short+'の '+(k==='final'?'ポーズから急降下！ ジャンプで よけろ！':'突進')+'！ ジャンプで よけろ！');
 }
 function bossUpdate(dt){
   BOSS.t+=dt;BOSS.stateT+=dt;
@@ -2089,13 +2232,13 @@ function bossUpdate(dt){
       if(Math.random()<dt*22)spark(BOSS.cx+rr(-200,200),rr(0,groundY),rr(2,5),['#ffe45a','#c9a3ff','#fff'][Math.floor(Math.random()*3)]);
       if(BOSS.stateT>3.1&&BOSS.stateT-dt<=3.1){st.shake=1.6;Sfx.thud(2);}
     }
-    if(BOSS.stateT>(fin?3.3:1.8)){BOSS.phase='fight';BOSS.stateT=0;msg(fin?'スター魔王 本気だ！ 星弾幕に 気をつけろ！':'攻撃が来る！ 低く降りた瞬間を踏め！');}
+    if(BOSS.stateT>(fin?3.3:1.8)){BOSS.phase='fight';BOSS.stateT=0;msg(fin?'ポールダンスショー開演！ ハートと星の弾幕を かいくぐれ！':'攻撃が来る！ 低く降りた瞬間を踏め！');}
     return;
   }
 
   if(BOSS.phase==='defeat'){
     BOSS.y=lerp(BOSS.y,groundY-26,Math.min(1,dt*2));
-    BOSS.x=lerp(BOSS.x,BOSS.cx-120,Math.min(1,dt*1.4));
+    BOSS.x=lerp(BOSS.x,bossKind()==='final'?BOSS.cx:BOSS.cx-120,Math.min(1,dt*1.4));
     BOSS.danceT+=dt;
     if(Math.random()<dt*14)spark(BOSS.x+rr(-90,90),BOSS.y+rr(-80,70),rr(1.5,3.4),['#ffd45e','#ff5ad1','#5ad7ff'][Math.floor(Math.random()*3)]);
     if(BOSS.stateT>3.5){
@@ -2134,13 +2277,16 @@ function bossUpdate(dt){
   BOSS.low=lerp(BOSS.low,lowWin,Math.min(1,dt*3.6*(1+BOSS.rage*.4)));
 
   if(BOSS.dash>0){
-    /* 突進（本気MAXで追加） */
+    /* 突進（本気MAXで追加）：スター魔王はポーズを決めてから急降下 */
     BOSS.dash-=dt;
-    const p=1-clamp(BOSS.dash/0.62,0,1);
-    BOSS.x=clamp(BOSS.dashFrom+BOSS.dashDir*(BOSS.dashReach||210)*p,BOSS.x0+40,BOSS.x1-40);
-    BOSS.y=lerp(BOSS.y,groundY-54,Math.min(1,dt*12));
-    if(Math.random()<dt*34)puff(BOSS.x,groundY-8,5);
-    if(Math.abs(P.x-BOSS.x)<bossHalfW()&&P.y>groundY-86){
+    const dTotal=BOSS.dashTotal||0.62;
+    const p=1-clamp(BOSS.dash/dTotal,0,1);
+    const poseEnd=bossKind()==='final'?0.3:0;
+    const dp=clamp((p-poseEnd)/Math.max(0.01,1-poseEnd),0,1);
+    BOSS.x=clamp(BOSS.dashFrom+BOSS.dashDir*(BOSS.dashReach||210)*dp,BOSS.x0+40,BOSS.x1-40);
+    BOSS.y=lerp(BOSS.y,dp>0?groundY-54:groundY-120,Math.min(1,dt*(dp>0?12:4)));
+    if(BOSS.dash>0&&Math.random()<dt*34)puff(BOSS.x,groundY-8,5);
+    if(dp>0.6&&Math.abs(P.x-BOSS.x)<bossHalfW()&&P.y>groundY-86){
       if(st.giantT>0||st.warpT>0||st.turboT>0)damageBoss(2,'slam');
       else hurt();
     }
@@ -2157,8 +2303,12 @@ function bossUpdate(dt){
       st.shake=Math.max(st.shake,.95);Sfx.signSlam();
     }
   }else{
-    BOSS.x=BOSS.cx+Math.sin(BOSS.t*.62*spd)*116;
-    const hoverY=groundY+hoverH+Math.sin(BOSS.t*1.7*spd)*12;
+    /* スター魔王はゴールドポールの周りを離れず、ポールに沿って上下にスライドする */
+    if(bossKind()==='final')BOSS.x=BOSS.cx+Math.sin(BOSS.t*.85*spd)*34;
+    else BOSS.x=BOSS.cx+Math.sin(BOSS.t*.62*spd)*116;
+    const hoverY=bossKind()==='final'
+      ? groundY-46+Math.sin(BOSS.t*.95*spd)*14
+      : groundY+hoverH+Math.sin(BOSS.t*1.7*spd)*12;
     const lowY=groundY-14+Math.sin(BOSS.t*3.1*spd)*4;
     BOSS.y=lerp(hoverY,lowY,BOSS.low);
   }
@@ -2190,11 +2340,11 @@ function bossUpdate(dt){
   for(let i=BOSS.shots.length-1;i>=0;i--){
     const s=BOSS.shots[i];
     s.t+=dt;
-    const straight=(s.kind==='bolt'||s.kind==='dark'||s.kind==='star'||s.kind==='disc'||s.kind==='feather');
+    const straight=(s.kind==='bolt'||s.kind==='dark'||s.kind==='star'||s.kind==='disc'||s.kind==='feather'||s.kind==='heart');
     if(straight){
       if(s.t>=s.delay){s.x+=s.vx*dt;s.y+=s.vy*dt;if(s.spin)s.ang=(s.ang||0)+s.spin*dt;}
       if(s.x<BOSS.x0-170||s.x>BOSS.x1+280||s.y<-70||s.y>VH+70||s.t>s.life){BOSS.shots.splice(i,1);continue;}
-    }else if(s.kind==='wave'||s.kind==='sauce'){
+    }else if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'){
       s.x+=s.vx*dt;s.r=26+Math.min(18,s.t*10);
       if(s.t>s.life||s.x<BOSS.x0-190||s.x>BOSS.x1+240){BOSS.shots.splice(i,1);continue;}
     }else if(s.kind==='egg'){
@@ -2223,7 +2373,7 @@ function bossUpdate(dt){
     }
     /* プレイヤーとの当たり（チャージ中はまだ当たらない） */
     if(s.delay&&s.t<s.delay)continue;
-    if(s.kind==='wave'||s.kind==='sauce'){
+    if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'){
       /* 地を走る衝撃波・ソースの波：ジャンプでよける */
       if(Math.abs(s.x-P.x)<s.r*.62+14&&P.y>groundY-56){
         if(st.giantT>0||st.warpT>0||st.turboT>0){
@@ -5700,6 +5850,190 @@ function drawCondenser(x,y,rot){
 }
 
 /* ------- BOSS エリアとドク本体 ------- */
+/* ------- スター魔王のポールダンスショー会場（ゴールドポール・ミラーボール・スポット・レーザー） ------- */
+function drawGoldPole(x,top,bot,front){
+  const w=front?7.5:12;
+  const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0);
+  if(front){
+    g.addColorStop(0,'rgba(255,226,150,.45)');
+    g.addColorStop(.4,'rgba(255,252,230,.85)');
+    g.addColorStop(1,'rgba(206,148,40,.40)');
+  }else{
+    g.addColorStop(0,'#7d5510');
+    g.addColorStop(.2,'#ffd96a');
+    g.addColorStop(.44,'#fffbe4');
+    g.addColorStop(.7,'#e6ad34');
+    g.addColorStop(1,'#6e4a0e');
+  }
+  ctx.save();
+  if(!front){
+    ctx.globalCompositeOperation='lighter';
+    ctx.shadowColor='rgba(255,215,120,.9)';ctx.shadowBlur=22;
+  }
+  ctx.fillStyle=g;
+  ctx.fillRect(x-w/2,top,w,bot-top);
+  ctx.restore();
+  if(!front){
+    /* ポールを走るきらめき */
+    for(let k=0;k<3;k++){
+      const p=((st.t*0.55+k*0.33)%1);
+      const sy=top+(bot-top)*p;
+      ctx.fillStyle='rgba(255,255,240,'+(0.5*(1-p))+')';
+      ctx.fillRect(x-1.5,sy,3,16);
+    }
+  }
+}
+function drawMirrorBall(x,y,r){
+  const hang=Math.max(4,y-46);
+  ctx.save();
+  ctx.strokeStyle='rgba(220,228,240,.55)';ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(x,hang-14);ctx.lineTo(x,y-r);ctx.stroke();
+  /* 光条 */
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<50;i++){
+    const a=i*0.72+st.t*0.5;
+    ctx.strokeStyle='rgba(255,250,235,'+(0.03+0.05*(i%3))+')';
+    ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r*4.4,y+Math.sin(a)*r*4.4);ctx.stroke();
+  }
+  const mg=ctx.createRadialGradient(x-r*0.3,y-r*0.35,1,x,y,r);
+  mg.addColorStop(0,'#ffffff');mg.addColorStop(.55,'#dbe4f0');mg.addColorStop(1,'#7f8a9c');
+  ctx.fillStyle=mg;ctx.beginPath();ctx.arc(x,y,r,0,6.284);ctx.fill();
+  ctx.strokeStyle='rgba(120,130,150,.6)';ctx.lineWidth=1;
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();ctx.moveTo(x-r,i*r*0.42);ctx.lineTo(x+r,i*r*0.42);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+i*r*0.42,y-r);ctx.lineTo(x+i*r*0.42,y+r);ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawFinalShow(){
+  if(STAGE.id!==5)return;
+  if(!(BOSS.def&&BOSS.def.kind==='final'))return;
+  if(!(BOSS.active||BOSS.done))return;
+  const x=BOSS.cx-st.camX;
+  if(x<-560||x>VW+560)return;
+  const poleTop=Math.max(8,groundY-352);
+  const poleBot=groundY+5;
+  const beat=0.5+0.5*Math.sin(st.t*3.6);
+
+  /* --- クラブのフロア（ネオンの光だまりとタイル） --- */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const fg=ctx.createRadialGradient(x,groundY+8,6,x,groundY+8,270);
+  fg.addColorStop(0,'rgba(255,120,210,'+(0.20+0.07*beat)+')');
+  fg.addColorStop(.45,'rgba(120,90,255,.10)');
+  fg.addColorStop(1,'rgba(60,20,120,0)');
+  ctx.fillStyle=fg;ctx.beginPath();ctx.ellipse(x,groundY+10,280,66,0,0,6.284);ctx.fill();
+  ctx.restore();
+  /* ステージ床のネオンライン */
+  const stgW=Math.min(VW*0.92,520);
+  for(let i=0;i<2;i++){
+    ctx.strokeStyle=i?'rgba(120,255,240,'+(0.35+0.2*beat)+')':'rgba(255,110,210,'+(0.35+0.2*(1-beat))+')';
+    ctx.lineWidth=2.4;
+    ctx.beginPath();
+    ctx.moveTo(x-stgW/2,groundY+2+i*7);
+    ctx.lineTo(x+stgW/2,groundY+2+i*7);
+    ctx.stroke();
+  }
+  for(let i=0;i<16;i++){
+    const tx=x-stgW/2+i*(stgW/15);
+    const on=((Math.floor(st.t*6)+i)%3===0);
+    ctx.fillStyle=on?['#ff5ad1','#5ad7ff','#ffe45a'][i%3]:'rgba(255,255,255,.06)';
+    ctx.fillRect(tx-8,groundY+14,16,5);
+  }
+
+  /* --- スポットライト（首振り） --- */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const coneCols=['rgba(255,120,200,','rgba(140,120,255,','rgba(120,240,255,'];
+  for(let i=0;i<3;i++){
+    const a=st.t*0.9+i*2.094;
+    const sx=x+Math.sin(a)*96;
+    const len=150+40*Math.sin(st.t*1.7+i);
+    const gg=ctx.createLinearGradient(sx,0,sx+(i-1)*len,groundY);
+    gg.addColorStop(0,coneCols[i]+'0)');
+    gg.addColorStop(.55,coneCols[i]+(0.07+0.05*beat)+')');
+    gg.addColorStop(1,coneCols[i]+(0.14+0.06*beat)+')');
+    ctx.fillStyle=gg;
+    ctx.beginPath();
+    ctx.moveTo(sx,0);
+    ctx.lineTo(sx+(i-1)*len-46,groundY+6);
+    ctx.lineTo(sx+(i-1)*len+46,groundY+6);
+    ctx.closePath();ctx.fill();
+  }
+  /* --- レーザー光線（左右から交差） --- */
+  for(let i=0;i<6;i++){
+    const ph=st.t*1.6+i*1.05;
+    const fromLeft=i%2===0;
+    const sy0=24+((i*37)%110);
+    const sx0=fromLeft?x-330:x+330;
+    const ang=Math.sin(ph)*0.55+(fromLeft?-0.45:3.59);
+    const ex=sx0+Math.cos(ang)*520, ey=sy0+Math.sin(ang)*520;
+    ctx.strokeStyle='rgba('+(i%3===0?'255,90,210':(i%3===1?'120,240,255':'255,230,120'))+','+(0.13+0.12*beat)+')';
+    ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(sx0,sy0);ctx.lineTo(ex,ey);ctx.stroke();
+  }
+  ctx.restore();
+
+  /* --- ゴールドのポール --- */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const pg=ctx.createLinearGradient(x,0,x,groundY);
+  pg.addColorStop(0,'rgba(255,220,140,0)');
+  pg.addColorStop(.5,'rgba(255,220,140,'+(0.10+0.04*beat)+')');
+  pg.addColorStop(1,'rgba(255,200,110,0)');
+  ctx.fillStyle=pg;
+  ctx.fillRect(x-26,poleTop,52,groundY-poleTop);
+  ctx.restore();
+  drawGoldPole(x,poleTop,poleBot,false);
+  /* ポールの根元 */
+  ctx.fillStyle='#c9a24a';
+  ctx.beginPath();ctx.ellipse(x,groundY+4,30,8,0,0,6.284);ctx.fill();
+  ctx.fillStyle='rgba(255,245,210,.85)';
+  ctx.beginPath();ctx.ellipse(x,groundY+2,19,4.6,0,0,6.284);ctx.fill();
+  /* ポールを伝う光のリング */
+  for(let k=0;k<4;k++){
+    const p=((st.t*0.7+k*0.25)%1);
+    const ry=poleTop+(groundY-poleTop)*p;
+    ctx.strokeStyle='rgba(255,235,160,'+(0.5*(1-Math.abs(p*2-1))*(0.5+0.5*beat))+')';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(x,ry,15,4,0,0,6.284);ctx.stroke();
+  }
+  /* 天井のミラーボール */
+  drawMirrorBall(x,poleTop+26,17);
+
+  /* --- 舞い上がるハートと星 --- */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<9;i++){
+    const p=((st.t*0.42+hash(i*3.3))%1);
+    const hx=x-120+hash(i*7.7)*240+Math.sin(st.t*1.4+i)*16;
+    const hy=groundY-20-p*(groundY-40);
+    const a=Math.sin(p*Math.PI);
+    if(i%3===0){
+      drawHeartShape(hx,hy,5.5,Math.sin(st.t*2+i)*0.3,'rgba(255,110,190,'+(0.55*a)+')',null);
+    }else{
+      ctx.fillStyle='rgba(255,235,160,'+(0.6*a)+')';
+      drawStarShape(hx,hy,4.6,2.0,st.t*1.4+i);
+    }
+  }
+  ctx.restore();
+
+  /* --- ショーのタイトル看板 --- */
+  ctx.save();
+  ctx.globalAlpha=0.9;
+  ctx.font='900 12px system-ui,sans-serif';ctx.textAlign='center';
+  const label=(BOSS.phase==='fight'?'★ SUPER STAR POLE SHOW ★':(BOSS.phase==='defeat'||BOSS.done?'★ CURTAIN CALL ★':'★ SUPER STAR POLE SHOW ★'));
+  const tw=ctx.measureText(label).width;
+  ctx.fillStyle='rgba(28,10,44,.55)';
+  ctx.fillRect(x-tw/2-12,10,tw+24,20);
+  ctx.strokeStyle='rgba(255,200,120,'+(0.4+0.3*beat)+')';ctx.lineWidth=1.4;
+  ctx.strokeRect(x-tw/2-12,10,tw+24,20);
+  ctx.fillStyle='rgba(255,236,180,'+(0.75+0.2*beat)+')';
+  ctx.fillText(label,x,24);
+  ctx.restore();
+}
+
 function drawBossArena(){
   if(P.x<18400&&!BOSS.active&&!BOSS.done)return;
   const x0=BOSS.x0-300-st.camX, x1=BOSS.x1+300-st.camX;
@@ -5877,6 +6211,11 @@ function drawNewBoss(){
   const bob=dancing?Math.abs(Math.sin(st.t*3.4))*7:Math.sin(st.t*1.9)*5;
   const feetY=BOSS.y+bob;
   const isFinal=kind==='final';
+  /* ポールダンス：ポールを軸にしたターン（横スケール反転）と腰振り */
+  const poleTurn=isFinal?Math.sin(st.t*0.85):0;
+  const poleFlat=isFinal?(0.55+0.45*Math.abs(poleTurn)):1;
+  const poleFlip=isFinal?(poleTurn<0?-1:1):1;
+  const hip=isFinal?Math.sin(st.t*6.6)*0.055:0;
   const auraCol=isFinal?['rgba(255,220,110,','rgba(150,90,230,']:kind==='chick'?['rgba(255,240,150,','rgba(120,200,90,']:['rgba(255,150,70,','rgba(200,60,30,'];
 
   /* 背景の光輪・魔法陣 */
@@ -5926,20 +6265,28 @@ function drawNewBoss(){
   else{g.addColorStop(0,auraCol[0]+'0.30)');g.addColorStop(.55,auraCol[1]+'0.12)');g.addColorStop(1,auraCol[1]+'0)');}
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,feetY-dh*0.5,dh*1.0,0,6.284);ctx.fill();
 
-  /* 本体（フラッシュ・ひび割れ・揺れ） */
+  /* 本体（フラッシュ・ひび割れ・揺れ・ポールダンス） */
   const img=BOSS_IMG[kind];
   ctx.save();
   ctx.translate(x,feetY);
   let rot=Math.sin(st.t*1.5)*.05;
   if(dying)rot+=Math.sin(BOSS.stateT*24)*.11*Math.max(0,1-BOSS.stateT/1.5);
   if(dancing)rot=Math.sin(st.t*3.6)*.12;
-  if(isFinal)rot*=0.7;
+  if(isFinal){
+    /* ポールに寄りかかり、ゆれながら腰を振る */
+    rot=hip+Math.sin(st.t*1.05)*0.035;
+    if(dying)rot+=Math.sin(BOSS.stateT*20)*.09*Math.max(0,1-BOSS.stateT/1.5);
+  }
   ctx.rotate(rot);
   const sca=1+(dying?Math.sin(BOSS.stateT*28)*.045*Math.max(0,1-BOSS.stateT/1.6):0);
-  ctx.scale(sca,sca);
+  ctx.scale(poleFlip*poleFlat*sca,sca);
   if(BOSS.flash>.02){
     ctx.shadowColor=isFinal?'rgba(255,240,170,'+Math.min(1,BOSS.flash)+')':'rgba(255,220,160,'+Math.min(1,BOSS.flash)+')';
     ctx.shadowBlur=34*Math.min(1,BOSS.flash);
+  }else if(isFinal){
+    /* スポットの逆光 */
+    ctx.shadowColor='rgba(255,150,220,'+(0.45+0.25*Math.sin(st.t*3.6))+')';
+    ctx.shadowBlur=26;
   }
   if(img&&img.naturalWidth>0){
     ctx.drawImage(img,-dw/2,-dh,dw,dh);
@@ -5947,6 +6294,44 @@ function drawNewBoss(){
     ctx.fillStyle='#d9c08a';ctx.fillRect(-dw/2,-dh,dw,dh);
   }
   ctx.restore();
+
+  /* ポールダンス：脚の前を横切るポールとキラキラ（顔と胸はよける） */
+  if(isFinal){
+    const pt=Math.max(8,groundY-352);
+    drawGoldPole(x-2,feetY-dh*0.40,groundY+3,true);
+    /* ポールに添えた手もとの光 */
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const gx=x-2, gy=feetY-dh*0.88;
+    const gg=ctx.createRadialGradient(gx,gy,2,gx,gy,18);
+    gg.addColorStop(0,'rgba(255,250,220,'+(0.30+0.2*Math.sin(st.t*5))+')');
+    gg.addColorStop(1,'rgba(255,215,140,0)');
+    ctx.fillStyle=gg;ctx.beginPath();ctx.arc(gx,gy,26,0,6.284);ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<8;i++){
+      const a=st.t*1.9+i*0.785;
+      const r=dw*0.5+18+Math.sin(st.t*3+i)*12;
+      const sx2=x+Math.cos(a)*r;
+      const sy2=feetY-dh*(0.28+0.5*hash(i*2.7))+Math.sin(a)*26;
+      const al=0.45+0.4*Math.sin(st.t*5+i*1.7);
+      if(i%3===0)drawHeartShape(sx2,sy2,5,(i%2?1:-1)*0.2,'rgba(255,130,200,'+(0.5*al+.2)+')',null);
+      else{
+        ctx.fillStyle='rgba(255,244,190,'+(0.55*al+.2)+')';
+        ctx.beginPath();ctx.arc(sx2,sy2,2.4,0,6.284);ctx.fill();
+      }
+    }
+    ctx.restore();
+    /* ポールダンス中の音符 */
+    if(!dying){
+      ctx.font='900 16px system-ui,sans-serif';ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,240,190,'+(0.55+0.35*Math.sin(st.t*4.4))+')';
+      ctx.fillText('♪',x-dw*0.72,feetY-dh*0.72+Math.sin(st.t*4)*6);
+      ctx.fillStyle='rgba(255,170,220,'+(0.5+0.35*Math.cos(st.t*4.8))+')';
+      ctx.fillText('♫',x+dw*0.78,feetY-dh*0.86+Math.cos(st.t*4.4)*6);
+    }
+  }
 
   /* 弱点（踏む場所）のしるし */
   if(BOSS.phase==='fight'){
@@ -6229,6 +6614,43 @@ function drawBossFX(){
       ctx.beginPath();ctx.ellipse(x,y,s.r*.7,s.r*.95,0,0,6.284);ctx.stroke();
       ctx.strokeStyle='rgba(140,60,20,.6)';ctx.lineWidth=2;
       ctx.beginPath();ctx.ellipse(x,y,s.r*1.1,s.r*.5,0,0,6.284);ctx.stroke();
+      ctx.restore();
+    }else if(s.kind==='heart'){
+      ctx.save();
+      const ch=s.t<s.delay?1:0;
+      const gr=(ch?30:22)+Math.sin(st.t*26+s.seed)*3;
+      const g5=ctx.createRadialGradient(x,s.y,2,x,s.y,gr);
+      g5.addColorStop(0,'rgba(255,220,240,'+(ch?.95:.7)+')');
+      g5.addColorStop(.5,'rgba(255,110,180,.5)');
+      g5.addColorStop(1,'rgba(255,60,140,0)');
+      ctx.fillStyle=g5;ctx.beginPath();ctx.arc(x,s.y,gr,0,6.284);ctx.fill();
+      const beat=1+0.16*Math.sin(st.t*12+s.seed);
+      drawHeartShape(x,s.y,11*beat,(s.ang||0)*0.4+Math.sin(st.t*4+s.seed)*0.18,'#ff5fa8','rgba(255,240,250,.95)');
+      ctx.fillStyle='rgba(255,255,255,.9)';
+      ctx.beginPath();ctx.arc(x-4,s.y-4,2.1,0,6.284);ctx.fill();
+      ctx.restore();
+    }else if(s.kind==='neon'){
+      const y=groundY-6;
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      const hue=(st.t*90)%360;
+      const g3=ctx.createRadialGradient(x,y,2,x,y,s.r*1.8);
+      g3.addColorStop(0,'rgba(120,255,240,.55)');
+      g3.addColorStop(.45,'rgba(255,90,200,.32)');
+      g3.addColorStop(1,'rgba(120,60,255,0)');
+      ctx.fillStyle=g3;ctx.beginPath();ctx.arc(x,y,s.r*1.8,0,6.284);ctx.fill();
+      ctx.strokeStyle='rgba(160,255,245,.95)';ctx.lineWidth=3.4;
+      ctx.beginPath();ctx.ellipse(x,y,s.r*.7,s.r*.95,0,0,6.284);ctx.stroke();
+      ctx.strokeStyle='rgba(255,110,210,.75)';ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.ellipse(x,y,s.r*1.12,s.r*.5,0,0,6.284);ctx.stroke();
+      /* 舞い上がるネオンの火花 */
+      for(let k=0;k<4;k++){
+        const ph=st.t*14+k*1.7+s.seed;
+        const pxp=x+(hash(k+s.seed)*24-12);
+        const pyp=y-8-Math.abs(Math.sin(ph))*24;
+        ctx.fillStyle=k%2?'rgba(255,130,220,.6)':'rgba(140,255,240,.6)';
+        ctx.beginPath();ctx.arc(pxp,pyp,1.9,0,6.284);ctx.fill();
+      }
       ctx.restore();
     }else if(s.kind==='star'){
       ctx.save();
@@ -7213,6 +7635,18 @@ function drawStarShape(x,y,r1,r2,rot){
   }
   ctx.closePath();ctx.fill();
 }
+/* ハート型（スター魔王のポールダンス弾） */
+function drawHeartShape(x,y,r,rot,fill,stroke){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);
+  ctx.beginPath();
+  ctx.moveTo(0,r*0.78);
+  ctx.bezierCurveTo(-r*1.28,0,-r*0.64,-r*0.98,0,-r*0.34);
+  ctx.bezierCurveTo(r*0.64,-r*0.98,r*1.28,0,0,r*0.78);
+  ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+  ctx.restore();
+}
 /* ゴールゲート（ステージ3〜5共通・色だけ変える） */
 function drawGoalGate(postCol,accent,label){
   const gx=LV.goalX+180;
@@ -7402,6 +7836,7 @@ function render(){
   }else if(STAGE.id===5){
     drawCastleScene();
     drawCastleGround();
+    drawFinalShow();
   }else{
     drawSky();
     drawFar();

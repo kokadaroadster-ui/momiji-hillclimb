@@ -365,7 +365,9 @@ const imgFinalBoss=new Image();  imgFinalBoss.decoding='async';  imgFinalBoss.sr
 const imgFishing=new Image();    imgFishing.decoding='async';    imgFishing.src='boss_fishing.png';
 const imgHelper=new Image();     imgHelper.decoding='async';     imgHelper.src='helper_man.png';
 const imgHelper2=new Image();    imgHelper2.decoding='async';    imgHelper2.src='helper_man2.png';
-let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false};
+/* グランドフィナーレに降臨する神 */
+const imgGod=new Image();        imgGod.decoding='async';        imgGod.src='god_char.png';
+let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false,god:false};
 const BOSS_IMG={chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing};
 /* バストアップ画像の下端をふわっと溶かして、脚と自然につなぐ */
 const sprite=document.createElement('canvas');
@@ -396,6 +398,7 @@ imgFinalBoss.onload=()=>assetsOK.final=imgFinalBoss.naturalWidth>0;
 imgFishing.onload=()=>assetsOK.fishing=imgFishing.naturalWidth>0;
 imgHelper.onload=()=>assetsOK.helper=imgHelper.naturalWidth>0;
 imgHelper2.onload=()=>assetsOK.helper2=imgHelper2.naturalWidth>0;
+imgGod.onload=()=>assetsOK.god=imgGod.naturalWidth>0;
 
 /* ======================= tiny utils ======================= */
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
@@ -569,6 +572,31 @@ const Sfx={
   },
   toss(){this.noise(.14,.06,900,1.2,0,300);this.tone(300,.12,'square',.05,180);},
   bossHit(){this.noise(.16,.16,520,.8,0,180);this.tone(220,.16,'square',.10,90);this.tone(440,.10,'triangle',.06,220,.02);},
+  /* 神降臨：光の柱が下りてくる音（上昇シマー＋低い哄き） */
+  godDescent(){
+    this.tone(65.41,2.0,'sine',.17,98,.05);
+    this.tone(130.81,1.9,'triangle',.08,196,.10);
+    this.noise(1.9,.11,700,1.0,0,7200);
+    [1046.5,1318.5,1568,2093].forEach((f,i)=>this.tone(f,.9,'sine',.035,null,.25+i*.12));
+  },
+  /* 神降臨：神々しい和音ファンファーレ（ハープ上昇→厳かな和音→きらめき） */
+  godFanfare(){
+    const harp=[523.25,659.25,783.99,1046.5,1318.5,1568,2093,2637];
+    harp.forEach((f,i)=>this.tone(f,.55,'sine',.05,null,i*.075));
+    const chord=(fr,vol,dur,delay)=>{
+      for(const f of fr){
+        this.tone(f,dur,'triangle',vol,null,delay);
+        this.tone(f*2,dur*.7,'sine',vol*.38,null,delay+.018);
+      }
+    };
+    chord([261.63,329.63,392,523.25],.070,1.5,.62);          /* C */
+    chord([349.23,440,523.25,698.46],.062,1.25,.98);         /* F */
+    chord([392,493.88,587.33,783.99],.062,1.25,1.36);        /* G */
+    chord([261.63,329.63,392,523.25,659.25,1046.5],.082,2.6,1.86); /* C 大団円 */
+    this.tone(2093,1.3,'sine',.038,3136,1.92);
+    this.tone(2637,1.5,'triangle',.028,3520,2.06);
+    this.noise(1.6,.07,5200,1.4,1.86,12000);
+  },
   bossDown(){
     this.noise(1.1,.24,220,.6,0,60);
     this.tone(70,1.0,'sawtooth',.16,32);
@@ -3211,7 +3239,8 @@ const END_MSGS_FINAL=[
   '嵐山も 地下も 夜の屋台も\n星空の 城も もう 平和だ。\nながい たびの むくうに ふさわしい あさだ。',
   'さあ いこう！\n紅葉の みちの むこうへ！'
 ];
-const END={active:false,t:0,phase:'',sky:0,msgIdx:0,chars:0,holdT:0,creditY:0,creditTotal:1,theEndT:0,msgs:END_MSGS};
+const END={active:false,t:0,phase:'',sky:0,msgIdx:0,chars:0,holdT:0,creditY:0,creditTotal:1,theEndT:0,msgs:END_MSGS,
+  descT:0,godLanded:false,godImpact:false};
 const endingUI=document.getElementById('endingUI'),
       endSkip=document.getElementById('endingSkip'),
       endDungeon=document.getElementById('endingDungeon'),
@@ -3221,6 +3250,7 @@ function startEnding(){
   st.mode='ending';
   END.active=true; END.t=0; END.phase='march'; END.sky=0;
   END.msgIdx=0; END.chars=0; END.holdT=0; END.creditY=0; END.theEndT=0;
+  END.descT=0; END.godLanded=false; END.godImpact=false;
   END.msgs=(STAGE.id===2)?END_MSGS_DUN:((STAGE.id===5)?END_MSGS_FINAL:END_MSGS);
   END.creditTotal=creditLayout().total;
   document.body.classList.add('ending');
@@ -3229,7 +3259,9 @@ function startEnding(){
   if(endRestart)endRestart.classList.remove('show');
   if(endDungeon)endDungeon.classList.remove('show');
   if(bossBar)bossBar.classList.remove('on');
-  Sfx.docSting();
+  /* 5面の最後は「神降臨」から。1・2面は従来どおり */
+  if(STAGE.id===5){ END.phase='descend'; Sfx.godDescent(); }
+  else Sfx.docSting();
 }
 function endEndingUI(){
   END.active=false; END.phase='';
@@ -3255,6 +3287,24 @@ function endingUpdate(dt){
   END.sky=clamp(END.sky+dt*0.058,0,1);
   if(st.flash>0)st.flash=Math.max(0,st.flash-dt*2.6);
   if(st.shake>0)st.shake=Math.max(0,st.shake-dt*2.4);
+
+  /* --- 神降臨（5面のグランドフィナーレ） --- */
+  if(END.phase==='descend'){
+    END.descT+=dt;
+    const t=END.descT;
+    if(!END.godLanded&&t>=1.05){ END.godLanded=true; Sfx.godFanfare(); }
+    if(!END.godImpact&&t>=2.62){
+      END.godImpact=true;
+      st.flash=Math.max(st.flash,1.2); st.flashCol='255,246,208'; st.shake=1.6;
+      Sfx.thud(1);
+    }
+    if(t>=7.15){
+      END.phase='march'; END.msgIdx=0; END.chars=0; END.holdT=0;
+      END.sky=Math.max(END.sky,0.08);
+      st.flash=Math.max(st.flash,0.9); st.flashCol='255,246,214';
+    }
+    return;
+  }
 
   if(END.phase==='march'){
     const m=END.msgs[END.msgIdx];
@@ -3301,6 +3351,7 @@ function creditEntries(){
   const dun=STAGE.id===2;
   const fin=STAGE.id===5;
   const cast=fin?[
+    {t:'row',  r:'神', n:'GOD（最後に 降臨した）'},
     {t:'row',  r:'スター魔王', n:'ラストボス（星になって 消えた）'},
     {t:'row',  r:'鉄板の大将', n:'コテ二刀流の お好み焼き屋'},
     {t:'row',  r:'うな丼番長', n:'中ボス（タレの かおり）'},
@@ -3359,7 +3410,7 @@ function creditEntries(){
     {t:'sub',  s:'そして あそんでくれた すべての ひとへ'},
     {gap:1.5},
     {t:'sub',  s:'Presented by 紅葉ダッシュ！'}
-  ]);
+  ].concat(fin?[{gap:1.1},{t:'sub',  s:'神の 祝福を あなたに  ✨'}]:[]));
 }
 function creditLayout(){
   const f=clamp(VW*0.030,11.5,17);
@@ -3492,6 +3543,228 @@ function drawEndingRoadster(x,y,sc,color,seed){
   drawRoadster(x,y-bob,sc,color,open,1);
 }
 
+/* ======================= 神（グランドフィナーレ） ======================= */
+let godRaySprite=null;
+function godAspect(){
+  return (imgGod&&imgGod.naturalWidth>0)?imgGod.naturalWidth/imgGod.naturalHeight:640/891;
+}
+function makeGodRaySprite(){
+  const sz=512;
+  const c=document.createElement('canvas');c.width=c.height=sz;
+  const g=c.getContext('2d');
+  g.translate(sz/2,sz/2);
+  for(let i=0;i<26;i++){
+    const a=i/26*Math.PI*2, len=sz*0.5, wid=(i%2)?0.028:0.072;
+    const grd=g.createLinearGradient(0,0,Math.cos(a)*len,Math.sin(a)*len);
+    grd.addColorStop(0,'rgba(255,246,200,.90)');
+    grd.addColorStop(.42,'rgba(255,228,150,.30)');
+    grd.addColorStop(1,'rgba(255,214,120,0)');
+    g.fillStyle=grd;
+    g.beginPath();g.moveTo(0,0);g.arc(0,0,len,a-wid,a+wid);g.closePath();g.fill();
+  }
+  godRaySprite=c;
+}
+/* 神の後光（金の光溜・回転する光輪） */
+function drawGodAura(cx,cy,r,t,alpha){
+  if(alpha<=0.01)return;
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const rg=ctx.createRadialGradient(cx,cy,r*0.04,cx,cy,r);
+  rg.addColorStop(0,'rgba(255,251,220,'+(0.50*alpha)+')');
+  rg.addColorStop(.34,'rgba(255,226,140,'+(0.26*alpha)+')');
+  rg.addColorStop(1,'rgba(255,190,90,0)');
+  ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx,cy,r,0,6.284);ctx.fill();
+  for(let k=0;k<2;k++){
+    const rr2=r*(k?0.46:0.68);
+    ctx.save();
+    ctx.translate(cx,cy);ctx.rotate(t*(k?-0.85:1.35));
+    ctx.strokeStyle='rgba(255,246,196,'+((k?0.34:0.46)*alpha)+')';
+    ctx.lineWidth=Math.max(1.2,r*0.014);
+    ctx.setLineDash([r*0.16,r*0.21]);
+    ctx.beginPath();ctx.arc(0,0,rr2,0,6.284);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+/* 神のスプライト（画像が未読込なら黄金の影で代用） */
+function drawGodSprite(cx,bottomY,h,alpha,rot){
+  const w=h*godAspect();
+  ctx.save();
+  if(alpha!=null)ctx.globalAlpha=clamp(alpha,0,1);
+  if(rot){ctx.translate(cx,bottomY);ctx.rotate(rot);ctx.translate(-cx,-bottomY);}
+  if(imgGod&&imgGod.complete&&imgGod.naturalWidth>0){
+    ctx.drawImage(imgGod,cx-w/2,bottomY-h,w,h);
+  }else{
+    const g=ctx.createLinearGradient(0,bottomY-h,0,bottomY);
+    g.addColorStop(0,'#fff7d6');g.addColorStop(.6,'#ffd76a');g.addColorStop(1,'#e8a520');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.moveTo(cx,bottomY-h);
+    ctx.quadraticCurveTo(cx+w*0.52,bottomY-h*0.62,cx+w*0.34,bottomY);
+    ctx.lineTo(cx-w*0.34,bottomY);
+    ctx.quadraticCurveTo(cx-w*0.52,bottomY-h*0.62,cx,bottomY-h);
+    ctx.fill();
+    ctx.fillStyle='rgba(255,250,220,.95)';
+    ctx.beginPath();ctx.arc(cx,bottomY-h*0.80,h*0.13,0,6.284);ctx.fill();
+  }
+  ctx.restore();
+  return {w,h};
+}
+/* 金のテロップ */
+function drawGodTelop(text,y,size,alpha,pop){
+  if(alpha<=0.01)return;
+  ctx.save();
+  ctx.globalAlpha=clamp(alpha,0,1);
+  ctx.translate(VW*0.5,y);
+  if(pop&&pop!==1)ctx.scale(pop,pop);
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.font='900 '+Math.round(size)+'px "Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif';
+  ctx.lineJoin='round';ctx.miterLimit=2;
+  ctx.lineWidth=size*0.22;ctx.strokeStyle='rgba(74,34,4,.66)';
+  ctx.strokeText(text,0,0);
+  const g=ctx.createLinearGradient(0,-size,0,size*0.30);
+  g.addColorStop(0,'#fffdf2');g.addColorStop(.42,'#ffeba8');g.addColorStop(1,'#efa51f');
+  ctx.fillStyle=g;ctx.fillText(text,0,0);
+  ctx.restore();
+}
+/* 舞い落ちる羽根・光の粒 */
+function drawGodParticles(t,alpha,count,seed){count=count||22;seed=seed||0;
+  if(alpha<=0.01)return;
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<count;i++){
+    const sd=hash(i*3.71+seed);
+    const fall=((t*(0.055+sd*0.075)+sd*1.37)%1);
+    const y=-VH*0.08+fall*(VH*1.22);
+    const x=VW*0.5+(hash(i*7.13+seed)-0.5)*VW*1.02+Math.sin(t*0.9+i*1.7)*VW*0.045;
+    const fade=clamp(Math.sin(fall*3.1416)*2.2,0,1);
+    const sz=1.6+hash(i*5.3)*3.4;
+    ctx.fillStyle='rgba(255,246,205,'+(0.55*fade*alpha)+')';
+    ctx.beginPath();ctx.arc(x,y,sz,0,6.284);ctx.fill();
+    if(i%3===0){
+      ctx.save();
+      ctx.translate(x,y);ctx.rotate(t*1.1+i);
+      ctx.fillStyle='rgba(255,252,232,'+(0.42*fade*alpha)+')';
+      ctx.beginPath();ctx.ellipse(0,0,sz*2.6,sz*0.9,0,0,6.284);ctx.fill();
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+/* --- 神降臨シーン（5面クリア直後） --- */
+function drawGodDescend(){
+  const t=END.descT, sky=clamp(END.sky+0.35,0,1), horizon=VH*0.64;
+  drawEndingSky(sky,horizon);
+  drawEndingRidges(sky,horizon);
+
+  /* 夜空のヴェール（神の白が映えるよう深い藍で落とす） */
+  const vt=clamp(t/0.9,0,1);
+  ctx.fillStyle='rgba(6,5,22,'+(0.50*vt)+')';
+  ctx.fillRect(0,0,VW,VH);
+
+  const bx=VW*0.5;
+  const open=clamp((t-0.10)/1.05,0,1);
+
+  /* 天から降りそそぐ黄金の光の柱 */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const topW=VW*0.055, botW=VW*0.31;
+  const bg2=ctx.createLinearGradient(0,0,0,VH);
+  bg2.addColorStop(0,'rgba(255,247,208,'+(0.34*open)+')');
+  bg2.addColorStop(.55,'rgba(255,232,160,'+(0.20*open)+')');
+  bg2.addColorStop(1,'rgba(255,214,120,0)');
+  ctx.fillStyle=bg2;
+  ctx.beginPath();
+  ctx.moveTo(bx-topW,0);ctx.lineTo(bx+topW,0);
+  ctx.lineTo(bx+botW,VH*0.99);ctx.lineTo(bx-botW,VH*0.99);
+  ctx.closePath();ctx.fill();
+  /* 回転する光条（ゴッドレイ） */
+  if(!godRaySprite)makeGodRaySprite();
+  const R=Math.max(VW,VH)*0.66;
+  ctx.save();
+  ctx.translate(bx,VH*0.40);ctx.rotate(t*0.22);
+  ctx.globalAlpha=0.52*open;
+  ctx.drawImage(godRaySprite,-R,-R,R*2,R*2);
+  ctx.restore();
+  ctx.restore();
+
+  /* 神の降下 */
+  const gh=clamp(Math.min(VH*0.62,VW*0.60),230,360);
+  const p=clamp((t-1.05)/1.58,0,1);
+  const ease=1-Math.pow(1-p,3);
+  const bob=(p>=1)?Math.sin(t*1.9)*VH*0.008*(1-clamp((t-2.62)/0.6,0,1)):0;
+  const bottomY=lerp(-gh*0.62,VH*0.895,ease)+bob;
+  const gw=gh*godAspect();
+
+  /* 後光 */
+  drawGodAura(bx,bottomY-gh*0.50,gh*0.80,t,0.30+0.75*p);
+
+  /* 神のまわりの光溜まり（やわらかな放射） */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const halo=ctx.createRadialGradient(bx,bottomY-gh*0.46,gw*0.05,bx,bottomY-gh*0.46,gw*1.15);
+  halo.addColorStop(0,'rgba(255,248,214,'+(0.36*p)+')');
+  halo.addColorStop(.45,'rgba(255,232,160,'+(0.15*p)+')');
+  halo.addColorStop(1,'rgba(255,214,120,0)');
+  ctx.fillStyle=halo;
+  ctx.beginPath();ctx.arc(bx,bottomY-gh*0.46,gw*1.15,0,6.284);ctx.fill();
+  ctx.restore();
+
+  /* 着地の光輪（衝撃波） */
+  if(END.godImpact){
+    const k=clamp((t-2.62)/1.5,0,1);
+    if(k<1){
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      ctx.strokeStyle='rgba(255,246,200,'+(0.70*(1-k))+')';
+      ctx.lineWidth=Math.max(2,VH*0.014*(1-k));
+      ctx.beginPath();
+      ctx.ellipse(bx,VH*0.885,gw*(0.5+k*1.9),VH*0.03+k*VH*0.075,0,0,6.284);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  drawGodParticles(t,clamp((t-0.4)/1.0,0,1),24,0);
+  drawGodSprite(bx,bottomY,gh,1,0);
+
+  /* 下辺の暗幕（テロップを読みやすく） */
+  const scrim=ctx.createLinearGradient(0,VH*0.66,0,VH);
+  scrim.addColorStop(0,'rgba(5,4,16,0)');
+  scrim.addColorStop(1,'rgba(5,4,16,.78)');
+  ctx.fillStyle=scrim;ctx.fillRect(0,VH*0.66,VW,VH*0.34);
+
+  /* セリフ・テロップ */
+  const titleIn=clamp((t-1.45)/0.45,0,1);
+  if(titleIn>0){
+    const pop=0.72+0.28*(1-Math.pow(1-titleIn,3));
+    const glow=0.5+0.5*Math.sin(t*3.1);
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const tg=ctx.createRadialGradient(VW*0.5,VH*0.155,2,VW*0.5,VH*0.155,VW*0.36);
+    tg.addColorStop(0,'rgba(255,238,170,'+(0.32*titleIn*glow)+')');
+    tg.addColorStop(.55,'rgba(255,224,140,'+(0.12*titleIn*glow)+')');
+    tg.addColorStop(1,'rgba(255,214,120,0)');
+    ctx.fillStyle=tg;ctx.fillRect(0,0,VW,VH*0.32);
+    ctx.restore();
+    drawGodTelop('✨ 神 降臨！！ ✨',VH*0.175,clamp(VW*0.072,17,44),titleIn,pop);
+  }
+  const l2=clamp((t-3.05)/0.55,0,1);
+  if(l2>0)drawGodTelop('よくぞ ここまで 走り抜けた！',VH*0.80,clamp(VW*0.034,12.5,23),l2,1);
+  const l3=clamp((t-4.55)/0.55,0,1);
+  if(l3>0)drawGodTelop('そなたの 走りに 祝福を！',VH*0.915,clamp(VW*0.034,12.5,23),l3,1);
+
+  /* フラッシュ */
+  if(st.flash>0){
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle='rgba('+(st.flashCol||'255,246,208')+','+clamp(st.flash,0,1)*0.85+')';
+    ctx.fillRect(0,0,VW,VH);
+    ctx.restore();
+  }
+}
+
 /* --- 凱旋シーン --- */
 function drawEndingMarch(withWindow){
   const sky=END.sky, horizon=VH*0.46;
@@ -3521,6 +3794,15 @@ function drawEndingMarch(withWindow){
   // 奥のロードスター
   drawEndingRoadster(VW*0.545,feet-VH*0.012,0.56,'#e8b21a',2);
   drawEndingRoadster(VW*0.995,feet-VH*0.008,0.52,'#7a1f2b',4);
+
+  // 全5面制覇時は、神が中央上空に浮かんで 全キャラを見守る
+  if(STAGE.id===5){
+    const gH=clamp(VH*0.34,160,290);
+    const gB=VH*0.50+Math.sin(END.t*1.7)*VH*0.010;
+    drawGodAura(VW*0.5,gB-gH*0.50,gH*0.80,END.t,0.80);
+    drawGodParticles(END.t,0.30,10,3);
+    drawGodSprite(VW*0.5,gB,gH,1,Math.sin(END.t*1.1)*0.012);
+  }
 
   // 主人公
   // 主人公（ゲーム本体と同じく、バストアップ＋脚で歩く）
@@ -3569,7 +3851,7 @@ function drawEndingMarch(withWindow){
     ctx.save();
     ctx.globalAlpha=bt;
     const bw2=Math.min(VW*0.74,560), bh2=44;
-    const bx3=(VW-bw2)/2, by3=VH*0.10+Math.sin(END.t*1.6)*2;
+    const bx3=(VW-bw2)/2, by3=VH*0.055+Math.sin(END.t*1.6)*2;
     ctx.fillStyle='rgba(36,12,50,.9)';
     ctx.beginPath();
     if(ctx.roundRect)ctx.roundRect(bx3,by3,bw2,bh2,10);else ctx.rect(bx3,by3,bw2,bh2);
@@ -3622,6 +3904,13 @@ function drawEndingMarch(withWindow){
   }
 
   if(withWindow)drawEndingMessage();
+  if(STAGE.id===5&&st.flash>0){
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle='rgba('+(st.flashCol||'255,246,214')+','+clamp(st.flash,0,1)*0.8+')';
+    ctx.fillRect(0,0,VW,VH);
+    ctx.restore();
+  }
 }
 
 function drawEndingMessage(){
@@ -3717,6 +4006,7 @@ function drawTheEnd(){
   const t=END.theEndT;
   const a=clamp(t/1.1,0,1);
   const sky=clamp(END.sky*0.9,0,1);
+  const fin=STAGE.id===5;
   const horizon=VH*0.58;
   drawEndingSky(sky,horizon);
   drawEndingRidges(sky,horizon);
@@ -3726,6 +4016,18 @@ function drawTheEnd(){
   rg.addColorStop(1,'rgba(255,150,70,0)');
   ctx.fillStyle=rg;ctx.fillRect(0,0,VW,VH);
 
+  /* 5面制覇の THE END：最上位に神が浮かぶ */
+  if(fin){
+    const gH=clamp(VH*0.29,140,270);
+    const gB=VH*0.31+Math.sin(t*1.6)*VH*0.008;
+    ctx.save();
+    ctx.globalAlpha=a;
+    drawGodAura(VW*0.5,gB-gH*0.50,gH*0.86,t,0.85);
+    drawGodParticles(t,a*0.7,14,5);
+    drawGodSprite(VW*0.5,gB,gH,1,0);
+    ctx.restore();
+  }
+
   ctx.save();
   ctx.globalAlpha=a;
 
@@ -3733,7 +4035,7 @@ function drawTheEnd(){
   ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.font='900 '+fs+'px Georgia,"Times New Roman",serif';
   if('letterSpacing' in ctx)ctx.letterSpacing=Math.round(fs*0.08)+'px';
-  const ty=VH*0.28;
+  const ty=fin?VH*0.47:VH*0.28;
   ctx.lineWidth=fs*0.09;ctx.strokeStyle='rgba(50,16,8,.65)';
   ctx.strokeText('THE END',VW*0.5,ty);
   const g=ctx.createLinearGradient(0,ty-fs,0,ty+fs*0.2);
@@ -3745,8 +4047,8 @@ function drawTheEnd(){
   ctx.fillStyle='#ffe2b0';
   ctx.fillText('こうようの へいわが もどった',VW*0.5,ty+fs*0.58);
 
-  const gw=Math.min(VW*0.88,560), gh=Math.min(VH*0.30,148);
-  const gx=(VW-gw)/2, gy=VH*0.43;
+  const gw=Math.min(VW*0.88,560), gh=fin?Math.min(VH*0.19,100):Math.min(VH*0.30,148);
+  const gx=(VW-gw)/2, gy=fin?VH*0.645:VH*0.43;
   drawDqWindow(gx,gy,gw,gh);
   const cells=[
     ['SCORE',st.score.toLocaleString('ja-JP')],
@@ -3772,7 +4074,7 @@ function drawTheEnd(){
   ctx.textAlign='center';
   ctx.font='800 '+Math.round(clamp(VW*0.018,9.5,13))+'px "Hiragino Kaku Gothic ProN",system-ui,sans-serif';
   ctx.fillStyle='rgba(255,240,215,.85)';
-  ctx.fillText('また あしたも、おはよう高雄で。',VW*0.5,gy+gh+VH*0.055);
+  ctx.fillText('また あしたも、おはよう高雄で。',VW*0.5,fin?gy-VH*0.030:gy+gh+VH*0.055);
 
   for(let i=0;i<18;i++){
     const ph=(t*0.8+i*0.13)%1;
@@ -3784,6 +4086,7 @@ function drawTheEnd(){
 }
 
 function drawEnding(){
+  if(END.phase==='descend'){drawGodDescend();return;}
   if(END.phase==='theend'){drawTheEnd();return;}
   if(END.phase==='credits'){drawEndingCredits();return;}
   drawEndingMarch(true);
@@ -7915,7 +8218,7 @@ window.__dash={
       goalX:LV.goalX, obstacles:LV.obstacles.length, stage:STAGE.id, stageName:STAGE.def.title,
       items:LV.items.length, assets:{runner:imgRunner.naturalWidth,doc:imgDoc.naturalWidth,boss:imgBoss.naturalWidth,
         chick:imgChick.naturalWidth,unadon:imgUnadon.naturalWidth,okonomiyaki:imgOkonomi.naturalWidth,final:imgFinalBoss.naturalWidth,
-        fishing:imgFishing.naturalWidth,helper:imgHelper.naturalWidth,helper2:imgHelper2.naturalWidth},
+        fishing:imgFishing.naturalWidth,helper:imgHelper.naturalWidth,helper2:imgHelper2.naturalWidth,god:imgGod.naturalWidth},
       vw:Math.round(VW), vh:Math.round(VH), ground:Math.round(groundY), fps:fpsVal,
       music:{track:Mus.track,step:Mus.step,notes:Mus.notes,ctx:Sfx.ac?Sfx.ac.state:null,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*100)/100:null},
       muted:Sfx.muted, masterGain:Sfx.master?Math.round(Sfx.master.gain.value*100)/100:null,
@@ -7959,7 +8262,7 @@ window.__dash={
   pressW(){pressW();},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
-  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2};
+  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,god:imgGod};
     const o={};for(const k in m)o[k]={complete:m[k].complete,w:m[k].naturalWidth,h:m[k].naturalHeight,ok:!!(m[k].complete&&m[k].naturalWidth>0)};return o;},
   bossSize(){return {kind:bossKind(),dh:Math.round(bossDH()),dw:Math.round(bossDW()),halfW:Math.round(bossHalfW()),hitTop:Math.round(bossHitTop())};},
   helperInfo(){return {active:HELPER.active,t:Math.round(HELPER.t*100)/100,cool:Math.round(HELPER.cool*10)/10,
@@ -8000,6 +8303,12 @@ window.__dash={
     if(st.mode!=='ending')startEnding();
     if(p==='credits'){END.phase='credits';END.creditY=0;END.creditTotal=creditLayout().total;if(endRestart)endRestart.classList.remove('show');}
     else if(p==='theend'){END.phase='theend';END.theEndT=0;if(endRestart)endRestart.classList.add('show');}
+    else if(p==='descend'){END.phase='descend';END.descT=0;END.godLanded=false;END.godImpact=false;}
+    else if(p==='march'){END.phase='march';END.msgIdx=0;END.chars=0;END.holdT=0;}
+  },
+  godInfo(){
+    return {phase:END.phase,descT:Math.round(END.descT*100)/100,landed:END.godLanded,impact:END.godImpact,
+      imgW:imgGod.naturalWidth,imgH:imgGod.naturalHeight,complete:imgGod.complete,stage:STAGE.id};
   },
   endingInfo(){
     return {mode:st.mode,phase:END.phase,t:Math.round(END.t*10)/10,sky:Math.round(END.sky*100)/100,

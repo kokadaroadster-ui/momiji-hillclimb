@@ -10169,7 +10169,7 @@ window.__dash={
     if(p==='credits'){END.phase='credits';END.creditY=0;END.creditTotal=creditLayout().total;if(endRestart)endRestart.classList.remove('show');}
     else if(p==='theend'){END.phase='theend';END.theEndT=0;if(endRestart)endRestart.classList.add('show');}
     else if(p==='reward'||p==='descend'){END.phase='reward';END.descT=0;END.keyIn=false;END.prizeIn=false;}
-    else if(p==='march'){END.phase='march';END.msgIdx=0;END.chars=0;END.holdT=0;}
+    else if(p==='march'){END.phase='march';END.t=0;END.msgIdx=0;END.chars=0;END.holdT=0;END.sky=0;}
   },
   prizeInfo(){
     return {phase:END.phase,descT:Math.round(END.descT*100)/100,keyIn:END.keyIn,prizeIn:END.prizeIn,

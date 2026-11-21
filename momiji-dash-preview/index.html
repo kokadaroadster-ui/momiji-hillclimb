@@ -13729,7 +13729,7 @@ window.__dash={
     P.x=(g.x0+g.x1)/2;P.y=groundY-6;P.vy=0;P.grounded=false;st.camX=P.x-VW*0.31;
     return {x:Math.round(P.x),hearts:st.hearts};
   },
-  rideClearInvuln(){st.invulnT=0;return 0;},,
+  rideClearInvuln(){st.invulnT=0;return 0;},
   obstacleTypes(){const m={};for(const o of LV.obstacles){if(o.dead)continue;m[o.type]=(m[o.type]||0)+1;}return m;},
   foeInfo(){
     const list=LV.obstacles.filter(o=>o.type==='assassin'&&!o.dead);

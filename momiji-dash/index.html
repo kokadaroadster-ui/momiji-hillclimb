@@ -372,12 +372,12 @@ const imgHelper2=new Image();    imgHelper2.decoding='async';    imgHelper2.src=
 const imgParty1=new Image();     imgParty1.decoding='async';     imgParty1.src='party_p1.png';const imgParty2=new Image();     imgParty2.decoding='async';     imgParty2.src='party_p2.png';
 const imgParty3=new Image();     imgParty3.decoding='async';     imgParty3.src='party_p3.png';
 const imgParty4=new Image();     imgParty4.decoding='async';     imgParty4.src='party_p4.png';
-/* 4人の刺客の 設定（who=1〜4）。style は ステージごとの 得意な動き：突進／ジャンプ／小弾投げ／突進＋投げ */
+/* 4人の刺客の 設定（who=1〜4）。style は キャラごとの 得意な動き：突進／ジャンプ／小弾投げ／突進＋投げ */
 const ASSASSINS=[
-  {who:1,name:'丸メガネの刺客',dh:140,ar:520/1197,style:'charge',accent:'#ff4d5e'},
-  {who:2,name:'青シャツの刺客',dh:150,ar:520/1569,style:'jump',  accent:'#4dc8ff'},
-  {who:3,name:'腕組みの刺客',  dh:158,ar:520/2026,style:'throw', accent:'#c98bff'},
-  {who:4,name:'タートルの刺客',dh:152,ar:520/1628,style:'dash',  accent:'#ffd34d'}
+  {who:1,name:'丸メガネの刺客',dh:112,ar:520/1197,style:'charge',accent:'#ff4d5e'},
+  {who:2,name:'青シャツの刺客',dh:120,ar:520/1569,style:'jump',  accent:'#4dc8ff'},
+  {who:3,name:'腕組みの刺客',  dh:126,ar:520/2026,style:'throw', accent:'#c98bff'},
+  {who:4,name:'タートルの刺客',dh:122,ar:520/1628,style:'dash',  accent:'#ffd34d'}
 ];
 function assassinDef(who){return ASSASSINS[clamp(who||1,1,4)-1];}
 function assassinImg(who){return [imgParty1,imgParty2,imgParty3,imgParty4][clamp(who||1,1,4)-1];}
@@ -3267,7 +3267,7 @@ function foeUpdate(dt){
       /* 小弾投げ */
       if((o.style==='throw'||o.style==='dash')&&near&&o.atkCd<=0&&o.lungeT<=0&&Math.abs(P.y-groundY)<200){
         foeShot(o);
-        o.atkCd=o.style==='throw'?rr(1.5,2.4):rr(2.6,3.8);
+        o.atkCd=o.style==='throw'?rr(1.8,2.8):rr(2.8,4.0);
       }
       /* 青シャツの刺客は ぴょんぴょん跳ねながら 迫る */
       if(o.style==='jump'){
@@ -3278,12 +3278,28 @@ function foeUpdate(dt){
           o.jvy=640;o.lungeCd=rr(1.0,1.9);
         }
       }
-      /* プレイヤーへ 歩み寄る */
+      /* プレイヤーへ 歩み寄る（4人で 立ち位置を すこしずらす） */
       let tx=o.homeX;
-      if(near&&dist>150)tx=o.x+o.dir*Math.min(130,dist-140);
+      const stand=116+(o.who-1)*30;
+      if(near&&dist>stand+26)tx=o.x+o.dir*Math.min(150,dist-stand);
       tx=clamp(tx,o.homeX-230,o.homeX+230);
-      if(o.lungeT<=0&&o.teleT<=0)o.x=lerp(o.x,tx,Math.min(1,dt*2.4));
+      if(o.lungeT<=0&&o.teleT<=0)o.x=lerp(o.x,tx,Math.min(1,dt*1.9));
       o.lean=lerp(o.lean||0,(o.lungeT>0?-o.lungeDir*0.22:0)+(o.teleT>0?-o.dir*0.12:0),Math.min(1,dt*10));
+    }
+    /* 刺客どうしが 重ならないよう 少し 押し合う（何度か ならして 重なりを のこさない） */
+    const pack=LV.obstacles.filter(o=>!o.dead&&o.type==='assassin'&&o.x>st.camX-460&&o.x<st.camX+VW+460);
+    for(let it=0;it<3;it++){
+      for(let i=0;i<pack.length;i++){
+        const a=pack[i];
+        for(let j=i+1;j<pack.length;j++){
+          const b=pack[j];
+          const d=b.x-a.x, min=(a.w+b.w)*0.9;
+          if(Math.abs(d)<min){
+            const push=(min-Math.abs(d))*0.5*(d<0?-1:1);
+            a.x-=push;b.x+=push;
+          }
+        }
+      }
     }
   }
   /* 小弾の移動と プレイヤーとの当たり */
@@ -3768,6 +3784,11 @@ function smashObstacle(o){
   if(o.type==='assassin')foeDefeated(o,'smash');
 }
 function hurt(o){
+  /* 刺客に ぶつかられたら 敵も 少し のけぞる（めり込んで 連続で 削られないように） */
+  if(o&&o.type==='assassin'&&!o.dead){
+    o.x+=(P.x<o.x?1:-1)*52;
+    o.lungeT=0;o.teleT=0;o.lungeCd=Math.max(o.lungeCd,0.9);
+  }
   if(st.invulnT>0)return;
   if(st.shieldT>0){
     st.shieldT=0;st.invulnT=1.0;

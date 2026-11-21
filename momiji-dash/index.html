@@ -3238,13 +3238,13 @@ function rivalUpdate(dt){
       damageRival(2,'slam');
       RIVAL.hitCd=Math.max(RIVAL.hitCd,1.0);
       P.vy=-320;P.grounded=false;P.speed=-90;
-    }else if(RIVAL.dashT>0||RIVAL.jy>30){
-      /* 危険なのは 突進と 急襲だけ。ぶつかったら しっかり ダメージ */
+    }else if((RIVAL.dashT>0&&P.y>groundY-rivalDH()*0.5)||RIVAL.jy>30){
+      /* 危険なのは 突進と 急襲だけ。突進は ジャンプで かわせる（高い位置なら セーフ） */
       if(st.invulnT<=0){
         hurt();
         RIVAL.hitCd=Math.max(RIVAL.hitCd,.7);
         P.speed=-160;
-        RIVAL.dashT=0;RIVAL.dashCd=Math.max(RIVAL.dashCd,1.2);
+        RIVAL.dashT=0;RIVAL.dashCd=Math.max(RIVAL.dashCd,1.7);
       }
     }else{
       /* 密着しているだけなら 押し返すだけ（理不尽な 連続ダメージを 防ぐ） */

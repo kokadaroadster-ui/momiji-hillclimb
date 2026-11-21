@@ -287,7 +287,7 @@
         <button class="stageBtn castle" data-stage="5" aria-label="ステージ5 星空の魔王城をはじめる">
           <span class="sl">STAGE 5</span>
           <span class="st">ステージ5：星空の魔王城（最終）</span>
-          <span class="sd">星降る玉座の間で、巨大なスター魔王が待っている</span>
+          <span class="sd">スター魔王の さらに奥に 真のラストボス。ドーナツ・コーヒー・タイヤホイールの 猛攻</span>
         </button>
       </div>
       <ul class="how" id="ovHow">
@@ -298,6 +298,7 @@
         <li><span class="k">MAPLE</span><span>紅葉コイン・エンブレムを集めて、ドクのディスコで回復</span></li>
         <li><span class="k">ITEM</span><span>♥ハート・🧲マグネット・⭐スター・💥POWERオーブ（即パワーアップ）・🛡シールド・×2スコアブースト</span></li>
         <li><span class="k w">BOSS</span><span>5つのボスは 途中から本気モード！ 動き・連射・突進が速くなる</span></li>
+        <li><span class="k w">TRUE</span><span>ステージ5の スター魔王を 倒すと、真のラストボスが 降臨！ ドーナツ🍩・コーヒー☕・タイヤホイールを 投げてくる（倒すと ロードスターを 授かる）</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
         <li><span class="k w">MID</span><span>ステージ4・5の 途中には 中ボス！ 倒すと ライフ回復＆Wゲージ満タンの ボーナス</span></li>
       </ul>
@@ -366,9 +367,10 @@ const imgFishing=new Image();    imgFishing.decoding='async';    imgFishing.src=
 const imgHelper=new Image();     imgHelper.decoding='async';     imgHelper.src='helper_man.png';
 const imgHelper2=new Image();    imgHelper2.decoding='async';    imgHelper2.src='helper_man2.png';
 /* グランドフィナーレに降臨する神 */
-const imgGod=new Image();        imgGod.decoding='async';        imgGod.src='god_char.png';
-let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false,god:false};
-const BOSS_IMG={chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing};
+/* 5面のスター魔王の さらに奥に 現れる 真のラストボス（ドーナツ＆コーヒー） */
+const imgTrueLast=new Image();  imgTrueLast.decoding='async';  imgTrueLast.src='true_last_boss.png';
+let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false,truelast:false};
+const BOSS_IMG={chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,truelast:imgTrueLast};
 /* バストアップ画像の下端をふわっと溶かして、脚と自然につなぐ */
 const sprite=document.createElement('canvas');
 let spriteReady=false;
@@ -398,7 +400,7 @@ imgFinalBoss.onload=()=>assetsOK.final=imgFinalBoss.naturalWidth>0;
 imgFishing.onload=()=>assetsOK.fishing=imgFishing.naturalWidth>0;
 imgHelper.onload=()=>assetsOK.helper=imgHelper.naturalWidth>0;
 imgHelper2.onload=()=>assetsOK.helper2=imgHelper2.naturalWidth>0;
-imgGod.onload=()=>assetsOK.god=imgGod.naturalWidth>0;
+imgTrueLast.onload=()=>assetsOK.truelast=imgTrueLast.naturalWidth>0;
 
 /* ======================= tiny utils ======================= */
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
@@ -573,14 +575,14 @@ const Sfx={
   toss(){this.noise(.14,.06,900,1.2,0,300);this.tone(300,.12,'square',.05,180);},
   bossHit(){this.noise(.16,.16,520,.8,0,180);this.tone(220,.16,'square',.10,90);this.tone(440,.10,'triangle',.06,220,.02);},
   /* 神降臨：光の柱が下りてくる音（上昇シマー＋低い哄き） */
-  godDescent(){
+  prizeRise(){
     this.tone(65.41,2.0,'sine',.17,98,.05);
     this.tone(130.81,1.9,'triangle',.08,196,.10);
     this.noise(1.9,.11,700,1.0,0,7200);
     [1046.5,1318.5,1568,2093].forEach((f,i)=>this.tone(f,.9,'sine',.035,null,.25+i*.12));
   },
   /* 神降臨：神々しい和音ファンファーレ（ハープ上昇→厳かな和音→きらめき） */
-  godFanfare(){
+  rewardFanfare(){
     const harp=[523.25,659.25,783.99,1046.5,1318.5,1568,2093,2637];
     harp.forEach((f,i)=>this.tone(f,.55,'sine',.05,null,i*.075));
     const chord=(fr,vol,dur,delay)=>{
@@ -636,6 +638,31 @@ const Sfx={
     this.noise(.30,.20,260,.7,0,90);
     this.tone(130,.28,'square',.10,60);
     this.tone(88,.40,'sawtooth',.09,44,.02);
+  },
+  /* --- 真のラストボス：警告サイレン --- */
+  siren(){
+    for(let i=0;i<3;i++){
+      this.tone(660,.30,'sawtooth',.10,880,i*.34);
+      this.tone(330,.30,'square',.05,440,i*.34);
+      this.noise(.26,.05,900,.7,i*.34,1800);
+    }
+    this.tone(80,1.3,'sine',.16,48,.4);
+  },
+  /* ドーナツ投げ */
+  donutToss(){
+    this.noise(.18,.06,1500,1.4,0,520);
+    this.tone(420,.14,'triangle',.05,220);
+  },
+  /* コーヒーが 飛び散る */
+  coffeeSplash(){
+    this.noise(.30,.13,2600,.8,0,700);
+    this.tone(190,.16,'sawtooth',.05,90);
+  },
+  /* タイヤホイール投げ（重い回転音） */
+  wheelThrow(){
+    this.tone(120,.42,'sawtooth',.12,520);
+    this.noise(.42,.14,600,1.1,0,2600);
+    this.tone(70,.34,'sine',.14,40,.02);
   }
 };
 
@@ -1071,20 +1098,63 @@ function playFinalBossStep(i,when){
   /* 合いの手（ハッ！）の短いスタブ */
   if(s===14&&bar%2===1)mnoise(.07,.045,1200,1.0,when);
 }
+/* ===== 真のラストボス: 激しく緊迫したラストバトル曲（ニ短調・176BPM） ===== */
+const MTLB={
+  bpm:176,
+  roots:[38,38,41,39,38,36,34,33],
+  /* 16分で刻む せわしないリード */
+  lead:[
+    [74,null,77,null,81,null,77,null,74,null,77,null,79,null,81,null],
+    [74,null,77,null,81,null,84,null,81,null,77,null,74,null,72,null],
+    [77,null,81,null,84,null,81,null,77,null,74,null,72,null,74,null],
+    [75,null,79,null,82,null,79,null,75,null,72,null,68,null,72,null],
+    [74,null,77,null,81,null,86,null,84,null,81,null,77,null,74,null],
+    [72,null,76,null,79,null,83,null,79,null,76,null,72,null,69,null],
+    [70,null,74,null,77,null,82,null,79,null,75,null,70,null,67,null],
+    [69,null,72,null,76,null,81,null,84,null,88,null,84,null,81,null]
+  ],
+  chord:[[0,3,7,12],[0,3,7,12],[0,4,7,12],[0,3,6,12],[0,3,7,12],[0,4,7,11],[0,3,7,10],[0,2,7,11]]
+};
+function playTlbStep(i,when){
+  const bar=Math.floor(i/16)%8, s=i%16, root=MTLB.roots[bar];
+  /* 四つ打ちのキックと ½拍のスネア */
+  if(s%4===0)mkick(when);
+  if(s===4||s===12){msnare(when);mnoise(.14,.05,1700,.9,when);}
+  if(s%2===0)mnoise(.025,.012,10200,2.6,when);
+  if(s===14)mnoise(.10,.02,8600,1.4,when);
+  /* 16分のベース刻み */
+  if(s%2===0)mnote(mtof(root+((s===6||s===14)?12:0)),.09,'sawtooth',.055,when);
+  /* 不気味な金管の和音 */
+  if(s===0||s===6||s===10){
+    const ch=MTLB.chord[bar];
+    for(let k=0;k<ch.length;k++)mnote(mtof(root+24+ch[k]),.13,'sawtooth',.016-k*.002,when);
+  }
+  /* リード */
+  const l=MTLB.lead[bar];
+  if(l[s]!=null){
+    mnote(mtof(l[s]),.14,'square',.026,when);
+    mnote(mtof(l[s]-12),.12,'triangle',.010,when);
+  }
+  /* 4小節ごとの ティンパニ連打 */
+  if(bar%4===3&&s>=10){mnoise(.07,.032,180,.7,when);mnote(mtof(root-12),.07,'sine',.05,when);}
+  /* 終わりの2小節に 不協和音の金管スタブ */
+  if(bar%2===1&&(s===7||s===15)){mnote(mtof(root+24+6),.10,'square',.014,when);mnote(mtof(root+24+11),.10,'sawtooth',.011,when);}
+}
 const MUS_BPM={run:MRUN.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
   camp:MCAMP.bpm,camp_boss:MCAMPBOSS.bpm,yatai:MYATAI.bpm,yatai_boss:MYATAIBOSS.bpm,
-  castle:MCASTLE.bpm,final_boss:MFINALBOSS.bpm};
+  castle:MCASTLE.bpm,final_boss:MFINALBOSS.bpm,tl_boss:MTLB.bpm};
 const MUS_STEP={run:playRunStep,boss:playBossStep,dungeon:playDungeonStep,dungeon_boss:playDungeonBossStep,
   ending:playEndingStep,camp:playCampStep,camp_boss:playCampBossStep,yatai:playYataiStep,
-  yatai_boss:playYataiBossStep,castle:playCastleStep,final_boss:playFinalBossStep};
-const MUS_BOSSY={boss:1,dungeon_boss:1,camp_boss:1,yatai_boss:1,final_boss:1};
+  yatai_boss:playYataiBossStep,castle:playCastleStep,final_boss:playFinalBossStep,tl_boss:playTlbStep};
+const MUS_BOSSY={boss:1,dungeon_boss:1,camp_boss:1,yatai_boss:1,final_boss:1,tl_boss:1};
 function musicUpdate(dt){
   let want=null;
   const d=STAGE.def||STAGE_DEFS[1];
-  const fighting=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='defeat');
+  const tlBoss=BOSS.def&&BOSS.def.kind==='truelast';
+  const fighting=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='defeat'||BOSS.phase==='warning');
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight'||MID.phase==='defeat');
   if(st.mode==='ending')want='ending';
-  else if(st.mode==='run')want=(fighting||midFight)?d.bossTrack:d.runTrack;
+  else if(st.mode==='run')want=(fighting||midFight)?(tlBoss?'tl_boss':d.bossTrack):d.runTrack;
   if(want!==Mus.track){Mus.track=want;Mus.step=0;Mus.next=0;}
   if(!Sfx.ac)return;
   let duck=1;
@@ -1323,10 +1393,13 @@ const STAGE_DEFS={
       name:'ヒヨコ男爵・強化版', short:'男爵', bar:'MID BOSS：ヒヨコ男爵・強化版'},
     boss:{trigger:17800,x0:17740,x1:18140,cx:17940,maxHp:16,kind:'final',hover:-48,scale:1.75,
       name:'スター魔王', short:'スター魔王', bar:'LAST BOSS：スター魔王'},
+    /* スター魔王を倒した あとに 現れる さらに奥のボス */
+    tlBoss:{trigger:17740,x0:17480,x1:18420,cx:17950,maxHp:30,kind:'truelast',hover:-100,
+      name:'真のラストボス', short:'真のラストボス', bar:'TRUE LAST BOSS：真のラストボス'},
     runTrack:'castle', bossTrack:'final_boss',
     clearTitle:'全5面 制覇!!',
-    clearSub:'スター魔王を うちたおし、紅葉の世界に 平和が もどった！',
-    overSub:'スター魔王の 星弾幕に のみこまれた…',
+    clearSub:'真のラストボスを うちたおし、ロードスターを 授かった！',
+    overSub:'真のラストボスの ドーナツ・コーヒー・タイヤホイールに のみこまれた…',
     startMsg:'星空の魔王城へ… ここが 最後のステージだ'
   }
 };
@@ -1531,7 +1604,7 @@ const BOSS={
   t:0, x:19160, y:0, low:0, hitCd:0, flash:0, atkT:1.5, partT:3.0,
   shots:[], parts:[], returns:[], stateT:0, danceT:0, cheerT:0,
   def:STAGE_DEFS[1].boss, said:0, sayT:0, sayIdx:0,
-  rage:0, spd:1, dash:0, dashFrom:0, dashDir:1, feint:0, burst:0, burstCd:4.5, rageFx:0
+  rage:0, spd:1, dash:0, dashFrom:0, dashDir:1, feint:0, burst:0, burstCd:4.5, rageFx:0, bigT:0
 };
 const TURBO_SPEED=545, MAG_R=270, MAG_DUR=8, TURBO_DUR=6.4;
 
@@ -1865,15 +1938,16 @@ function resetBoss(){
   BOSS.t=0;BOSS.x=BOSS.cx;BOSS.y=groundY-250;BOSS.low=0;BOSS.hitCd=0;BOSS.flash=0;
   BOSS.atkT=1.5;BOSS.partT=3.0;BOSS.stateT=0;BOSS.danceT=0;BOSS.cheerT=0;
   BOSS.said=0;BOSS.sayT=0;BOSS.sayIdx=0;
-  BOSS.rage=0;BOSS.spd=1;BOSS.dash=0;BOSS.feint=0;BOSS.burst=0;BOSS.burstCd=4.5;BOSS.rageFx=0;
+  BOSS.rage=0;BOSS.spd=1;BOSS.dash=0;BOSS.feint=0;BOSS.burst=0;BOSS.burstCd=4.5;BOSS.rageFx=0;BOSS.bigT=0;
   BOSS.shots.length=0;BOSS.parts.length=0;BOSS.returns.length=0;
   if(bossBar)bossBar.classList.remove('on','hit','rage');
   updateBossBar();
 }
 function bossKind(){return (BOSS.def&&BOSS.def.kind)||'doc';}
-function bossIsNew(){const k=bossKind();return k==='chick'||k==='okonomiyaki'||k==='final';}
+function bossIsNew(){const k=bossKind();return k==='chick'||k==='okonomiyaki'||k==='final'||k==='truelast';}
 function bossDH(){
   const k=bossKind();
+  if(k==='truelast')return 300;
   if(k==='final')return 330;
   if(k==='chick')return 198;
   if(k==='okonomiyaki')return 206;
@@ -1883,7 +1957,7 @@ function bossDH(){
 function bossSpriteImg(){const k=bossKind();return BOSS_IMG[k]||null;}
 function bossDW(){const im=bossSpriteImg();const ratio=(im&&im.naturalWidth&&im.naturalHeight)?im.naturalWidth/im.naturalHeight:0.78;return bossDH()*ratio;}
 function bossHalfW(){return bossIsNew()?Math.max(58,bossDW()*0.34):46;}
-function bossHitTop(){return bossIsNew()?bossDH()*0.9:172;}
+function bossHitTop(){return bossKind()==='truelast'?bossDH()*0.62:(bossIsNew()?bossDH()*0.9:172);}
 function startBoss(){
   if(BOSS.active||BOSS.done)return;
   const k=bossKind();
@@ -1926,6 +2000,30 @@ function startBoss(){
     (k==='chick'?'ヒヨコ男爵だ！ 低く降りた瞬間を 踏みつけろ！':
     (k==='okonomiyaki'?'鉄板の大将だ！ ソースウェーブは ジャンプでよけろ！':
     (dun?'非案内人だ！ 低く降りた瞬間を踏みつけろ！':'ドクだ！ 踏みつけ＆落ちた反撃パーツで倒せ！'))));
+}
+/* ===== 真のラストボス：5面のスター魔王を倒した後に現れる、さらに奥のボス ===== */
+function startTrueLastBoss(){
+  const d=(STAGE.def&&STAGE.def.tlBoss)||{trigger:17740,x0:17480,x1:18420,cx:17950,maxHp:30,kind:'truelast',hover:-100,
+    name:'真のラストボス',short:'真のラストボス',bar:'TRUE LAST BOSS：真のラストボス'};
+  BOSS.def=d; BOSS.trigger=d.trigger; BOSS.x0=d.x0; BOSS.x1=d.x1; BOSS.cx=d.cx;
+  BOSS.maxHp=d.maxHp; BOSS.hp=d.maxHp; BOSS.done=false;
+  BOSS.active=true; BOSS.phase='warning'; BOSS.stateT=0; BOSS.t=0;
+  BOSS.x=d.cx; BOSS.y=groundY-780; BOSS.low=0; BOSS.hitCd=0; BOSS.flash=0;
+  BOSS.atkT=2.4; BOSS.partT=3.6; BOSS.danceT=0; BOSS.cheerT=0;
+  BOSS.rage=0; BOSS.spd=1; BOSS.dash=0; BOSS.feint=0; BOSS.burst=0; BOSS.burstCd=4.2; BOSS.rageFx=0; BOSS.bigT=0;
+  BOSS.said=0; BOSS.sayT=0; BOSS.sayIdx=0;
+  BOSS.shots.length=0; BOSS.parts.length=0; BOSS.returns.length=0;
+  st.checkpoint=d.x0-120;
+  /* 直前の スター魔王との連戦で 詰まらないよう、回復を ひとつ入れる */
+  st.hearts=Math.max(st.hearts,3);
+  st.gauge=Math.max(st.gauge,70);
+  st.telop=''; st.telopT=0; st.telopSub=''; st.msg=''; st.msgT=0;
+  st.shake=1.6; st.flash=.9; st.flashCol='255,40,60';
+  Sfx.siren(); Sfx.bossIntro();
+  const bn=document.getElementById('bossName'); if(bn)bn.textContent=d.bar;
+  const w=document.getElementById('bossWarn'); if(w)w.textContent='⚠ WARNING — 真のラストボス';
+  if(bossBar){bossBar.classList.add('on');bossBar.classList.remove('rage');}
+  updateBossBar();
 }
 /* ===== 中ボス（うな丼番長 など）===== */
 function resetMid(def){
@@ -2128,6 +2226,60 @@ function fireNeonWave(dir){
   Sfx.wave();
   st.shake=Math.max(st.shake,.28);
 }
+/* --- 真のラストボスの技（ドーナツ投げ・コーヒー投げ・タイヤホイール投げ） --- */
+/* 回転しながら 扇状に 飛んでくる チョコドーナツ */
+function fireDonutFan(n){
+  const m=1+0.30*BOSS.rage;
+  const ang0=Math.atan2((P.y-58)-(BOSS.y-150),P.x-BOSS.x);
+  const cnt=n||3;
+  for(let i=0;i<cnt;i++){
+    const ang=ang0+(i-(cnt-1)/2)*0.20;
+    BOSS.shots.push({kind:'donut',x:BOSS.x,y:BOSS.y-150,vx:Math.cos(ang)*312*m,vy:Math.sin(ang)*312*m,t:0,delay:.34+i*.06,life:3.8,r:22,ang:rr(0,6.283),spin:rr(7,13),seed:Math.random()*9});
+  }
+  Sfx.donutToss();
+}
+/* バウンドする 巨大ドーナツ */
+function throwDonutBig(){
+  BOSS.shots.push({kind:'donutb',x:BOSS.x,y:BOSS.y-170,vx:clamp((P.x-BOSS.x)*0.60,-300,300)+rr(-40,40),vy:-250,t:0,delay:.4,life:7,r:34,ang:0,spin:rr(-8,8),bounce:0,seed:Math.random()*9});
+  Sfx.donutToss();
+}
+/* 落ちると 拾って 投げ返せる ドーナツ */
+function throwDonutPart(){
+  BOSS.shots.push({kind:'donutpart',x:BOSS.x,y:BOSS.y-150,vx:clamp((P.x-BOSS.x)*0.6,-230,230)+rr(-40,40),vy:-205,t:0,life:6,r:22,ang:0,spin:rr(-6,6),bounced:false});
+  Sfx.donutToss();
+}
+/* 湯気の立つ コーヒーカップ投げ */
+function throwCoffeeCup(){
+  BOSS.shots.push({kind:'coffee',x:BOSS.x,y:BOSS.y-150,vx:clamp((P.x-BOSS.x)*0.66,-320,320)+rr(-40,40),vy:-215,t:0,delay:.4,life:6.5,r:20,ang:0,spin:rr(-6,6),bounce:0,seed:Math.random()*9});
+  Sfx.donutToss();
+}
+/* 放物線で 降ってくる ホットコーヒー */
+function fireCoffeeRain(n){
+  const cnt=n||3;
+  for(let i=0;i<cnt;i++){
+    const x=clamp(P.x+rr(-300,240),BOSS.x0+20,BOSS.x1-20);
+    BOSS.shots.push({kind:'coffee',x,y:-40,vx:rr(-30,30),vy:rr(265,340)*(1+0.14*BOSS.rage),t:0,delay:i*.10,life:6.5,r:17,ang:rr(0,6.283),spin:rr(-7,7),bounce:0,seed:Math.random()*9});
+  }
+  Sfx.coffeeSplash();
+}
+/* 高速回転する タイヤホイール投げ（ゴムタイヤ＋アルミホイール） */
+function throwWheel(){
+  const m=1+0.18*BOSS.rage;
+  const dir=(P.x<BOSS.x)?-1:1;
+  BOSS.shots.push({kind:'wheel',x:BOSS.x,y:BOSS.y-160,vx:dir*rr(245,335)*m,vy:rr(-190,-90),t:0,delay:.45,life:7.5,r:34,ang:0,spin:dir*rr(11,15),bounce:0,seed:Math.random()*9});
+  Sfx.wheelThrow();
+  st.shake=Math.max(st.shake,.4);
+}
+/* 覚醒時の大技：タイヤホイールの 連続投げ */
+function fireWheelVolley(n){
+  const cnt=n||5;
+  for(let i=0;i<cnt;i++){
+    const dir=(i%2===0)?-1:1;
+    BOSS.shots.push({kind:'wheel',x:BOSS.x+dir*20,y:BOSS.y-150-i*8,vx:dir*rr(200,325),vy:rr(-270,-135),t:0,delay:.5+i*.22,life:8,r:34,ang:0,spin:dir*rr(12,17),bounce:0,seed:Math.random()*9});
+  }
+  Sfx.wheelThrow();
+  st.shake=Math.max(st.shake,.8);
+}
 function defeatBoss(){
   const k=bossKind();
   const dun=k==='dungeon';
@@ -2144,25 +2296,29 @@ function defeatBoss(){
     st.telop='まいど ありがとう!!';st.telopT=3.4;
     st.telopSub='鉄板の大将は コテを しまった… ゴールへ突入!!';
   }else if(k==='final'){
-    st.telop='全5面 制覇!!';st.telopT=4.4;
-    st.telopSub='スター魔王は 最後のポーズを決めて 星になって消えていった…';
-  }else{
+    st.telop='スター魔王 撃破!!';st.telopT=4.4;
+    st.telopSub='…しかし 玉座の 奥から 重い 足音が 聞こえてくる…';
+  }else if(k==='truelast'){
+    st.telop='TRUE LAST BOSS 撃破!!';st.telopT=4.8;
+    st.telopSub='「見事だ… おまえに ふさわしい 相棒を 用意してある」';  }else{
     st.telop='GREAT SCOTT!!';st.telopT=3.2;
     st.telopSub='ドクは改心した！ ゴールへ突入!!';
   }
-  st.shake=k==='final'?2.2:1.6;st.flash=1;st.flashCol=dun?'210,170,255':(k==='final'?'255,240,190':(k==='chick'?'255,245,180':'255,242,190'));
-  st.score+=3000;
+  st.shake=k==='final'?2.2:(k==='truelast'?2.6:1.6);st.flash=1;st.flashCol=dun?'210,170,255':(k==='truelast'?'255,210,120':(k==='final'?'255,240,190':(k==='chick'?'255,245,180':'255,242,190')));
+  st.score+=k==='truelast'?8000:3000;
   st.bats=Math.min(3,st.bats+1);
   Sfx.bossDown();
   for(let i=0;i<(k==='final'?130:80);i++)spark(BOSS.x+rr(-150,150),BOSS.y+rr(-120,90),rr(2,7),
     dun?['#c9a3ff','#ff6b9e','#7ce0c8','#ffffff'][i%4]:
-    (k==='final'?['#ffe45a','#c9a3ff','#ff8a3d','#ffffff'][i%4]:['#ffd45e','#ff6b5e','#9be6ff','#ffffff'][i%4]));
-  for(let i=0;i<34;i++)debris(BOSS.x+rr(-90,90),BOSS.y+rr(-80,70),dun?['#5a4a6a','#b8a8d8','#2a1f3a','#c9a3ff'][i%4]:['#8fa4b5','#c1121f','#f2f2f2','#ffd45e'][i%4]);
+    (k==='truelast'?['#ff4b3e','#ffd45e','#ffb0a0','#ffffff'][i%4]:
+    (k==='final'?['#ffe45a','#c9a3ff','#ff8a3d','#ffffff'][i%4]:['#ffd45e','#ff6b5e','#9be6ff','#ffffff'][i%4])));
+  for(let i=0;i<34;i++)debris(BOSS.x+rr(-90,90),BOSS.y+rr(-80,70),dun?['#5a4a6a','#b8a8d8','#2a1f3a','#c9a3ff'][i%4]:(k==='truelast'?['#2a1014','#8a1018','#e8a520','#f4e8d8'][i%4]:['#8fa4b5','#c1121f','#f2f2f2','#ffd45e'][i%4]));
   updateBossBar();
-  msg(k==='final'?'スター魔王「見事だ… 紅葉の ゆうしゃよ」':
+  msg(k==='truelast'?'真のラストボス「…見事だ。 ロードスターを やろう」':
+    (k==='final'?'スター魔王「見事だ… 紅葉の ゆうしゃよ」':
     (k==='chick'?'ヒヨコ男爵「ピヨ…（満足）」':
     (k==='okonomiyaki'?'大将「まいど！ また 食べに来いよ」':
-    (dun?'非案内人「あなたのお役には…立てませんでした」':'ドク「GREAT SCOTT!! 行ってこい！」'))));
+    (dun?'非案内人「あなたのお役には…立てませんでした」':'ドク「GREAT SCOTT!! 行ってこい！」')))));
 }
 /* ボスの本気モード（残HPで3段階：通常／本気／本気MAX） */
 function bossRageCheck(){
@@ -2175,19 +2331,22 @@ function bossRageCheck(){
   BOSS.atkT=Math.min(BOSS.atkT,.5);
   BOSS.rageFx=1;
   const dun=BOSS.def&&BOSS.def.kind==='dungeon';
-  st.flash=.9;st.flashCol=dun?'220,140,255':'255,90,60';
+  const tl=BOSS.def&&BOSS.def.kind==='truelast';
+  st.flash=.9;st.flashCol=tl?'255,70,70':(dun?'220,140,255':'255,90,60');
   st.shake=1.2;
-  st.telop=want>=2?'本気 MAX!!':'本気を出した！';
+  st.telop=tl?(want>=2?'カフェインMAX!!':'糖分ブースト!!'):(want>=2?'本気 MAX!!':'本気を出した！');
   st.telopT=2.4;
-  st.telopSub=want>=2?'攻撃が さらに速く 激しくなる!!':'ボスの 動きが 速くなった!!';
+  st.telopSub=tl?(want>=2?'コーヒー・ドーナツ・タイヤホイールの 猛攻が はじまる!!':'ドーナツ投げが 激しく 速くなる!!'):(want>=2?'攻撃が さらに速く 激しくなる!!':'ボスの 動きが 速くなった!!');
   Sfx.rage(want);
   if(bossBar){
     bossBar.classList.add('rage');
     const w=document.getElementById('bossWarn');
-    if(w)w.textContent=want>=2?'⚠ SPEED MAX — 連射・突進が激化！':'⚠ SPEED UP — 動きが速くなった！';
+    if(w)w.textContent=tl?(want>=2?'⚠ CAFFEINE MAX — タイヤホイール乱舞！':'⚠ SUGAR BOOST — ドーナツ投擲が激化！'):(want>=2?'⚠ SPEED MAX — 連射・突進が激化！':'⚠ SPEED UP — 動きが速くなった！');
   }
-  msg(want>=2?'ボスが本気MAX!! 超加速してくる！':'ボスが本気を出した！ 動きが速くなった！');
-  for(let i=0;i<26;i++)spark(BOSS.x+rr(-90,90),BOSS.y-rr(0,120),rr(2,6),dun?['#c9a3ff','#ff6b9e','#ffffff']:['#ff8a3d','#ffd45e','#ffffff'][i%3]);
+  msg(tl?(want>=2?'真のラストボスが覚醒!! カフェインMAX — タイヤホイールが 飛んでくる！':'真のラストボスが 糖分ブースト!! ドーナツが 増えて 速くなる！'):(want>=2?'ボスが本気MAX!! 超加速してくる！':'ボスが本気を出した！ 動きが速くなった！'));
+  for(let i=0;i<26;i++)spark(BOSS.x+rr(-90,90),BOSS.y-rr(0,120),rr(2,6),dun?['#c9a3ff','#ff6b9e','#ffffff']:(tl?['#ff4b3e','#ffd45e','#fff'][i%3]:['#ff8a3d','#ffd45e','#ffffff'][i%3]));
+  /* 覚醒の瞬間に 大技（タイヤホイール乱舞）を予告 */
+  if(tl&&want>=2)BOSS.bigT=1.4;
 }
 /* 本気モードの攻撃セット（連射・扇状弾・突進・フェイント） */
 function bossAttack(){
@@ -2226,6 +2385,33 @@ function bossAttack(){
     else if(pick<.84)bossDash();
     else fireHeartFan(3);
     if(r>=1&&Math.random()<.26)firePoleRing(6);
+  }else if(k==='truelast'){
+    /* ドーナツ・コーヒー・タイヤホイールの 三段攻撃（覚醒で 同時波状攻撃） */
+    const pick=Math.random();
+    if(r>=2){
+      if(pick<.16){fireDonutFan(3);fireCoffeeRain(3);}
+      else if(pick<.32)throwWheel();
+      else if(pick<.50)fireDonutFan(5);
+      else if(pick<.66){throwCoffeeCup();fireCoffeeRain(2);}
+      else if(pick<.82)throwDonutBig();
+      else {fireCoffeeRain(4);throwDonutBig();}
+      if(Math.random()<.26)throwWheel();
+      if(Math.random()<.22)throwCoffeeCup();
+    }else if(r>=1){
+      if(pick<.30)fireDonutFan(3);
+      else if(pick<.54)throwDonutBig();
+      else if(pick<.78)throwCoffeeCup();
+      else fireCoffeeRain(3);
+      if(Math.random()<.20)throwDonutBig();
+      if(Math.random()<.14)fireDonutFan(2);
+    }else{
+      if(pick<.32)fireDonutFan(2);
+      else if(pick<.56)throwDonutBig();
+      else if(pick<.80)throwCoffeeCup();
+      else bossDash();
+      if(Math.random()<.16)fireCoffeeRain(2);
+    }
+    if(r>=1&&Math.random()<.12)BOSS.feint=.75;
   }else{
     const pick=Math.random();
     if(r>=2&&pick<.24)bossDash();
@@ -2251,29 +2437,53 @@ function bossUpdate(dt){
   if(BOSS.hitCd>0)BOSS.hitCd-=dt;
   if(BOSS.flash>0)BOSS.flash=Math.max(0,BOSS.flash-dt*2.4);
 
+  /* --- 真のラストボスの 警告演出（暗転＋サイレン、4.4秒） --- */
+  if(BOSS.phase==='warning'){
+    BOSS.y=groundY-780; BOSS.x=BOSS.cx;
+    if(Math.random()<dt*30)spark(BOSS.cx+rr(-280,280),rr(0,groundY),rr(2,5),['#ff3b4e','#ffd45e','#fff'][Math.floor(Math.random()*3)]);
+    if(BOSS.stateT>0.9&&BOSS.stateT-dt<=0.9){st.shake=1.4;Sfx.siren();}
+    if(BOSS.stateT>2.0&&BOSS.stateT-dt<=2.0){st.flash=1;st.flashCol='255,60,70';Sfx.thud(2);st.shake=1.8;}
+    if(BOSS.stateT>2.6&&Math.random()<dt*10)st.flash=Math.max(st.flash,.22);
+    if(BOSS.stateT>=4.4){
+      BOSS.phase='intro';BOSS.stateT=0;
+      st.telop='真のラストボス 降臨!!';st.telopT=3.4;
+      st.telopSub='「よくぞ ここまで 来た。 ドーナツと コーヒーで もてなそう」';
+      st.flash=1;st.flashCol='255,220,180';st.shake=2;
+      Sfx.bossIntro();
+    }
+    return;
+  }
+
   if(BOSS.phase==='intro'){
     const fin=bossKind()==='final';
-    BOSS.y=lerp(BOSS.y,groundY+hoverH,Math.min(1,dt*(fin?1.5:2.2)));
+    const tl=bossKind()==='truelast';
+    BOSS.y=lerp(BOSS.y,groundY+hoverH,Math.min(1,dt*(fin?1.5:(tl?1.05:2.2))));
     BOSS.x=BOSS.cx+Math.sin(BOSS.t*1.1)*60;
-    if(fin){
-      /* 星が降ってくる降臨演出 */
-      if(Math.random()<dt*22)spark(BOSS.cx+rr(-200,200),rr(0,groundY),rr(2,5),['#ffe45a','#c9a3ff','#fff'][Math.floor(Math.random()*3)]);
-      if(BOSS.stateT>3.1&&BOSS.stateT-dt<=3.1){st.shake=1.6;Sfx.thud(2);}
+    if(fin||tl){
+      /* 星・紅い火花が降ってくる降臨演出 */
+      if(Math.random()<dt*(tl?30:22))spark(BOSS.cx+rr(-220,220),rr(0,groundY),rr(2,5),tl?['#ff3b4e','#ffd45e','#fff'][Math.floor(Math.random()*3)]:['#ffe45a','#c9a3ff','#fff'][Math.floor(Math.random()*3)]);
+      if(BOSS.stateT>(tl?2.6:3.1)&&BOSS.stateT-dt<=(tl?2.6:3.1)){st.shake=1.6;Sfx.thud(2);}
     }
-    if(BOSS.stateT>(fin?3.3:1.8)){BOSS.phase='fight';BOSS.stateT=0;msg(fin?'ポールダンスショー開演！ ハートと星の弾幕を かいくぐれ！':'攻撃が来る！ 低く降りた瞬間を踏め！');}
+    if(BOSS.stateT>(fin?3.3:(tl?3.0:1.8))){
+      BOSS.phase='fight';BOSS.stateT=0;
+      msg(fin?'ポールダンスショー開演！ ハートと星の弾幕を かいくぐれ！':
+        (tl?'真のラストボスだ！ ドーナツ・コーヒー・タイヤホイールを ジャンプで よけろ！':'攻撃が来る！ 低く降りた瞬間を踏め！'));
+    }
     return;
   }
 
   if(BOSS.phase==='defeat'){
     BOSS.y=lerp(BOSS.y,groundY-26,Math.min(1,dt*2));
-    BOSS.x=lerp(BOSS.x,bossKind()==='final'?BOSS.cx:BOSS.cx-120,Math.min(1,dt*1.4));
+    BOSS.x=lerp(BOSS.x,(bossKind()==='final'||bossKind()==='truelast')?BOSS.cx:BOSS.cx-120,Math.min(1,dt*1.4));
     BOSS.danceT+=dt;
     if(Math.random()<dt*14)spark(BOSS.x+rr(-90,90),BOSS.y+rr(-80,70),rr(1.5,3.4),['#ffd45e','#ff5ad1','#5ad7ff'][Math.floor(Math.random()*3)]);
-    if(BOSS.stateT>3.5){
+    if(BOSS.stateT>(bossKind()==='truelast'?4.2:3.5)){
+      /* 5面：スター魔王を倒したら、すぐクリアにせず 真のラストボスへ */
+      if(bossKind()==='final'){ startTrueLastBoss(); return; }
       BOSS.active=false;BOSS.done=true;BOSS.phase='done';BOSS.cheerT=0;
       if(bossBar)bossBar.classList.remove('on');
       st.checkpoint=BOSS.x1;
-      msg('さあ、ゴールへ！');
+      msg(bossKind()==='truelast'?'さあ、ゴールへ！ 全5面 制覇だ！':'さあ、ゴールへ！');
     }
     return;
   }
@@ -2352,11 +2562,24 @@ function bossUpdate(dt){
       BOSS.atkT=Math.max(.55,iv);
     }
   }
+  /* 覚醒の 大技（タイヤホイール乱舞）の タイマー */
+  if(BOSS.bigT>0){
+    BOSS.bigT-=dt;
+    if(BOSS.bigT<=0&&bossKind()==='truelast'){
+      BOSS.bigT=0;
+      st.telop='ホイール乱舞!!';st.telopT=3.0;
+      st.telopSub='最後の大技 — 新品ホイールが バウンドして 襲いかかる！ ジャンプで かわせ！';
+      st.flash=.85;st.flashCol='255,120,60';st.shake=1.1;
+      fireWheelVolley(5);
+      msg('タイヤホイール乱舞!! 転がるホイールを ジャンプで よけろ！');
+    }
+  }
   BOSS.partT-=dt;
   if(BOSS.partT<=0&&bossKind()!=='chick'&&bossKind()!=='okonomiyaki'){
     BOSS.partT=Math.max(1.5,(dun?2.7:3.1)/BOSS.spd);
     if(dun)throwSign();
     else if(bossKind()==='final')throwStarPart();
+    else if(bossKind()==='truelast')throwDonutPart();
     else throwBossPart();
   }
   if(dun){
@@ -2368,13 +2591,57 @@ function bossUpdate(dt){
   for(let i=BOSS.shots.length-1;i>=0;i--){
     const s=BOSS.shots[i];
     s.t+=dt;
-    const straight=(s.kind==='bolt'||s.kind==='dark'||s.kind==='star'||s.kind==='disc'||s.kind==='feather'||s.kind==='heart');
+    const straight=(s.kind==='bolt'||s.kind==='dark'||s.kind==='star'||s.kind==='disc'||s.kind==='feather'||s.kind==='heart'||s.kind==='donut');
     if(straight){
       if(s.t>=s.delay){s.x+=s.vx*dt;s.y+=s.vy*dt;if(s.spin)s.ang=(s.ang||0)+s.spin*dt;}
       if(s.x<BOSS.x0-170||s.x>BOSS.x1+280||s.y<-70||s.y>VH+70||s.t>s.life){BOSS.shots.splice(i,1);continue;}
-    }else if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'){
-      s.x+=s.vx*dt;s.r=26+Math.min(18,s.t*10);
-      if(s.t>s.life||s.x<BOSS.x0-190||s.x>BOSS.x1+240){BOSS.shots.splice(i,1);continue;}
+    }else if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'||s.kind==='splash'){
+      if(s.kind==='splash'){
+        /* こぼれた 熱いコーヒー：しばらく 足もとが あぶない */
+        s.r=22+Math.min(36,s.t*54);
+        if(s.t>s.life){BOSS.shots.splice(i,1);continue;}
+      }else{
+        s.x+=s.vx*dt;s.r=26+Math.min(18,s.t*10);
+        if(s.t>s.life||s.x<BOSS.x0-190||s.x>BOSS.x1+240){BOSS.shots.splice(i,1);continue;}
+      }
+    }else if(s.kind==='donutb'||s.kind==='wheel'||s.kind==='coffee'){
+      /* バウンドする 巨大ドーナツ・タイヤホイール・投げた コーヒーカップ */
+      if(s.t>=s.delay){
+        s.vy+=1160*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.ang=(s.ang||0)+(s.spin||0)*dt;
+        const floor=groundY-(s.kind==='coffee'?s.r*0.34:s.r*0.74);
+        if(s.y>floor&&s.vy>0){
+          const maxB=s.kind==='wheel'?2:(s.kind==='donutb'?1:0);
+          if((s.bounce||0)<maxB){
+            s.bounce=(s.bounce||0)+1;
+            s.y=floor;
+            s.vy=-Math.abs(s.vy)*(s.kind==='wheel'?0.78:0.55);
+            s.vx*=(s.kind==='wheel'?0.92:0.7);
+            if(s.kind==='wheel'){
+              Sfx.thud(1);st.shake=Math.max(st.shake,.34);
+              for(let k=0;k<8;k++)puff(s.x+rr(-18,18),groundY-4,3);
+              for(let k=0;k<5;k++)debris(s.x+rr(-16,16),groundY-8,['#232327','#a9b2bb'][k%2]);
+            }else{
+              for(let k=0;k<7;k++)spark(s.x+rr(-14,14),groundY-rr(0,16),rr(2,4),'#8a4a1c');
+            }
+          }else{
+            BOSS.shots.splice(i,1);
+            if(s.kind==='coffee'){
+              /* 着弾：熱いコーヒーが 飛び散る */
+              BOSS.shots.push({kind:'splash',x:clamp(s.x,BOSS.x0+20,BOSS.x1-20),y:groundY-6,vx:0,t:0,delay:0,life:.85,r:24,ang:0,spin:0,seed:Math.random()*9});
+              Sfx.coffeeSplash();
+              for(let k=0;k<12;k++)spark(s.x+rr(-22,22),groundY-rr(0,26),rr(2,4.5),['#7a3b16','#c9762f','#ffe9b0'][k%3]);
+            }else if(s.kind==='wheel'){
+              Sfx.thud(2);st.shake=Math.max(st.shake,.5);
+              for(let k=0;k<10;k++)debris(s.x+rr(-20,20),groundY-6,['#232327','#a9b2bb','#e33b2f'][k%3]);
+            }else{
+              for(let k=0;k<10;k++)spark(s.x+rr(-18,18),groundY-rr(0,20),rr(2,4),['#6b3a16','#c9822f','#fff'][k%3]);
+              puff(s.x,groundY-4,5);
+            }
+            continue;
+          }
+        }
+      }
+      if(s.x<BOSS.x0-200||s.x>BOSS.x1+320||s.y<-90||s.t>s.life){BOSS.shots.splice(i,1);continue;}
     }else if(s.kind==='egg'){
       if(s.t>=s.delay){s.vy+=1160*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.ang+=s.spin*dt;}
       if(s.y>groundY-13&&s.vy>0){
@@ -2401,8 +2668,8 @@ function bossUpdate(dt){
     }
     /* プレイヤーとの当たり（チャージ中はまだ当たらない） */
     if(s.delay&&s.t<s.delay)continue;
-    if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'){
-      /* 地を走る衝撃波・ソースの波：ジャンプでよける */
+    if(s.kind==='wave'||s.kind==='sauce'||s.kind==='neon'||s.kind==='splash'){
+      /* 地を走る衝撃波・ソースの波・こぼれたコーヒー：ジャンプでよける */
       if(Math.abs(s.x-P.x)<s.r*.62+14&&P.y>groundY-56){
         if(st.giantT>0||st.warpT>0||st.turboT>0){
           BOSS.shots.splice(i,1);
@@ -2411,7 +2678,7 @@ function bossUpdate(dt){
         }else if(st.invulnT<=0){
           BOSS.shots.splice(i,1);
           hurt();
-          for(let k=0;k<10;k++)spark(s.x,groundY-rr(0,30),3,'#c9a3ff');
+          for(let k=0;k<10;k++)spark(s.x,groundY-rr(0,30),3,s.kind==='splash'?'#c9762f':'#c9a3ff');
         }
       }
       continue;
@@ -2465,7 +2732,7 @@ function bossUpdate(dt){
   const pxh=st.giantT>0?(st.powerLv>=2?37:27):20;
   const pxTop=st.giantT>0?(st.powerLv>=2?186:132):100;
   if(Math.abs(P.x-BOSS.x)<halfW+pxh && P.y>btop+2 && P.y-pxTop<bbot && BOSS.hitCd<=0){
-    const stompWin=bossKind()==='final'?bossDH()*0.62:(bossIsNew()?120:90);
+    const stompWin=bossKind()==='final'?bossDH()*0.62:(bossKind()==='truelast'?bossDH()*0.52:(bossIsNew()?120:90));
     if(P.vy>0&&P.y<btop+stompWin){
       damageBoss(1,'stomp');
       P.vy=-440;P.jumps=1;P.grounded=false;
@@ -2891,7 +3158,7 @@ function update(dt){
   if(keys.left)target=SLOW;
   if(st.warpT>0)target=WARP_SPEED;
   else if(st.turboT>0)target=Math.max(target,TURBO_SPEED);
-  const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight');
+  const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='warning');
   const bossStop=BOSS.active&&BOSS.phase==='defeat';
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight');
   const midStop=MID.active&&MID.phase==='defeat';
@@ -3234,13 +3501,13 @@ const END_MSGS_DUN=[
   'さあ いこう！\nあなたが だれかの お役に 立てる 場所へ！'
 ];
 const END_MSGS_FINAL=[
-  'おお ゆうしゃよ！\n5つの ステージを かけぬけ\nスター魔王を うちたおした！',
-  'キャンプ場の ヒヨコ男爵も\n屋台の うな丼番長に 鉄板の大将\nみんな あなたの 帰りを まっている。',
-  '嵐山も 地下も 夜の屋台も\n星空の 城も もう 平和だ。\nながい たびの むくうに ふさわしい あさだ。',
-  'さあ いこう！\n紅葉の みちの むこうへ！'
+  'おお ゆうしゃよ！\n5つの ステージを かけぬけ\n真のラストボスを うちたおした！',
+  'ドーナツも コーヒーも タイヤホイールも\nもう こわくない。\n玉座の 奥に 朝日が さしこむ。',
+  '真のラストボスは わらって いった。\n「よくぞ ここまで 走り抜けた。\nこの ロードスターを おまえに 授けよう」',
+  'さあ いこう！\nNAロードスターと ともに\n紅葉の みちの むこうへ！'
 ];
 const END={active:false,t:0,phase:'',sky:0,msgIdx:0,chars:0,holdT:0,creditY:0,creditTotal:1,theEndT:0,msgs:END_MSGS,
-  descT:0,godLanded:false,godImpact:false};
+  descT:0,keyIn:false,prizeIn:false};
 const endingUI=document.getElementById('endingUI'),
       endSkip=document.getElementById('endingSkip'),
       endDungeon=document.getElementById('endingDungeon'),
@@ -3250,7 +3517,7 @@ function startEnding(){
   st.mode='ending';
   END.active=true; END.t=0; END.phase='march'; END.sky=0;
   END.msgIdx=0; END.chars=0; END.holdT=0; END.creditY=0; END.theEndT=0;
-  END.descT=0; END.godLanded=false; END.godImpact=false;
+  END.descT=0; END.keyIn=false; END.prizeIn=false;
   END.msgs=(STAGE.id===2)?END_MSGS_DUN:((STAGE.id===5)?END_MSGS_FINAL:END_MSGS);
   END.creditTotal=creditLayout().total;
   document.body.classList.add('ending');
@@ -3259,8 +3526,8 @@ function startEnding(){
   if(endRestart)endRestart.classList.remove('show');
   if(endDungeon)endDungeon.classList.remove('show');
   if(bossBar)bossBar.classList.remove('on');
-  /* 5面の最後は「神降臨」から。1・2面は従来どおり */
-  if(STAGE.id===5){ END.phase='descend'; Sfx.godDescent(); }
+  /* 5面の最後は「真のラストボスから ロードスター授与」から。1・2面は従来どおり */
+  if(STAGE.id===5){ END.phase='reward'; Sfx.prizeRise(); }
   else Sfx.docSting();
 }
 function endEndingUI(){
@@ -3288,20 +3555,20 @@ function endingUpdate(dt){
   if(st.flash>0)st.flash=Math.max(0,st.flash-dt*2.6);
   if(st.shake>0)st.shake=Math.max(0,st.shake-dt*2.4);
 
-  /* --- 神降臨（5面のグランドフィナーレ） --- */
-  if(END.phase==='descend'){
+  /* --- ロードスター授与（5面のグランドフィナーレ） --- */
+  if(END.phase==='reward'){
     END.descT+=dt;
     const t=END.descT;
-    if(!END.godLanded&&t>=1.05){ END.godLanded=true; Sfx.godFanfare(); }
-    if(!END.godImpact&&t>=2.62){
-      END.godImpact=true;
-      st.flash=Math.max(st.flash,1.2); st.flashCol='255,246,208'; st.shake=1.6;
-      Sfx.thud(1);
+    if(!END.keyIn&&t>=1.05){ END.keyIn=true; Sfx.rewardFanfare(); st.flash=Math.max(st.flash,.32); st.flashCol='255,246,208'; }
+    if(!END.prizeIn&&t>=2.85){
+      END.prizeIn=true;
+      st.flash=Math.max(st.flash,1.15); st.flashCol='255,246,208'; st.shake=1.4;
+      Sfx.thud(1); Sfx.prizeRise();
     }
-    if(t>=7.15){
+    if(t>=7.6){
       END.phase='march'; END.msgIdx=0; END.chars=0; END.holdT=0;
-      END.sky=Math.max(END.sky,0.08);
-      st.flash=Math.max(st.flash,0.9); st.flashCol='255,246,214';
+      END.sky=Math.max(END.sky,0.06);
+      st.flash=Math.max(st.flash,0.8); st.flashCol='255,246,214';
     }
     return;
   }
@@ -3351,7 +3618,8 @@ function creditEntries(){
   const dun=STAGE.id===2;
   const fin=STAGE.id===5;
   const cast=fin?[
-    {t:'row',  r:'神', n:'GOD（最後に 降臨した）'},
+    {t:'row',  r:'真のラストボス', n:'TRUE LAST BOSS（ドーナツと コーヒーと ホイール）'},
+    {t:'row',  r:'NAロードスター', n:'真のラストボスから 授かった 相棒'},
     {t:'row',  r:'スター魔王', n:'ラストボス（星になって 消えた）'},
     {t:'row',  r:'鉄板の大将', n:'コテ二刀流の お好み焼き屋'},
     {t:'row',  r:'うな丼番長', n:'中ボス（タレの かおり）'},
@@ -3410,7 +3678,7 @@ function creditEntries(){
     {t:'sub',  s:'そして あそんでくれた すべての ひとへ'},
     {gap:1.5},
     {t:'sub',  s:'Presented by 紅葉ダッシュ！'}
-  ].concat(fin?[{gap:1.1},{t:'sub',  s:'神の 祝福を あなたに  ✨'}]:[]));
+  ].concat(fin?[{gap:1.1},{t:'sub',  s:'ロードスターと ともに、 紅葉の みちへ  🚗'},{t:'sub',  s:'GET! NA ROADSTER  ✨'}]:[]));
 }
 function creditLayout(){
   const f=clamp(VW*0.030,11.5,17);
@@ -3543,12 +3811,9 @@ function drawEndingRoadster(x,y,sc,color,seed){
   drawRoadster(x,y-bob,sc,color,open,1);
 }
 
-/* ======================= 神（グランドフィナーレ） ======================= */
-let godRaySprite=null;
-function godAspect(){
-  return (imgGod&&imgGod.naturalWidth>0)?imgGod.naturalWidth/imgGod.naturalHeight:640/891;
-}
-function makeGodRaySprite(){
+/* ======================= ごほうび：NAロードスター授与（グランドフィナーレ） ======================= */
+let goldRaySprite=null;
+function makeGoldRays(){
   const sz=512;
   const c=document.createElement('canvas');c.width=c.height=sz;
   const g=c.getContext('2d');
@@ -3562,10 +3827,10 @@ function makeGodRaySprite(){
     g.fillStyle=grd;
     g.beginPath();g.moveTo(0,0);g.arc(0,0,len,a-wid,a+wid);g.closePath();g.fill();
   }
-  godRaySprite=c;
+  goldRaySprite=c;
 }
-/* 神の後光（金の光溜・回転する光輪） */
-function drawGodAura(cx,cy,r,t,alpha){
+/* 黄金の後光（光の溜まり・回転する光輪） */
+function drawGoldAura(cx,cy,r,t,alpha){
   if(alpha<=0.01)return;
   ctx.save();
   ctx.globalCompositeOperation='lighter';
@@ -3587,32 +3852,8 @@ function drawGodAura(cx,cy,r,t,alpha){
   }
   ctx.restore();
 }
-/* 神のスプライト（画像が未読込なら黄金の影で代用） */
-function drawGodSprite(cx,bottomY,h,alpha,rot){
-  const w=h*godAspect();
-  ctx.save();
-  if(alpha!=null)ctx.globalAlpha=clamp(alpha,0,1);
-  if(rot){ctx.translate(cx,bottomY);ctx.rotate(rot);ctx.translate(-cx,-bottomY);}
-  if(imgGod&&imgGod.complete&&imgGod.naturalWidth>0){
-    ctx.drawImage(imgGod,cx-w/2,bottomY-h,w,h);
-  }else{
-    const g=ctx.createLinearGradient(0,bottomY-h,0,bottomY);
-    g.addColorStop(0,'#fff7d6');g.addColorStop(.6,'#ffd76a');g.addColorStop(1,'#e8a520');
-    ctx.fillStyle=g;
-    ctx.beginPath();
-    ctx.moveTo(cx,bottomY-h);
-    ctx.quadraticCurveTo(cx+w*0.52,bottomY-h*0.62,cx+w*0.34,bottomY);
-    ctx.lineTo(cx-w*0.34,bottomY);
-    ctx.quadraticCurveTo(cx-w*0.52,bottomY-h*0.62,cx,bottomY-h);
-    ctx.fill();
-    ctx.fillStyle='rgba(255,250,220,.95)';
-    ctx.beginPath();ctx.arc(cx,bottomY-h*0.80,h*0.13,0,6.284);ctx.fill();
-  }
-  ctx.restore();
-  return {w,h};
-}
 /* 金のテロップ */
-function drawGodTelop(text,y,size,alpha,pop){
+function drawGoldTelop(text,y,size,alpha,pop){
   if(alpha<=0.01)return;
   ctx.save();
   ctx.globalAlpha=clamp(alpha,0,1);
@@ -3628,8 +3869,8 @@ function drawGodTelop(text,y,size,alpha,pop){
   ctx.fillStyle=g;ctx.fillText(text,0,0);
   ctx.restore();
 }
-/* 舞い落ちる羽根・光の粒 */
-function drawGodParticles(t,alpha,count,seed){count=count||22;seed=seed||0;
+/* 舞い落ちる金の粒 */
+function drawGoldMotes(t,alpha,count,seed){count=count||22;seed=seed||0;
   if(alpha<=0.01)return;
   ctx.save();
   ctx.globalCompositeOperation='lighter';
@@ -3652,108 +3893,244 @@ function drawGodParticles(t,alpha,count,seed){count=count||22;seed=seed||0;
   }
   ctx.restore();
 }
-/* --- 神降臨シーン（5面クリア直後） --- */
-function drawGodDescend(){
-  const t=END.descT, sky=clamp(END.sky+0.35,0,1), horizon=VH*0.64;
-  drawEndingSky(sky,horizon);
-  drawEndingRidges(sky,horizon);
-
-  /* 夜空のヴェール（神の白が映えるよう深い藍で落とす） */
-  const vt=clamp(t/0.9,0,1);
-  ctx.fillStyle='rgba(6,5,22,'+(0.50*vt)+')';
-  ctx.fillRect(0,0,VW,VH);
-
-  const bx=VW*0.5;
-  const open=clamp((t-0.10)/1.05,0,1);
-
-  /* 天から降りそそぐ黄金の光の柱 */
+/* 黄金のカギ（ロードスターのキー） */
+function drawKey(x,y,s,rot,alpha){
+  ctx.save();
+  ctx.translate(x,y);ctx.rotate(rot||0);ctx.scale(s,s);
+  if(alpha!=null)ctx.globalAlpha=clamp(alpha,0,1);
+  const g=ctx.createLinearGradient(0,-10,0,10);
+  g.addColorStop(0,'#fff7cc');g.addColorStop(.45,'#ffd45e');g.addColorStop(1,'#c8871a');
+  ctx.strokeStyle=g;ctx.lineWidth=3.2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-2,-6);ctx.lineTo(-2,12);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-2,12);ctx.lineTo(6,12);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-2,7);ctx.lineTo(4,7);ctx.stroke();
+  /* リング（持ち手） */
+  ctx.beginPath();ctx.arc(-2,-10,6.4,0,6.284);
+  ctx.lineWidth=3.4;ctx.strokeStyle=g;ctx.stroke();
+  ctx.strokeStyle='rgba(255,253,226,.85)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(-2,-10,6.4,-2.4,-0.6);ctx.stroke();
+  ctx.restore();
+}
+/* リボンをかけた ピカピカの NA ロードスター */
+function drawPrizeRoadster(cx,baseY,sc,open,t,shiny){
+  ctx.save();
+  ctx.translate(cx,baseY);
+  /* 床の黄金の光だまり */
+  if(shiny!==false){
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const fg=ctx.createRadialGradient(0,-sc*14,4,0,0,sc*72);
+    fg.addColorStop(0,'rgba(255,238,180,'+(0.30+0.10*Math.sin(t*3))+')');
+    fg.addColorStop(.45,'rgba(255,206,110,.12)');
+    fg.addColorStop(1,'rgba(255,190,80,0)');
+    ctx.fillStyle=fg;ctx.beginPath();ctx.ellipse(0,0,sc*72,sc*18,0,0,6.284);ctx.fill();
+    ctx.restore();
+  }
+  /* 本体（NA型・リトラ） */
+  drawRoadster(0,0,sc,'#c8131f',open,1);
+  /* ピカピカの照り返し */
   ctx.save();
   ctx.globalCompositeOperation='lighter';
-  const topW=VW*0.055, botW=VW*0.31;
-  const bg2=ctx.createLinearGradient(0,0,0,VH);
-  bg2.addColorStop(0,'rgba(255,247,208,'+(0.34*open)+')');
-  bg2.addColorStop(.55,'rgba(255,232,160,'+(0.20*open)+')');
-  bg2.addColorStop(1,'rgba(255,214,120,0)');
-  ctx.fillStyle=bg2;
+  const gl=ctx.createLinearGradient(-sc*40,-sc*40,sc*20,-sc*10);
+  gl.addColorStop(0,'rgba(255,255,240,0)');
+  gl.addColorStop(.45,'rgba(255,252,225,'+(0.30+0.16*Math.sin(t*2.4))+')');
+  gl.addColorStop(1,'rgba(255,255,240,0)');
+  ctx.fillStyle=gl;
+  ctx.beginPath();ctx.moveTo(-sc*44,-sc*26);ctx.lineTo(sc*10,-sc*34);ctx.lineTo(sc*34,-sc*22);ctx.lineTo(-sc*30,-sc*16);ctx.closePath();ctx.fill();
+  ctx.restore();
+  /* アルミホイール（ロードスター風のスポーク） */
+  for(const wx of [-26,26]){
+    ctx.save();ctx.translate(sc*wx,-sc*12);
+    ctx.beginPath();ctx.arc(0,0,sc*5.6,0,6.284);ctx.fillStyle='#cfd7e0';ctx.fill();
+    ctx.fillStyle='#8f9aa5';
+    for(let k=0;k<6;k++){ctx.save();ctx.rotate(k*Math.PI/3);ctx.fillRect(-sc*0.55,-sc*5.2,sc*1.1,sc*5.2);ctx.restore();}
+    ctx.beginPath();ctx.arc(0,0,sc*1.9,0,6.284);ctx.fillStyle='#eef3f8';ctx.fill();
+    ctx.restore();
+  }
+  /* リボンの帯 */
+  ctx.fillStyle='#e8262f';
   ctx.beginPath();
-  ctx.moveTo(bx-topW,0);ctx.lineTo(bx+topW,0);
-  ctx.lineTo(bx+botW,VH*0.99);ctx.lineTo(bx-botW,VH*0.99);
+  ctx.moveTo(-sc*46,-sc*32);ctx.quadraticCurveTo(0,-sc*27,sc*46,-sc*19);
+  ctx.lineTo(sc*46,-sc*13);ctx.quadraticCurveTo(0,-sc*21,-sc*46,-sc*26);
   ctx.closePath();ctx.fill();
-  /* 回転する光条（ゴッドレイ） */
-  if(!godRaySprite)makeGodRaySprite();
-  const R=Math.max(VW,VH)*0.66;
-  ctx.save();
-  ctx.translate(bx,VH*0.40);ctx.rotate(t*0.22);
-  ctx.globalAlpha=0.52*open;
-  ctx.drawImage(godRaySprite,-R,-R,R*2,R*2);
+  ctx.strokeStyle='rgba(255,226,180,.75)';ctx.lineWidth=Math.max(1,sc*0.5);ctx.stroke();
+  /* ボンネットの上の リボンの結び目 */
+  const bx=sc*20, by=-sc*40;
+  ctx.fillStyle='#ff3b46';
+  ctx.beginPath();ctx.ellipse(bx-sc*8,by-sc*2.5,sc*8,sc*5,-0.5,0,6.284);ctx.fill();
+  ctx.beginPath();ctx.ellipse(bx+sc*8,by-sc*2.5,sc*8,sc*5,0.5,0,6.284);ctx.fill();
+  ctx.fillStyle='#ffd34d';
+  ctx.beginPath();ctx.arc(bx,by,sc*3.8,0,6.284);ctx.fill();
+  ctx.fillStyle='#e8262f';
+  ctx.beginPath();ctx.moveTo(bx-sc*3,by+sc*1.5);ctx.lineTo(bx-sc*9,by+sc*15);ctx.lineTo(bx-sc*1,by+sc*12);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(bx+sc*3,by+sc*1.5);ctx.lineTo(bx+sc*9,by+sc*15);ctx.lineTo(bx+sc*1,by+sc*12);ctx.closePath();ctx.fill();
+  /* ゴールドの エンブレム */
+  ctx.beginPath();ctx.arc(-sc*30,-sc*23,sc*2.6,0,6.284);ctx.fillStyle='#ffd45e';ctx.fill();
+  /* ヘッドライトの光条 */
+  if(open){
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const bg=ctx.createLinearGradient(sc*34,-sc*26,sc*110,-sc*10);
+    bg.addColorStop(0,'rgba(255,250,220,.34)');
+    bg.addColorStop(1,'rgba(255,240,190,0)');
+    ctx.fillStyle=bg;
+    ctx.beginPath();
+    ctx.moveTo(sc*32,-sc*24);ctx.lineTo(sc*118,-sc*2);ctx.lineTo(sc*118,-sc*40);ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
-  ctx.restore();
+}
 
-  /* 神の降下 */
-  const gh=clamp(Math.min(VH*0.62,VW*0.60),230,360);
-  const p=clamp((t-1.05)/1.58,0,1);
-  const ease=1-Math.pow(1-p,3);
-  const bob=(p>=1)?Math.sin(t*1.9)*VH*0.008*(1-clamp((t-2.62)/0.6,0,1)):0;
-  const bottomY=lerp(-gh*0.62,VH*0.895,ease)+bob;
-  const gw=gh*godAspect();
+/* --- 授与シーン（真のラストボスを倒した直後） --- */
+function drawRewardScene(){
+  const t=END.descT;
+  const horizon=VH*0.60, feet=VH*0.80;
+  drawEndingSky(0.14,horizon);
+  drawEndingRidges(0.14,horizon);
 
-  /* 後光 */
-  drawGodAura(bx,bottomY-gh*0.50,gh*0.80,t,0.30+0.75*p);
-
-  /* 神のまわりの光溜まり（やわらかな放射） */
+  /* 黄金の朝焼け */
   ctx.save();
   ctx.globalCompositeOperation='lighter';
-  const halo=ctx.createRadialGradient(bx,bottomY-gh*0.46,gw*0.05,bx,bottomY-gh*0.46,gw*1.15);
-  halo.addColorStop(0,'rgba(255,248,214,'+(0.36*p)+')');
-  halo.addColorStop(.45,'rgba(255,232,160,'+(0.15*p)+')');
-  halo.addColorStop(1,'rgba(255,214,120,0)');
-  ctx.fillStyle=halo;
-  ctx.beginPath();ctx.arc(bx,bottomY-gh*0.46,gw*1.15,0,6.284);ctx.fill();
+  const sky=ctx.createRadialGradient(VW*0.5,horizon*0.9,10,VW*0.5,horizon*0.9,VW*0.9);
+  sky.addColorStop(0,'rgba(255,226,150,'+(0.30+0.06*Math.sin(t*1.3))+')');
+  sky.addColorStop(.55,'rgba(255,180,90,.12)');
+  sky.addColorStop(1,'rgba(255,150,60,0)');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,VW,VH);
+  /* 天からの光条 */
+  if(!goldRaySprite)makeGoldRays();
+  const open=clamp((t-0.1)/1.0,0,1);
+  const R=Math.max(VW,VH)*0.62;
+  ctx.save();
+  ctx.translate(VW*0.5,VH*0.34);ctx.rotate(t*0.16);
+  ctx.globalAlpha=0.26*open;
+  ctx.drawImage(goldRaySprite,-R,-R,R*2,R*2);
+  ctx.restore();
   ctx.restore();
 
-  /* 着地の光輪（衝撃波） */
-  if(END.godImpact){
-    const k=clamp((t-2.62)/1.5,0,1);
-    if(k<1){
-      ctx.save();
-      ctx.globalCompositeOperation='lighter';
-      ctx.strokeStyle='rgba(255,246,200,'+(0.70*(1-k))+')';
-      ctx.lineWidth=Math.max(2,VH*0.014*(1-k));
+  /* 地面（アスファルト） */
+  ctx.fillStyle='#2b2622';
+  ctx.fillRect(0,feet-6,VW,VH-feet+6);
+  ctx.fillStyle='rgba(255,220,160,.18)';
+  ctx.fillRect(0,feet-6,VW,2.5);
+
+  /* 真のラストボス（見送る） */
+  const bossA=1-clamp((t-4.4)/1.6,0,1);
+  if(bossA>0.02){
+    const bh=clamp(VH*0.26,108,200);
+    const bw=bh*(imgTrueLast.naturalWidth&&imgTrueLast.naturalHeight?imgTrueLast.naturalWidth/imgTrueLast.naturalHeight:0.75);
+    const bxp=VW*0.88;
+    ctx.save();
+    ctx.globalAlpha=bossA*0.96;
+    ctx.globalCompositeOperation='lighter';
+    const aura=ctx.createRadialGradient(bxp,feet-bh*0.5,4,bxp,feet-bh*0.5,bw*1.1);
+    aura.addColorStop(0,'rgba(255,80,70,.26)');aura.addColorStop(1,'rgba(140,0,20,0)');
+    ctx.fillStyle=aura;ctx.beginPath();ctx.arc(bxp,feet-bh*0.5,bw*1.1,0,6.284);ctx.fill();
+    ctx.restore();
+    if(imgTrueLast.complete&&imgTrueLast.naturalWidth>0){
+      ctx.save();ctx.globalAlpha=bossA*0.96;
+      ctx.drawImage(imgTrueLast,bxp-bw/2,feet-bh,bw,bh);
+      ctx.restore();
+    }
+    /* 見送りのセリフ */
+    const say=clamp((t-0.6)/0.5,0,1)*(1-clamp((t-4.2)/0.5,0,1));
+    if(say>0.02&&bossA>0.2){
+      ctx.save();ctx.globalAlpha=say;
+      const fs=Math.round(clamp(VW*0.017,9.5,13));
+      const txt='「…見事だ。 これを持っていけ」';
+      ctx.font='800 '+fs+'px "Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif';
+      const tw=ctx.measureText(txt).width;
+      const bxx=clamp(bxp-tw/2-10,VW*0.03,VW-tw-24), byy=feet-bh*0.98-20;
+      ctx.fillStyle='rgba(255,248,235,.92)';
       ctx.beginPath();
-      ctx.ellipse(bx,VH*0.885,gw*(0.5+k*1.9),VH*0.03+k*VH*0.075,0,0,6.284);
-      ctx.stroke();
+      if(ctx.roundRect)ctx.roundRect(bxx,byy,tw+20,fs*1.9,9);else ctx.rect(bxx,byy,tw+20,fs*1.9);
+      ctx.fill();
+      ctx.fillStyle='#7a1a14';ctx.textAlign='left';
+      ctx.fillText(txt,bxx+10,byy+fs*1.3);
       ctx.restore();
     }
   }
 
-  drawGodParticles(t,clamp((t-0.4)/1.0,0,1),24,0);
-  drawGodSprite(bx,bottomY,gh,1,0);
+  /* 主人公 */
+  const heroH=clamp(VH*0.20,66,112), heroW=heroH*540/806;
+  const hx=VW*0.20, bob=Math.abs(Math.sin(t*4.6))*2.6;
+  ctx.fillStyle='rgba(0,0,0,.38)';
+  ctx.beginPath();ctx.ellipse(hx,feet+2,heroW*0.44,5,0,0,6.284);ctx.fill();
+  const k=heroH/84, lph=t*6.6;
+  ctx.save();
+  ctx.translate(hx,feet-bob);
+  ctx.scale(k,k);
+  drawLeg(-5,Math.sin(lph)*0.5,'#2f3a63');
+  drawLeg(5,Math.sin(lph+Math.PI)*0.5,'#3a4776');
+  if(spriteReady||imgRunner.naturalWidth>0){
+    ctx.drawImage(spriteReady?sprite:imgRunner,-heroW/2/k,-30-84,heroW/k,84);
+  }else{
+    const bw2=84*540/806;
+    ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw2/2,-114,bw2,84);
+    ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-114+bw2*0.52,bw2*0.42,0,6.284);ctx.fill();
+  }
+  ctx.restore();
 
-  /* 下辺の暗幕（テロップを読みやすく） */
-  const scrim=ctx.createLinearGradient(0,VH*0.66,0,VH);
-  scrim.addColorStop(0,'rgba(5,4,16,0)');
-  scrim.addColorStop(1,'rgba(5,4,16,.78)');
-  ctx.fillStyle=scrim;ctx.fillRect(0,VH*0.66,VW,VH*0.34);
+  /* ロードスターが 走りこんでくる */
+  const rollP=clamp((t-1.75)/1.15,0,1);
+  const ease=1-Math.pow(1-rollP,3);
+  const scv=clamp(VW*0.0034,1.1,2.4);
+  const carX=lerp(VW+160,VW*0.57,ease);
+  const lightsOn=t>=2.85;
+  if(rollP>0){
+    /* タイヤの砂ぼこり */
+    if(rollP<1){
+      for(let i=0;i<3;i++)puff(carX-scv*46,feet-4,3+rollP*3);
+    }
+    drawPrizeRoadster(carX,feet,scv,lightsOn,t,true);
+  }
 
-  /* セリフ・テロップ */
-  const titleIn=clamp((t-1.45)/0.45,0,1);
-  if(titleIn>0){
-    const pop=0.72+0.28*(1-Math.pow(1-titleIn,3));
-    const glow=0.5+0.5*Math.sin(t*3.1);
+  /* お披露目の きらめき */
+  if(t>2.85&&rollP>0.9){
+    const kk=clamp((t-2.85)/0.5,0,1);
     ctx.save();
     ctx.globalCompositeOperation='lighter';
-    const tg=ctx.createRadialGradient(VW*0.5,VH*0.155,2,VW*0.5,VH*0.155,VW*0.36);
-    tg.addColorStop(0,'rgba(255,238,170,'+(0.32*titleIn*glow)+')');
-    tg.addColorStop(.55,'rgba(255,224,140,'+(0.12*titleIn*glow)+')');
-    tg.addColorStop(1,'rgba(255,214,120,0)');
-    ctx.fillStyle=tg;ctx.fillRect(0,0,VW,VH*0.32);
+    for(let i=0;i<10;i++){
+      const a=i*0.63+t*0.5;
+      const rr2=scv*(48+16*Math.sin(t*2+i));
+      const px=carX+Math.cos(a)*rr2, py=feet-scv*26+Math.sin(a)*rr2*0.55;
+      const tw=0.5+0.5*Math.sin(t*7+i);
+      ctx.fillStyle='rgba(255,250,215,'+(0.8*tw*kk)+')';
+      drawStarShape(px,py,4+3.4*tw,1.6+1.3*tw,a);
+    }
     ctx.restore();
-    drawGodTelop('✨ 神 降臨！！ ✨',VH*0.175,clamp(VW*0.072,17,44),titleIn,pop);
   }
-  const l2=clamp((t-3.05)/0.55,0,1);
-  if(l2>0)drawGodTelop('よくぞ ここまで 走り抜けた！',VH*0.80,clamp(VW*0.034,12.5,23),l2,1);
-  const l3=clamp((t-4.55)/0.55,0,1);
-  if(l3>0)drawGodTelop('そなたの 走りに 祝福を！',VH*0.915,clamp(VW*0.034,12.5,23),l3,1);
+
+  /* カギが ボスから 主人公へ わたる */
+  const kp=clamp((t-1.05)/1.15,0,1);
+  if(kp>0){
+    const ke=1-Math.pow(1-kp,3);
+    const kx0=VW*0.82, ky0=VH*0.50;
+    const kx1=hx+heroW*0.34, ky1=feet-heroH*0.86;
+    const kx=lerp(kx0,kx1,ke), ky=lerp(ky0,ky1,ke)-Math.sin(ke*Math.PI)*VH*0.10;
+    drawKey(kx,ky,clamp(heroH*0.013,1.05,2.0),Math.sin(t*2.4)*0.35,1);
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const kg=ctx.createRadialGradient(kx,ky,1,kx,ky,heroH*0.22);
+    kg.addColorStop(0,'rgba(255,248,200,'+(0.55*(1-kp*0.3))+')');
+    kg.addColorStop(1,'rgba(255,220,120,0)');
+    ctx.fillStyle=kg;ctx.beginPath();ctx.arc(kx,ky,heroH*0.22,0,6.284);ctx.fill();
+    ctx.restore();
+  }
+
+  /* 黄金の粒 */
+  drawGoldMotes(t,clamp((t-0.3)/1.0,0,1)*0.9,18,0);
+
+  /* テロップ */
+  const l1=clamp((t-2.95)/0.55,0,1);
+  if(l1>0){
+    const pop=0.72+0.28*(1-Math.pow(1-l1,3));
+    drawGoldTelop('✨ ロードスターを てにいれた！！ ✨',VH*0.155,clamp(VW*0.042,14,30),l1,pop);
+  }
+  const l2=clamp((t-3.9)/0.55,0,1);
+  if(l2>0)drawGoldTelop('よくぞ ここまで 走り抜けた！',VH*0.245,clamp(VW*0.032,11.5,22),l2,1);
+  const l3=clamp((t-5.0)/0.55,0,1);
+  if(l3>0)drawGoldTelop('この ロードスターを おまえに 授けよう！',VH*0.318,clamp(VW*0.030,11,21),l3,1);
 
   /* フラッシュ */
   if(st.flash>0){
@@ -3795,13 +4172,29 @@ function drawEndingMarch(withWindow){
   drawEndingRoadster(VW*0.545,feet-VH*0.012,0.56,'#e8b21a',2);
   drawEndingRoadster(VW*0.995,feet-VH*0.008,0.52,'#7a1f2b',4);
 
-  // 全5面制覇時は、神が中央上空に浮かんで 全キャラを見守る
+  // 全5面制覇時は、授かった ロードスターが 空に浮かんで キャラたちを見守る
   if(STAGE.id===5){
-    const gH=clamp(VH*0.34,160,290);
-    const gB=VH*0.50+Math.sin(END.t*1.7)*VH*0.010;
-    drawGodAura(VW*0.5,gB-gH*0.50,gH*0.80,END.t,0.80);
-    drawGodParticles(END.t,0.30,10,3);
-    drawGodSprite(VW*0.5,gB,gH,1,Math.sin(END.t*1.1)*0.012);
+    const rsc=clamp(VW*0.0024,1.1,1.8);
+    const ry=VH*0.335+Math.sin(END.t*1.4)*VH*0.006;
+    drawGoldAura(VW*0.5,ry-rsc*22,rsc*54,END.t,0.72);
+    drawGoldMotes(END.t,0.26,9,3);
+    drawPrizeRoadster(VW*0.5,ry,rsc,Math.sin(END.t*2.2)>0,END.t,true);
+    /* GET! プレート */
+    const fs=Math.round(clamp(VW*0.019,9,13.5));
+    ctx.save();
+    ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.font='900 '+fs+'px system-ui,sans-serif';
+    const label='GET! NA ROADSTER';
+    const tw=ctx.measureText(label).width;
+    const py=ry+rsc*26;
+    ctx.fillStyle='rgba(30,12,6,.72)';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(VW*0.5-tw/2-12,py,tw+24,fs*1.8,8);else ctx.rect(VW*0.5-tw/2-12,py,tw+24,fs*1.8);
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,214,120,.85)';ctx.lineWidth=1.6;ctx.stroke();
+    ctx.fillStyle='#ffe9b0';
+    ctx.fillText(label,VW*0.5,py+fs*1.28);
+    ctx.restore();
   }
 
   // 主人公
@@ -4016,15 +4409,16 @@ function drawTheEnd(){
   rg.addColorStop(1,'rgba(255,150,70,0)');
   ctx.fillStyle=rg;ctx.fillRect(0,0,VW,VH);
 
-  /* 5面制覇の THE END：最上位に神が浮かぶ */
+  /* 5面制覇の THE END：授かった ロードスターが 光の中に浮かぶ */
   if(fin){
-    const gH=clamp(VH*0.29,140,270);
-    const gB=VH*0.31+Math.sin(t*1.6)*VH*0.008;
+    const rsc=clamp(VW*0.0022,1.0,1.7);
+    const ry=VH*0.315+Math.sin(t*1.5)*VH*0.005;
     ctx.save();
     ctx.globalAlpha=a;
-    drawGodAura(VW*0.5,gB-gH*0.50,gH*0.86,t,0.85);
-    drawGodParticles(t,a*0.7,14,5);
-    drawGodSprite(VW*0.5,gB,gH,1,0);
+    drawGoldAura(VW*0.5,ry-rsc*22,rsc*52,t,0.85);
+    drawGoldMotes(t,a*0.7,12,5);
+    drawPrizeRoadster(VW*0.5,ry,rsc,Math.sin(t*2.6)>0,t,true);
+    /* GET! NA ROADSTER バッジ（車と THE END の間に置くと重なるので、下部の一文に合流させる） */
     ctx.restore();
   }
 
@@ -4074,7 +4468,7 @@ function drawTheEnd(){
   ctx.textAlign='center';
   ctx.font='800 '+Math.round(clamp(VW*0.018,9.5,13))+'px "Hiragino Kaku Gothic ProN",system-ui,sans-serif';
   ctx.fillStyle='rgba(255,240,215,.85)';
-  ctx.fillText('また あしたも、おはよう高雄で。',VW*0.5,fin?gy-VH*0.030:gy+gh+VH*0.055);
+  ctx.fillText(fin?'GET! NA ROADSTER — また あしたも、おはよう高雄で。':'また あしたも、おはよう高雄で。',VW*0.5,fin?gy-VH*0.030:gy+gh+VH*0.055);
 
   for(let i=0;i<18;i++){
     const ph=(t*0.8+i*0.13)%1;
@@ -4086,7 +4480,7 @@ function drawTheEnd(){
 }
 
 function drawEnding(){
-  if(END.phase==='descend'){drawGodDescend();return;}
+  if(END.phase==='reward'){drawRewardScene();return;}
   if(END.phase==='theend'){drawTheEnd();return;}
   if(END.phase==='credits'){drawEndingCredits();return;}
   drawEndingMarch(true);
@@ -6337,6 +6731,172 @@ function drawFinalShow(){
   ctx.restore();
 }
 
+/* ------- 真のラストボスの 玉座の奥（血紅のフロア・浮かぶドーナツ） ------- */
+function drawTrueLastShow(){
+  if(STAGE.id!==5)return;
+  if(!(BOSS.def&&BOSS.def.kind==='truelast'))return;
+  if(!(BOSS.active||BOSS.done))return;
+  const x=BOSS.cx-st.camX;
+  if(x<-700||x>VW+700)return;
+  const beat=0.5+0.5*Math.sin(st.t*3.1);
+
+  /* ボスの背後の 暖色の光（黒衣を 背景から 浮かび上がらせる） */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const bg2=ctx.createRadialGradient(x,groundY-190,10,x,groundY-190,VW*0.30);
+  bg2.addColorStop(0,'rgba(255,170,130,'+(0.095+0.025*beat)+')');
+  bg2.addColorStop(.55,'rgba(200,80,70,.05)');
+  bg2.addColorStop(1,'rgba(120,20,30,0)');
+  ctx.fillStyle=bg2;ctx.beginPath();ctx.arc(x,groundY-190,VW*0.30,0,6.284);ctx.fill();
+  ctx.restore();
+
+  /* 床の 血紅の光だまり */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const fg=ctx.createRadialGradient(x,groundY+8,8,x,groundY+8,360);
+  fg.addColorStop(0,'rgba(255,60,60,'+(0.15+0.06*beat)+')');
+  fg.addColorStop(.5,'rgba(150,20,40,.10)');
+  fg.addColorStop(1,'rgba(60,0,10,0)');
+  ctx.fillStyle=fg;ctx.beginPath();ctx.ellipse(x,groundY+10,360,84,0,0,6.284);ctx.fill();
+  ctx.restore();
+
+  /* 床の 警告ストライプ */
+  for(let i=0;i<13;i++){
+    ctx.fillStyle=((Math.floor(st.t*4)+i)%2)?'rgba(255,70,60,.18)':'rgba(20,8,12,.32)';
+    ctx.fillRect(x-330+i*54,groundY+16,26,5);
+  }
+
+  /* 背景に 浮かぶ 巨大ドーナツ（ゆっくり 逆回転） */
+  ctx.save();
+  ctx.globalAlpha=0.20;
+  drawDonut(x-VW*0.30,groundY-306,58,st.t*0.5,false);
+  drawDonut(x+VW*0.31,groundY-252,44,-st.t*0.62,false);
+  ctx.restore();
+
+  /* 空中を 漂う コーヒーカップと湯気 */
+  ctx.save();
+  ctx.globalAlpha=0.30;
+  drawCoffeeCup(x-VW*0.21,groundY-190+Math.sin(st.t*0.9)*8,1.15,Math.sin(st.t*0.8)*0.12,st.t,1.3);
+  drawCoffeeCup(x+VW*0.22,groundY-232+Math.sin(st.t*1.1+2)*8,0.95,Math.sin(st.t*0.7+1)*0.12,st.t,2.7);
+  ctx.restore();
+
+  /* 頭上を よぎる タイヤホイールの 影（終盤の予感） */
+  ctx.save();
+  ctx.globalAlpha=0.12+0.05*beat;
+  const wa=st.t*0.35;
+  drawTireWheel(x-Math.cos(wa)*VW*0.34,groundY-330+Math.sin(wa)*30,30,st.t*1.2);
+  ctx.restore();
+
+  /* 紅と金の スポットライト */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<3;i++){
+    const sx=x+Math.sin(st.t*0.8+i*2.1)*110;
+    const gg=ctx.createLinearGradient(sx,0,sx+(i-1)*140,groundY);
+    gg.addColorStop(0,'rgba(255,90,70,0)');
+    gg.addColorStop(.55,'rgba(255,70,60,'+(0.035+0.03*beat)+')');
+    gg.addColorStop(1,'rgba(255,190,90,'+(0.06+0.03*beat)+')');
+    ctx.fillStyle=gg;
+    ctx.beginPath();
+    ctx.moveTo(sx,-10);
+    ctx.lineTo(sx+(i-1)*140-54,groundY+6);
+    ctx.lineTo(sx+(i-1)*140+54,groundY+6);
+    ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ------- 真のラストボスの 警告演出（暗転・サイレン・WARNING） ------- */
+function drawTrueLastWarn(){
+  if(!(BOSS.active&&BOSS.phase==='warning'))return;
+  const t=BOSS.stateT;
+  const vt=clamp(t/0.7,0,1);
+  const pulse=0.5+0.5*Math.sin(t*11);
+
+  /* 暗転 */
+  ctx.save();
+  ctx.fillStyle='rgba(8,2,6,'+(0.62*vt)+')';
+  ctx.fillRect(0,0,VW,VH);
+  ctx.globalCompositeOperation='lighter';
+  const g=ctx.createRadialGradient(VW*0.5,VH*0.46,10,VW*0.5,VH*0.46,VW*0.78);
+  g.addColorStop(0,'rgba(255,40,50,'+((0.22+0.16*pulse)*vt)+')');
+  g.addColorStop(1,'rgba(120,0,10,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
+  ctx.restore();
+
+  /* 上下の 警告ストライプ */
+  const off=(t*90)%44;
+  ctx.save();
+  ctx.fillStyle='rgba(255,60,50,'+(0.26+0.18*pulse)+')';
+  for(let i=-1;i<VW/44+2;i++){
+    ctx.fillRect(i*44+off,0,16,VH*0.05);
+    ctx.fillRect(i*44+off,VH*0.95,16,VH*0.05);
+  }
+  ctx.restore();
+
+  /* 降りてくる シルエット */
+  const p=clamp((t-1.4)/2.0,0,1);
+  if(p>0){
+    const h=clamp(Math.min(VH*0.46,VW*0.44),190,300);
+    const bh=lerp(-h*0.6,VH*0.985,1-Math.pow(1-p,3));
+    const bw=h*0.72;
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    const aura=ctx.createRadialGradient(VW*0.5,bh-h*0.5,4,VW*0.5,bh-h*0.5,bw*1.1);
+    aura.addColorStop(0,'rgba(255,70,60,'+(0.30+0.24*p)+')');
+    aura.addColorStop(1,'rgba(140,0,20,0)');
+    ctx.fillStyle=aura;ctx.beginPath();ctx.arc(VW*0.5,bh-h*0.5,bw*1.1,0,6.284);ctx.fill();
+    ctx.restore();
+    const img=imgTrueLast;
+    if(img&&img.naturalWidth>0){
+      const w=h*img.naturalWidth/img.naturalHeight;
+      ctx.save();
+      ctx.globalAlpha=0.50+0.50*p;
+      ctx.drawImage(img,VW*0.5-w/2,bh-h,w,h);
+      ctx.restore();
+    }
+  }
+
+  /* WARNING!! */
+  const a1=clamp(t/0.3,0,1);
+  ctx.save();
+  ctx.globalAlpha=a1;
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  const fsW=clamp(VW*0.095,24,62);
+  ctx.font='900 '+Math.round(fsW)+'px "Arial Black",Impact,system-ui,sans-serif';
+  ctx.lineJoin='round';
+  const wy=VH*0.255;
+  ctx.lineWidth=fsW*0.14;ctx.strokeStyle='rgba(40,0,0,.85)';
+  ctx.strokeText('WARNING!!',VW*0.5,wy);
+  const gg=ctx.createLinearGradient(0,wy-fsW,0,wy+fsW*0.22);
+  gg.addColorStop(0,'#fff3b0');gg.addColorStop(.45,'#ff5240');gg.addColorStop(1,'#8a0010');
+  ctx.fillStyle=gg;ctx.fillText('WARNING!!',VW*0.5,wy);
+  ctx.restore();
+
+  const a2=clamp((t-1.0)/0.5,0,1);
+  if(a2>0){
+    ctx.save();
+    ctx.globalAlpha=a2;ctx.textAlign='center';
+    const fs2=clamp(VW*0.040,15,28);
+    ctx.font='900 '+Math.round(fs2)+'px "Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif';
+    ctx.lineJoin='round';
+    ctx.lineWidth=fs2*0.34;ctx.strokeStyle='rgba(30,0,4,.85)';
+    ctx.strokeText('真のラストボス  降臨！！',VW*0.5,VH*0.35);
+    ctx.fillStyle='#ffe9b0';ctx.fillText('真のラストボス  降臨！！',VW*0.5,VH*0.35);
+    ctx.restore();
+  }
+  const a3=clamp((t-2.4)/0.5,0,1);
+  if(a3>0){
+    ctx.save();
+    ctx.globalAlpha=a3*0.9;ctx.textAlign='center';
+    const fs3=clamp(VW*0.020,9.5,14);
+    ctx.font='800 '+Math.round(fs3)+'px "Hiragino Kaku Gothic ProN",system-ui,sans-serif';
+    ctx.fillStyle='rgba(255,214,170,.9)';
+    ctx.fillText('ドーナツ・コーヒー・タイヤホイール — 覚悟しろ',VW*0.5,VH*0.415);
+    ctx.restore();
+  }
+}
+
 function drawBossArena(){
   if(P.x<18400&&!BOSS.active&&!BOSS.done)return;
   const x0=BOSS.x0-300-st.camX, x1=BOSS.x1+300-st.camX;
@@ -6499,7 +7059,8 @@ function drawBoss(){
 const NEWBOSS_LINES={
   chick:['ピヨピヨ！ 卵 投げるぞ','キャンプ場は わしの ものじゃ','羽根が 飛ぶぞ 気をつけろ'],
   okonomiyaki:['まいど！ 焼けたで！','コテ二刀流、受けてみい','ソースの波を くらえ！'],
-  final:['よくぞ ここまで のぼってきた','星の力、見せてやろう','これが 最後の攻撃だ…！']
+  final:['よくぞ ここまで のぼってきた','星の力、見せてやろう','これが 最後の攻撃だ…！'],
+  truelast:['ドーナツを くらえ！','コーヒーは 熱いうちに どうぞ','タイヤホイール、 新品だぞ']
 };
 function drawNewBoss(){
   if(!BOSS.active&&!BOSS.done)return;
@@ -6514,12 +7075,13 @@ function drawNewBoss(){
   const bob=dancing?Math.abs(Math.sin(st.t*3.4))*7:Math.sin(st.t*1.9)*5;
   const feetY=BOSS.y+bob;
   const isFinal=kind==='final';
+  const isTL=kind==='truelast';
   /* ポールダンス：ポールを軸にしたターン（横スケール反転）と腰振り */
   const poleTurn=isFinal?Math.sin(st.t*0.85):0;
   const poleFlat=isFinal?(0.55+0.45*Math.abs(poleTurn)):1;
   const poleFlip=isFinal?(poleTurn<0?-1:1):1;
   const hip=isFinal?Math.sin(st.t*6.6)*0.055:0;
-  const auraCol=isFinal?['rgba(255,220,110,','rgba(150,90,230,']:kind==='chick'?['rgba(255,240,150,','rgba(120,200,90,']:['rgba(255,150,70,','rgba(200,60,30,'];
+  const auraCol=isFinal?['rgba(255,220,110,','rgba(150,90,230,']:(isTL?['rgba(255,96,80,','rgba(120,0,24,']:(kind==='chick'?['rgba(255,240,150,','rgba(120,200,90,']:['rgba(255,150,70,','rgba(200,60,30,']));
 
   /* 背景の光輪・魔法陣 */
   ctx.save();
@@ -6549,6 +7111,28 @@ function drawNewBoss(){
         const sx2=x-dw*0.7+hash(i*3.1)*dw*1.4;
         ctx.beginPath();ctx.moveTo(sx2,0);ctx.lineTo(sx2+(hash(i*7.3)-0.5)*40,groundY);ctx.stroke();
       }
+    }
+  }else if(isTL){
+    /* 真のラストボス：紅いオーラの輪と 周囲を回る金の粒 */
+    const R=dh*0.70;
+    for(let k=0;k<3;k++){
+      ctx.strokeStyle='rgba(255,70,60,'+(0.13+0.06*Math.sin(st.t*1.4+k))+')';
+      ctx.lineWidth=2.4;
+      ctx.beginPath();ctx.arc(x,feetY-dh*0.52,R-k*24,0,6.284);ctx.stroke();
+    }
+    for(let i=0;i<10;i++){
+      const a=st.t*0.5+i*0.628;
+      ctx.fillStyle='rgba(255,190,120,'+(0.20+0.14*Math.sin(st.t*2.4+i))+')';
+      ctx.beginPath();ctx.arc(x+Math.cos(a)*R,feetY-dh*0.52+Math.sin(a)*R*0.8,2.8,0,6.284);ctx.fill();
+    }
+    /* 降臨中の 紅い光の柱 */
+    if(BOSS.phase==='intro'||BOSS.phase==='warning'){
+      const gp=ctx.createLinearGradient(x,0,x,groundY);
+      gp.addColorStop(0,'rgba(255,80,70,0)');
+      gp.addColorStop(.5,'rgba(255,60,60,'+(0.14+0.09*Math.sin(st.t*7))+')');
+      gp.addColorStop(1,'rgba(255,40,50,0)');
+      ctx.fillStyle=gp;
+      ctx.fillRect(x-dw*0.66,0,dw*1.32,groundY);
     }
   }else{
     const R=dh*0.75;
@@ -6584,12 +7168,16 @@ function drawNewBoss(){
   const sca=1+(dying?Math.sin(BOSS.stateT*28)*.045*Math.max(0,1-BOSS.stateT/1.6):0);
   ctx.scale(poleFlip*poleFlat*sca,sca);
   if(BOSS.flash>.02){
-    ctx.shadowColor=isFinal?'rgba(255,240,170,'+Math.min(1,BOSS.flash)+')':'rgba(255,220,160,'+Math.min(1,BOSS.flash)+')';
+    ctx.shadowColor=(isFinal||isTL)?'rgba(255,240,170,'+Math.min(1,BOSS.flash)+')':'rgba(255,220,160,'+Math.min(1,BOSS.flash)+')';
     ctx.shadowBlur=34*Math.min(1,BOSS.flash);
   }else if(isFinal){
     /* スポットの逆光 */
     ctx.shadowColor='rgba(255,150,220,'+(0.45+0.25*Math.sin(st.t*3.6))+')';
     ctx.shadowBlur=26;
+  }else if(isTL){
+    /* 黒衣が 暗い背景に 沈まないよう、暖色のリムライト */
+    ctx.shadowColor='rgba(255,176,150,'+(0.42+0.16*Math.sin(st.t*2.6))+')';
+    ctx.shadowBlur=18;
   }
   if(img&&img.naturalWidth>0){
     ctx.drawImage(img,-dw/2,-dh,dw,dh);
@@ -6857,6 +7445,164 @@ function drawBossRage(){
   ctx.fillText(BOSS.rage>=2?'!!':'!',x,feet-dh-16);
 }
 
+/* ------- 真のラストボスの 投げもの（ドーナツ・コーヒー・タイヤホイール） ------- */
+function drawDonut(x,y,r,rot,big){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);
+  if(big){
+    /* 巨大ドーナツは ほんのり 赤く光る */
+    const g0=ctx.createRadialGradient(0,0,r*0.3,0,0,r*1.7);
+    g0.addColorStop(0,'rgba(255,190,120,.38)');g0.addColorStop(1,'rgba(255,120,60,0)');
+    ctx.fillStyle=g0;ctx.beginPath();ctx.arc(0,0,r*1.7,0,6.284);ctx.fill();
+  }else{
+    const g0=ctx.createRadialGradient(0,0,r*0.3,0,0,r*1.55);
+    g0.addColorStop(0,'rgba(255,220,150,.26)');g0.addColorStop(1,'rgba(255,170,70,0)');
+    ctx.fillStyle=g0;ctx.beginPath();ctx.arc(0,0,r*1.55,0,6.284);ctx.fill();
+  }
+  /* 揚げ生地のリング */
+  ctx.beginPath();ctx.arc(0,0,r,0,6.284);ctx.arc(0,0,r*0.33,0,6.284,true);
+  ctx.fillStyle='#d69a52';ctx.fill();
+  /* チョコグレーズ */
+  ctx.beginPath();ctx.arc(0,0,r*0.80,0,6.284);ctx.arc(0,0,r*0.42,0,6.284,true);
+  ctx.fillStyle='#4a2313';ctx.fill();
+  /* グレーズの照り */
+  ctx.strokeStyle='rgba(255,224,186,.45)';ctx.lineWidth=Math.max(1.2,r*0.11);
+  ctx.beginPath();ctx.arc(0,0,r*0.90,-2.45,-1.45);ctx.stroke();
+  /* スプリンクル */
+  const cols=['#ffe45a','#ff7a9e','#7ce0c8','#fff6e0'];
+  for(let k=0;k<7;k++){
+    const a=k*0.92+0.35, rr2=r*(0.60+0.15*((k%3)-1));
+    ctx.save();ctx.translate(Math.cos(a)*rr2,Math.sin(a)*rr2);ctx.rotate(a*2.4);
+    ctx.fillStyle=cols[k%4];ctx.fillRect(-r*0.10,-r*0.032,r*0.20,r*0.064);
+    ctx.restore();
+  }
+  /* 穴のふち */
+  ctx.beginPath();ctx.arc(0,0,r*0.34,0,6.284);
+  ctx.strokeStyle='rgba(64,30,14,.9)';ctx.lineWidth=Math.max(1.2,r*0.11);ctx.stroke();
+  /* 背景が暗くても 浮かぶよう 外周に 淡い金の縁取り */
+  ctx.beginPath();ctx.arc(0,0,r*0.995,0,6.284);
+  ctx.strokeStyle='rgba(255,238,200,.55)';ctx.lineWidth=Math.max(1,1.3);ctx.stroke();
+  ctx.restore();
+}
+
+function drawCoffeeCup(x,y,sc,rot,t,seed){
+  const s=sc||1, tm=t||0, sd=seed||0;
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);ctx.scale(s,s);
+  /* 湯気 */
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let k=0;k<3;k++){
+    const ph=(tm*1.5+k*0.9+sd)%1;
+    ctx.strokeStyle='rgba(255,242,222,'+(0.32*(1-ph))+')';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    for(let j=0;j<=6;j++){
+      const yy=-16-j*4.4;
+      const xx=Math.sin(j*0.95+tm*3+k*2.1)*3.0*(1+j*0.13);
+      if(j===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+  /* こぼれるコーヒー */
+  ctx.fillStyle='#5a2a0e';
+  ctx.beginPath();ctx.ellipse(2,-13,8,5,-0.5,0,6.284);ctx.fill();
+  ctx.beginPath();ctx.ellipse(-6,-16,4,3,0.4,0,6.284);ctx.fill();
+  /* カップ本体 */
+  ctx.beginPath();
+  ctx.moveTo(-11,-8);ctx.lineTo(11,-8);
+  ctx.quadraticCurveTo(10,9.5,0,11);ctx.quadraticCurveTo(-10,9.5,-11,-8);
+  ctx.closePath();
+  ctx.fillStyle='#fdf6ea';ctx.fill();
+  ctx.strokeStyle='rgba(120,90,70,.85)';ctx.lineWidth=1.4;ctx.stroke();
+  /* 取っ手 */
+  ctx.beginPath();ctx.arc(12,-1.5,5.2,-1.25,1.25);ctx.lineWidth=3.2;ctx.strokeStyle='#fdf6ea';ctx.stroke();
+  ctx.beginPath();ctx.arc(12,-1.5,5.2,-1.25,1.25);ctx.lineWidth=1.1;ctx.strokeStyle='rgba(120,90,70,.7)';ctx.stroke();
+  /* コーヒー面 */
+  ctx.beginPath();ctx.ellipse(0,-8,10.6,3.2,0,0,6.284);ctx.fillStyle='#4a220b';ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,-8,10.6,3.2,0,0,6.284);ctx.strokeStyle='rgba(255,226,180,.55)';ctx.lineWidth=1;ctx.stroke();
+  /* カップの縁のきらめき */
+  ctx.strokeStyle='rgba(255,246,230,.75)';ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(-8,3);ctx.lineTo(-4,6.5);ctx.stroke();
+  ctx.restore();
+}
+
+/* タイヤ＋スポーツアルミホイール（ロードスター風の 8本スポーク） */
+function drawTireWheel(x,y,r,rot){
+  ctx.save();ctx.translate(x,y);
+  /* 回転のにじみ */
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  const blur=ctx.createRadialGradient(0,0,r*0.55,0,0,r*1.25);
+  blur.addColorStop(0,'rgba(255,200,140,0)');
+  blur.addColorStop(.65,'rgba(255,170,110,.10)');
+  blur.addColorStop(1,'rgba(255,140,80,0)');
+  ctx.fillStyle=blur;ctx.beginPath();ctx.arc(0,0,r*1.25,0,6.284);ctx.fill();
+  ctx.restore();
+  ctx.rotate(rot||0);
+  /* ゴムタイヤ */
+  ctx.beginPath();ctx.arc(0,0,r,0,6.284);
+  ctx.fillStyle='#17181c';ctx.fill();
+  ctx.strokeStyle='#08080b';ctx.lineWidth=Math.max(1.4,r*0.10);ctx.stroke();
+  /* トレッドパターン */
+  ctx.strokeStyle='rgba(126,132,142,.55)';ctx.lineWidth=Math.max(1,r*0.07);
+  for(let k=0;k<20;k++){
+    const a=k*6.283/20;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a)*r*0.86,Math.sin(a)*r*0.86);
+    ctx.lineTo(Math.cos(a)*r*0.985,Math.sin(a)*r*0.985);
+    ctx.stroke();
+  }
+  /* サイドウォールの主張 */
+  ctx.beginPath();ctx.arc(0,0,r*0.80,0,6.284);
+  ctx.strokeStyle='rgba(90,96,106,.7)';ctx.lineWidth=Math.max(1,r*0.05);ctx.stroke();
+  /* アルミホイール */
+  const wr=r*0.62;
+  const g=ctx.createRadialGradient(-wr*0.3,-wr*0.3,wr*0.08,0,0,wr);
+  g.addColorStop(0,'#f2f6fa');g.addColorStop(.5,'#c3ccd6');g.addColorStop(1,'#7f8994');
+  ctx.beginPath();ctx.arc(0,0,wr,0,6.284);ctx.fillStyle=g;ctx.fill();
+  /* 8本スポーク */
+  for(let k=0;k<8;k++){
+    ctx.save();ctx.rotate(k*6.283/8);
+    ctx.beginPath();
+    ctx.moveTo(-wr*0.15,wr*0.16);ctx.lineTo(wr*0.15,wr*0.16);
+    ctx.lineTo(wr*0.095,wr*0.93);ctx.lineTo(-wr*0.095,wr*0.93);
+    ctx.closePath();
+    ctx.fillStyle='#eef3f8';ctx.fill();
+    ctx.strokeStyle='rgba(120,132,146,.55)';ctx.lineWidth=Math.max(.8,wr*0.02);ctx.stroke();
+    ctx.restore();
+  }
+  /* 赤いブレーキキャリパー */
+  ctx.beginPath();ctx.arc(0,0,wr*0.74,-0.5,0.5);
+  ctx.lineWidth=wr*0.17;ctx.strokeStyle='#d4202a';ctx.stroke();
+  /* リムと センターキャップ */
+  ctx.beginPath();ctx.arc(0,0,wr*0.98,0,6.284);ctx.lineWidth=Math.max(1.2,r*0.06);ctx.strokeStyle='rgba(244,249,255,.95)';ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,wr*0.30,0,6.284);ctx.fillStyle='#2b3138';ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,wr*0.15,0,6.284);ctx.fillStyle='#e8eef5';ctx.fill();
+  ctx.restore();
+}
+
+function drawCoffeeSplash(x,y,r,t){
+  const k=clamp(t/0.85,0,1);
+  ctx.save();
+  /* 地面のコーヒーの 溜まり */
+  ctx.beginPath();ctx.ellipse(x,y,r*0.92,r*0.30,0,0,6.284);
+  ctx.fillStyle='rgba(92,40,12,'+(0.52*(1-k))+')';ctx.fill();
+  ctx.strokeStyle='rgba(255,212,150,'+(0.5*(1-k))+')';ctx.lineWidth=2;ctx.stroke();
+  /* 飛び散る しずく */
+  for(let i=0;i<8;i++){
+    const a=i*0.82+0.4, sp=68+((i*37)%44);
+    const px=x+Math.cos(a)*sp*k, py=y-Math.sin(a)*sp*k*0.85;
+    ctx.fillStyle='rgba(124,58,20,'+(0.72*(1-k))+')';
+    ctx.beginPath();ctx.arc(px,py,Math.max(.6,3.4-2.4*k),0,6.284);ctx.fill();
+  }
+  /* 湯気 */
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<3;i++){
+    const p=((t*2.0+i*0.33)%1);
+    ctx.fillStyle='rgba(255,240,218,'+(0.30*(1-p))+')';
+    ctx.beginPath();ctx.arc(x+(i-1)*11+Math.sin(p*6+i)*4,y-10-p*28,5+p*7,0,6.284);ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawBossFX(){
   if(!BOSS.active&&!BOSS.done)return;
   if(BOSS.active&&(BOSS.phase==='fight'||BOSS.phase==='intro')&&BOSS.rage>0)drawBossRage();
@@ -7047,6 +7793,18 @@ function drawBossFX(){
         ctx.beginPath();ctx.arc(px,py,1.8,0,6.284);ctx.fill();
       }
       ctx.restore();
+    }else if(s.kind==='donut'){
+      drawDonut(x,s.y,s.r,s.ang||st.t*8);
+    }else if(s.kind==='donutb'){
+      drawDonut(x,s.y,s.r,s.ang||st.t*4,true);
+    }else if(s.kind==='donutpart'){
+      drawDonut(x,s.y,s.r,s.ang||st.t*5);
+    }else if(s.kind==='coffee'){
+      drawCoffeeCup(x,s.y,s.r/17,s.ang||0,s.t,s.seed);
+    }else if(s.kind==='wheel'){
+      drawTireWheel(x,s.y,s.r,s.ang||st.t*10);
+    }else if(s.kind==='splash'){
+      drawCoffeeSplash(x,s.y,s.r,s.t);
     }else{
       drawCondenser(x,s.y,s.ang);
     }
@@ -7060,6 +7818,7 @@ function drawBossFX(){
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,p.y+bob,22,0,6.284);ctx.fill();
     if(p.kind==='gear')drawGear(x,p.y+bob,11,st.t*1.4,'#9be6ff');
     else if(p.kind==='sign')drawSign(x,p.y+bob,1.15);
+    else if(p.kind==='donutpart')drawDonut(x,p.y+bob,13,st.t*1.4);
     else if(p.kind==='starpart'){
       ctx.save();ctx.translate(x,p.y+bob);ctx.rotate(st.t*1.6);
       ctx.fillStyle='#ffe45a';drawStarShape(0,0,13,5.6,st.t*1.4);
@@ -7080,6 +7839,7 @@ function drawBossFX(){
     ctx.globalAlpha=.9;
     if(r.kind==='gear')drawGear(x,y,11,t*14,'#ffffff');
     else if(r.kind==='sign')drawSign(x,y,1.3);
+    else if(r.kind==='donutpart')drawDonut(x,y,15,t*12);
     else if(r.kind==='starpart'){
       ctx.save();ctx.translate(x,y);ctx.rotate(t*10);
       ctx.fillStyle='#fff8d0';drawStarShape(0,0,14,6,t*8);
@@ -8140,6 +8900,7 @@ function render(){
     drawCastleScene();
     drawCastleGround();
     drawFinalShow();
+    drawTrueLastShow();
   }else{
     drawSky();
     drawFar();
@@ -8169,6 +8930,7 @@ function render(){
   drawParticles();
   drawMessages();
   drawVignette();
+  drawTrueLastWarn();
 
   // flashes
   if(st.flash>0){
@@ -8218,10 +8980,11 @@ window.__dash={
       goalX:LV.goalX, obstacles:LV.obstacles.length, stage:STAGE.id, stageName:STAGE.def.title,
       items:LV.items.length, assets:{runner:imgRunner.naturalWidth,doc:imgDoc.naturalWidth,boss:imgBoss.naturalWidth,
         chick:imgChick.naturalWidth,unadon:imgUnadon.naturalWidth,okonomiyaki:imgOkonomi.naturalWidth,final:imgFinalBoss.naturalWidth,
-        fishing:imgFishing.naturalWidth,helper:imgHelper.naturalWidth,helper2:imgHelper2.naturalWidth,god:imgGod.naturalWidth},
+        fishing:imgFishing.naturalWidth,helper:imgHelper.naturalWidth,helper2:imgHelper2.naturalWidth,truelast:imgTrueLast.naturalWidth},
       vw:Math.round(VW), vh:Math.round(VH), ground:Math.round(groundY), fps:fpsVal,
       music:{track:Mus.track,step:Mus.step,notes:Mus.notes,ctx:Sfx.ac?Sfx.ac.state:null,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*100)/100:null},
       muted:Sfx.muted, masterGain:Sfx.master?Math.round(Sfx.master.gain.value*100)/100:null,
+      flash:Math.round(st.flash*100)/100, flashCol:st.flashCol, shake:Math.round(st.shake*100)/100,
       near:(()=>{let d=9999;for(const o of LV.obstacles){if(o.dead)continue;const dd=o.x-P.x;if(dd>0&&dd<d)d=dd;}return Math.round(d);})(),
       gapAhead:(()=>{let d=9999;for(const g of LV.gaps){const dd=g.x0-P.x;if(dd>-40&&dd<d)d=dd;}return Math.round(d);})()
     };
@@ -8262,7 +9025,7 @@ window.__dash={
   pressW(){pressW();},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
-  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,god:imgGod};
+  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast};
     const o={};for(const k in m)o[k]={complete:m[k].complete,w:m[k].naturalWidth,h:m[k].naturalHeight,ok:!!(m[k].complete&&m[k].naturalWidth>0)};return o;},
   bossSize(){return {kind:bossKind(),dh:Math.round(bossDH()),dw:Math.round(bossDW()),halfW:Math.round(bossHalfW()),hitTop:Math.round(bossHitTop())};},
   helperInfo(){return {active:HELPER.active,t:Math.round(HELPER.t*100)/100,cool:Math.round(HELPER.cool*10)/10,
@@ -8303,13 +9066,26 @@ window.__dash={
     if(st.mode!=='ending')startEnding();
     if(p==='credits'){END.phase='credits';END.creditY=0;END.creditTotal=creditLayout().total;if(endRestart)endRestart.classList.remove('show');}
     else if(p==='theend'){END.phase='theend';END.theEndT=0;if(endRestart)endRestart.classList.add('show');}
-    else if(p==='descend'){END.phase='descend';END.descT=0;END.godLanded=false;END.godImpact=false;}
+    else if(p==='reward'||p==='descend'){END.phase='reward';END.descT=0;END.keyIn=false;END.prizeIn=false;}
     else if(p==='march'){END.phase='march';END.msgIdx=0;END.chars=0;END.holdT=0;}
   },
-  godInfo(){
-    return {phase:END.phase,descT:Math.round(END.descT*100)/100,landed:END.godLanded,impact:END.godImpact,
-      imgW:imgGod.naturalWidth,imgH:imgGod.naturalHeight,complete:imgGod.complete,stage:STAGE.id};
+  prizeInfo(){
+    return {phase:END.phase,descT:Math.round(END.descT*100)/100,keyIn:END.keyIn,prizeIn:END.prizeIn,
+      imgW:imgTrueLast.naturalWidth,imgH:imgTrueLast.naturalHeight,complete:imgTrueLast.complete,stage:STAGE.id};
   },
+  /* --- 真のラストボス（動作検証用） --- */
+  tlStart(){startTrueLastBoss();return BOSS.phase;},
+  tlInfo(){
+    return {kind:bossKind(),phase:BOSS.phase,hp:BOSS.hp,maxHp:BOSS.maxHp,rage:BOSS.rage,bigT:Math.round(BOSS.bigT*100)/100,
+      active:BOSS.active,done:BOSS.done,shots:BOSS.shots.map(s=>s.kind),
+      x0:BOSS.x0,x1:BOSS.x1,cx:BOSS.cx,imgW:imgTrueLast.naturalWidth,imgH:imgTrueLast.naturalHeight,
+      barText:bossBar?bossBar.innerText.replace(/\n/g,' '):''};
+  },
+  tlVolley(){fireWheelVolley(5);return BOSS.shots.map(s=>s.kind);},
+  tlFire(){bossAttack();return BOSS.shots.map(s=>s.kind);},
+  tlDonut(){fireDonutFan(3);throwDonutBig();return BOSS.shots.map(s=>s.kind);},
+  tlCoffee(){throwCoffeeCup();fireCoffeeRain(3);return BOSS.shots.map(s=>s.kind);},
+  tlShots(){return BOSS.shots.map(s=>({kind:s.kind,x:Math.round(s.x),y:Math.round(s.y),t:Math.round(s.t*100)/100}));},
   endingInfo(){
     return {mode:st.mode,phase:END.phase,t:Math.round(END.t*10)/10,sky:Math.round(END.sky*100)/100,
       msgIdx:END.msgIdx,chars:Math.round(END.chars),creditY:Math.round(END.creditY),creditTotal:Math.round(END.creditTotal),

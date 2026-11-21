@@ -2297,7 +2297,7 @@ function buildLevel(){
     const rideBad=()=>
       LV.gaps.some(g=>rx>g.x0-200&&rx<g.x1+200)||
       LV.tunnels.some(t=>rx>t.x0-220&&rx<t.x1+220)||
-      LV.obstacles.some(o=>Math.abs(o.x-rx)<150)||
+      LV.obstacles.some(o=>Math.abs(o.x-rx)<260)||
       DOC_X.some(dd=>Math.abs(dd-rx)<240)||
       CP_X.some(c=>Math.abs(c-rx)<180)||
       (d.mid&&rx>d.mid.trigger-720&&rx<d.mid.x1+620)||
@@ -5883,6 +5883,7 @@ function update(dt){
       else if(it.type==='ride'){
         const rd=RIDE_DEFS[it.kind]||RIDE_DEFS.boar;
         RIDE.active=true;RIDE.kind=it.kind;RIDE.t=0;RIDE.pT=0;RIDE.lostT=0;RIDE.popT=1.8;
+        st.invulnT=Math.max(st.invulnT,.9);   /* 乗った直後の 0.9秒は 無敵（取りたてで すぐ はじけない） */
         addScore(300,it.x,it.y);
         Sfx.rideOn(it.kind);
         st.pops.push({x:it.x,y:it.y-46,text:rd.pop,t:0,life:1.7,col:'#fff6cc',size:26});
@@ -8739,6 +8740,11 @@ function drawRideItem(x,y,t,kind){
 function drawMount(kind,T0){
   const T=(T0==null?st.t:T0);
   const ph=(T0==null?P.phase:T0*7);
+  /* 種類ごとに 横／縦の 伸びを 調整（主人公より ひと回り大きく見せる） */
+  const SC={car:[1.18,1.02],boar:[1.12,1.06],dolphin:[1.16,1.06],hawk:[1.12,1.1]};
+  const kk=SC[kind]||SC.boar;
+  ctx.save();
+  ctx.scale(kk[0],kk[1]);
   if(kind==='car'){
     /* NAロードスター風 オープン2シーター */
     const g=ctx.createLinearGradient(0,-32,0,-6);
@@ -8873,6 +8879,7 @@ function drawMount(kind,T0){
     ctx.beginPath();ctx.moveTo(-24,-16);ctx.lineTo(-46,-9+Math.sin(T*5)*3);ctx.lineTo(-40,-18);ctx.lineTo(-46,-24+Math.sin(T*5)*3);ctx.closePath();ctx.fill();
     ctx.restore();
   }
+  ctx.restore();
 }
 /* またがりポーズの 脚（乗り物の わきに 曲げて 下ろす） */
 function drawRideLeg(hx,ang,col){
@@ -13730,6 +13737,7 @@ window.__dash={
     return {x:Math.round(P.x),hearts:st.hearts};
   },
   rideClearInvuln(){st.invulnT=0;return 0;},
+  hold(v){const n=v||0;keys.right=n>0;keys.left=n<0;return {right:keys.right,left:keys.left,speed:Math.round(P.speed)};},
   obstacleTypes(){const m={};for(const o of LV.obstacles){if(o.dead)continue;m[o.type]=(m[o.type]||0)+1;}return m;},
   foeInfo(){
     const list=LV.obstacles.filter(o=>o.type==='assassin'&&!o.dead);

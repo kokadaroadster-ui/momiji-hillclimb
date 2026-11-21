@@ -60,14 +60,32 @@
   #pad{position:fixed;inset:0;z-index:20;pointer-events:none;display:flex;align-items:flex-end;justify-content:space-between;
        padding:0 calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
   .side{display:flex;gap:10px;align-items:flex-end}
-  .side.right{flex-direction:column;align-items:flex-end;gap:10px}
   .btn{pointer-events:auto;border:2px solid rgba(255,255,255,.34);border-radius:50%;color:#fff;
        width:clamp(54px,11.5vmin,82px);height:clamp(54px,11.5vmin,82px);
        background:rgba(255,255,255,.15);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
        font:800 clamp(17px,3.6vmin,24px)/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;
-       box-shadow:0 5px 14px rgba(0,0,0,.28);touch-action:none;padding:0;cursor:pointer}
+       box-shadow:0 5px 14px rgba(0,0,0,.28);touch-action:none;padding:0;cursor:pointer;
+       -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
   .btn.on,.btn:active{background:rgba(255,255,255,.42);transform:scale(.94)}
-  .jump{width:clamp(68px,14vmin,100px);height:clamp(68px,14vmin,100px);
+  /* ---------- 左：十字キー ---------- */
+  .dpad{pointer-events:auto;touch-action:none;display:grid;position:relative;
+        grid-template-columns:repeat(3,var(--dc));grid-template-rows:repeat(3,var(--dc));
+        gap:var(--dg);--dc:clamp(50px,15.4vmin,64px);--dg:3px}
+  .dpad .btn{width:100%;height:100%;border-radius:26%;font-size:clamp(14px,3.1vmin,20px);
+             background:rgba(255,255,255,.16);box-shadow:0 4px 12px rgba(0,0,0,.26)}
+  .dpad .btn.on,.dpad .btn:active{background:rgba(255,255,255,.48);transform:scale(.93)}
+  #bU{grid-area:1/2}#bL{grid-area:2/1}#bR{grid-area:2/3}#bD{grid-area:3/2}
+  .dcore{grid-area:2/2;place-self:center;width:36%;height:36%;border-radius:50%;
+         background:rgba(255,255,255,.09);pointer-events:none}
+  /* ---------- 右：アクションボタン（W／🚀／JUMP） ---------- */
+  .side.right{display:grid;grid-template-columns:var(--sw) var(--sw);
+              grid-template-rows:var(--sw) var(--jw);gap:var(--rg);
+              align-items:end;justify-items:end;
+              --sw:clamp(46px,11.4vmin,72px);--jw:clamp(64px,15.6vmin,96px);--rg:8px}
+  .side.right .btn{width:var(--sw);height:var(--sw)}
+  .side.right #bJ{width:var(--jw);height:var(--jw)}
+  #bW{grid-area:1/1}#bM{grid-area:1/2}#bJ{grid-area:2/2}
+  .jump{
         background:radial-gradient(circle at 34% 28%,rgba(150,235,255,.55),rgba(30,120,190,.45));
         border-color:rgba(190,240,255,.75);font-size:clamp(12px,2.4vmin,15px);letter-spacing:.06em}
   .wbtn{background:radial-gradient(circle at 34% 28%,#ff7f6b,#b1101c 78%);
@@ -278,13 +296,17 @@
 
   <div id="pad">
     <div class="side left">
-      <button id="bL" class="btn" aria-label="減速">◀</button>
-      <button id="bR" class="btn" aria-label="加速">▶</button>
+      <div class="dpad" id="dpad" role="group" aria-label="十字キー（左右で移動・上でジャンプ／上昇・下で潜水／下降）">
+        <button id="bU" class="btn" aria-label="上（ジャンプ／浮上）">▲</button>
+        <button id="bL" class="btn" aria-label="左（減速）">◀</button>
+        <span class="dcore" aria-hidden="true"></span>
+        <button id="bR" class="btn" aria-label="右（加速）">▶</button>
+        <button id="bD" class="btn" aria-label="下（潜水／下降）">▼</button>
+      </div>
     </div>
     <div class="side right">
-      <button id="bM" class="btn shot" aria-label="ミサイル／魚雷を発射">🚀</button>
       <button id="bW" class="btn wbtn" aria-label="Wスペシャル">W</button>
-      <button id="bD" class="btn" aria-label="下降・潜水" hidden>▼</button>
+      <button id="bM" class="btn shot" aria-label="ミサイル／魚雷を発射">🚀</button>
       <button id="bJ" class="btn jump" aria-label="ジャンプ／上昇">JUMP</button>
     </div>
   </div>
@@ -343,8 +365,8 @@
         </button>
       </div>
       <ul class="how" id="ovHow">
-        <li><span class="k">◀ ▶</span><span>走るのは自動。◀で減速、▶で加速（PCは ←→ か A・D）</span></li>
-        <li><span class="k">JUMP</span><span>ジャンプ（2段まで）。落石・パイロン・カラス・タカは踏みつけて粉砕。角のあるシカは よける</span></li>
+        <li><span class="k">十字キー</span><span>左下の十字キー：◀で減速・▶で加速（走るのは自動。PCは ←→ か A・D）。▲でジャンプ、▼で急降下</span></li>
+        <li><span class="k">JUMP</span><span>右下の JUMP（十字キーの▲と同じ）：ジャンプ（2段まで）。落石・パイロン・カラス・タカは踏みつけて粉砕。角のあるシカは よける</span></li>
         <li><span class="k w">W</span><span>ゲージ満タンで巨大化（BIG）！ もう一度で 超巨大化（MEGA）！無敵で体当たり</span></li>
         <li><span class="k w">W</span><span>⚡バッテリー所持中なら 88MPH タイムワープ加速</span></li>
         <li><span class="k">MAPLE</span><span>紅葉コイン・エンブレムを集めて、ドクのディスコで回復</span></li>
@@ -357,14 +379,14 @@
         <li><span class="k w">TRUE</span><span>ステージ8の 天空王を 倒すと、真のラストボスが 降臨！ ドーナツ🍩・コーヒー☕・タイヤホイールを 投げてくる（倒すと ロードスターを 授かる）</span></li>
         <li><span class="k">DEPTH</span><span>ステージ6 地底潜航：段差を おりながら 浅層→結晶洞→マグマ層へ。落石・ドリルメカ・コウモリ・溶岩弾</span></li>
         <li><span class="k w">SHOT</span><span>🚀ミサイル／魚雷（水中は魚雷）：F・X（または Enter）で発射、押しっぱなしで連射。水中・空中の敵を 1発で撃破（刺客・ウツボは2発）、中ボス・ボス・4人目の刺客にも ダメージ、敵の弾も 撃ち落とせる</span></li>
-        <li><span class="k w">SWIM</span><span>ステージ7 深海：▲（JUMP・↑）を押すと ぐんぐん浮上、▼（↓）で しっかり潜水。押さなければ ごくゆっくり沈む。アイテムは 泳ぐ高さ（中層〜水面寄り）に 配置</span></li>
-        <li><span class="k w">FLY</span><span>ステージ8 天空：▲（↑）で 上昇、▼（↓）で 下降。アイテムは 中高度〜上空に 配置。加速ウインドリングを くぐると スピードアップ＆スコア</span></li>
+        <li><span class="k w">SWIM</span><span>ステージ7 深海：十字キーの▲（または JUMP・↑）で ぐんぐん浮上、▼（↓）で しっかり潜水。押さなければ ごくゆっくり沈む。アイテムは 泳ぐ高さ（中層〜水面寄り）に 配置</span></li>
+        <li><span class="k w">FLY</span><span>ステージ8 天空：▲（または JUMP・↑）で 上昇、▼（↓）で 下降。アイテムは 中高度〜上空に 配置。加速ウインドリングを くぐると スピードアップ＆スコア</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
         <li><span class="k w">MID</span><span>ステージ4・5の 途中には 中ボス！ 倒すと ライフ回復＆Wゲージ満タンの ボーナス</span></li>
       </ul>
       <button id="btnStart" class="btnStart">スタート ▶</button>
       <button id="btnNextStage" class="btnStart dun" hidden>🕯️ ステージ2（地下ダンジョン）へ挑む</button>
-      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音<br>スマホ：画面下のボタンで操作（縦持ち・横持ちどちらもOK）</p>
+      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）</p>
     </div>
   </div>
 </div>
@@ -1426,7 +1448,7 @@ const STAGE_DEFS={
     boss:{trigger:19020,x0:18960,x1:19340,cx:19160,maxHp:12,kind:'doc',hover:-138,
       name:'タイムトラベラー・ドク', short:'ドク', bar:'BOSS：タイムトラベラー・ドク'},
     runTrack:'run', bossTrack:'boss',
-    startMsg:'スタート！ ◀▶で速度、JUMPでジャンプ'
+    startMsg:'スタート！ 十字キー◀▶で速度、JUMP／▲でジャンプ'
   },
   2:{
     id:2, name:'地下ダンジョン', title:'恐怖の地下ダンジョン',
@@ -1698,7 +1720,7 @@ const STAGE_DEFS={
     clearTitle:'深海 クリア!!',
     clearSub:'海溝の底から 光の さす方へ 泳ぎきった！ 次は 空へ',
     overSub:'リヴァイアサンの 泡に つつまれて 沈んだ…',
-    startMsg:'潜行！ ▲で ぐんぐん浮上、▼で もぐる。🚀魚雷で 敵を 撃破！'
+    startMsg:'潜行！ 十字キー▲で ぐんぐん浮上、▼で もぐる。🚀魚雷で 敵を 撃破！'
   },
   /* ===== ステージ8: 天空スカイクルーズ（空中飛行・最終） ===== */
   8:{
@@ -1749,7 +1771,7 @@ const STAGE_DEFS={
     clearTitle:'全8面 制覇!!',
     clearSub:'真のラストボスを うちたおし、ロードスターを 授かった！',
     overSub:'真のラストボスの ドーナツ・コーヒー・タイヤホイールに のみこまれた…',
-    startMsg:'天空へ！ ▲（↑）で 上昇、▼（↓）で 下降。🚀ミサイルで 敵を 撃ち落とせ'
+    startMsg:'天空へ！ ▲（JUMP・↑）で 上昇、▼（↓）で 下降。🚀ミサイルで 敵を 撃ち落とせ'
   }
 };
 const STAGE={id:1,def:STAGE_DEFS[1]};
@@ -1776,7 +1798,7 @@ function applyStage(id){
   const bn=document.getElementById('bossName');
   if(bn)bn.textContent=d.boss.bar;
   const bd=document.getElementById('bD');
-  if(bd)bd.hidden=!(travelMode()==='swim'||travelMode()==='fly');
+  if(bd)bd.hidden=false;
   const bj=document.getElementById('bJ');
   if(bj)bj.textContent=(travelMode()==='swim'||travelMode()==='fly')?'▲':'JUMP';
   const tp=document.getElementById('travPill');
@@ -2247,38 +2269,97 @@ function bindHold(el,on,off){
   el.addEventListener('lostpointercapture',up);
   el.addEventListener('contextmenu',e=>e.preventDefault());
 }
-const bL=document.getElementById('bL'),bR=document.getElementById('bR'),
-      bJ=document.getElementById('bJ'),bW=document.getElementById('bW');
-bindHold(bL,()=>keys.left=true,()=>keys.left=false);
-bindHold(bR,()=>keys.right=true,()=>keys.right=false);
+const bJ=document.getElementById('bJ'),bW=document.getElementById('bW');
+/* 入力は「押している持ち主（指・キー）の集合」で管理する。
+   十字キーの▲と JUMP を 両方押しても、片方を離しただけで浮上が止まらない */
+const holds={left:new Set(),right:new Set(),up:new Set(),down:new Set(),shot:new Set()};
+function setHold(k,id,on){
+  const s=holds[k]; if(!s)return;
+  if(on)s.add(id); else s.delete(id);
+  keys[k]=s.size>0;
+}
+function clearHolds(){for(const k in holds){holds[k].clear();keys[k]=false;}}
 /* JUMP＝ジャンプ／泳ぎ蹴り／上昇。押し続けると 水中・空中で 浮上を助ける */
-bindHold(bJ,()=>{keys.up=true;doJump();},()=>{keys.up=false;});
+bindHold(bJ,()=>{setHold('up','jump',true);doJump();},()=>setHold('up','jump',false));
 bindHold(bW,()=>pressW());
-const bD=document.getElementById('bD');
-bindHold(bD,()=>{keys.down=true;doDive();},()=>keys.down=false);
 /* SHOT：ミサイル／魚雷。押しっぱなしで 連射 */
 const bM=document.getElementById('bM');
-bindHold(bM,()=>{keys.shot=true;fireMissile();},()=>keys.shot=false);
+bindHold(bM,()=>{setHold('shot','shot',true);fireMissile();},()=>setHold('shot','shot',false));
+
+/* ===== 十字キー（左下）：▲▼◀▶ =====
+   4方向を1つの領域で受け、指を滑らせても その方向へ切り替わる。
+   指ごとに pointerId で管理するので、右手のボタンと同時に押しても両方効く */
+const dpad=document.getElementById('dpad');
+const dpadEls={up:document.getElementById('bU'),left:document.getElementById('bL'),
+               right:document.getElementById('bR'),down:document.getElementById('bD')};
+const dpadPtrs=new Map();                        /* pointerId -> 'up'|'down'|'left'|'right'|null */
+const dpadCount={up:0,down:0,left:0,right:0};     /* 同じ向きを押している指の数（表示用） */
+function dpadDirAt(e){
+  const r=dpad.getBoundingClientRect();
+  if(!r.width||!r.height)return null;
+  const dx=(e.clientX-(r.left+r.width/2))/r.width;
+  const dy=(e.clientY-(r.top+r.height/2))/r.height;
+  if(Math.abs(dx)<.10&&Math.abs(dy)<.10)return null;          /* 中心は無効 */
+  return Math.abs(dy)>Math.abs(dx)?(dy<0?'up':'down'):(dx<0?'left':'right');
+}
+function dpadHold(id,dir){
+  const first=dpadCount[dir]++===0;
+  if(first&&dpadEls[dir])dpadEls[dir].classList.add('on');
+  if(dir==='up'){setHold('up','p'+id,true);doJump();}
+  else if(dir==='down'){setHold('down','p'+id,true);doDive();}
+  else setHold(dir,'p'+id,true);
+}
+function dpadUnhold(id,dir){
+  if(dpadCount[dir]>0&&--dpadCount[dir]===0&&dpadEls[dir])dpadEls[dir].classList.remove('on');
+  setHold(dir,'p'+id,false);
+}
+function dpadMove(id,e){
+  if(!dpadPtrs.has(id))return;
+  const dir=dpadDirAt(e), prev=dpadPtrs.get(id)||null;
+  if(dir===prev)return;
+  if(prev)dpadUnhold(id,prev);
+  if(dir)dpadHold(id,dir);
+  dpadPtrs.set(id,dir);
+}
+function dpadEnd(id){
+  if(!dpadPtrs.has(id))return;
+  const dir=dpadPtrs.get(id);
+  if(dir)dpadUnhold(id,dir);
+  dpadPtrs.delete(id);
+}
+if(dpad){
+  dpad.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    try{dpad.setPointerCapture(e.pointerId);}catch(_){}
+    dpadPtrs.set(e.pointerId,null);
+    dpadMove(e.pointerId,e);
+  },{passive:false});
+  dpad.addEventListener('pointermove',e=>{if(!dpadPtrs.has(e.pointerId))return;e.preventDefault();dpadMove(e.pointerId,e);},{passive:false});
+  dpad.addEventListener('pointerup',e=>dpadEnd(e.pointerId));
+  dpad.addEventListener('pointercancel',e=>dpadEnd(e.pointerId));
+  dpad.addEventListener('lostpointercapture',e=>dpadEnd(e.pointerId));
+  dpad.addEventListener('contextmenu',e=>e.preventDefault());
+}
 
 window.addEventListener('keydown',e=>{
   const k=e.key;
   if(k==='ArrowLeft'||k==='ArrowRight'||k==='ArrowUp'||k==='ArrowDown'||k===' '){e.preventDefault();}
   if(k==='m'||k==='M'){toggleMute();return;}
-  if(k==='Enter'){ if(st.mode==='run'){keys.shot=true;if(!e.repeat)fireMissile();} else if(st.mode!=='ending'){startGame(STAGE.id);} return; }
-  if(k==='ArrowLeft'||k==='a'||k==='A')keys.left=true;
-  if(k==='ArrowRight'||k==='d'||k==='D')keys.right=true;
-  if(k==='ArrowUp'||k===' '||k==='z'||k==='Z'){keys.up=true;if(!e.repeat)doJump();}
-  if(k==='ArrowDown'||k==='s'||k==='S'){keys.down=true;if(!e.repeat)doDive();}
-  if(k==='f'||k==='F'||k==='x'||k==='X'){keys.shot=true;if(!e.repeat)fireMissile();}
+  if(k==='Enter'){ if(st.mode==='run'){setHold('shot','kb',true);if(!e.repeat)fireMissile();} else if(st.mode!=='ending'){startGame(STAGE.id);} return; }
+  if(k==='ArrowLeft'||k==='a'||k==='A')setHold('left','kb',true);
+  if(k==='ArrowRight'||k==='d'||k==='D')setHold('right','kb',true);
+  if(k==='ArrowUp'||k===' '||k==='z'||k==='Z'){setHold('up','kb',true);if(!e.repeat)doJump();}
+  if(k==='ArrowDown'||k==='s'||k==='S'){setHold('down','kb',true);if(!e.repeat)doDive();}
+  if(k==='f'||k==='F'||k==='x'||k==='X'){setHold('shot','kb',true);if(!e.repeat)fireMissile();}
   if((k==='w'||k==='W')&&!e.repeat)pressW();
 },{passive:false});
 window.addEventListener('keyup',e=>{
   const k=e.key;
-  if(k==='ArrowLeft'||k==='a'||k==='A')keys.left=false;
-  if(k==='ArrowRight'||k==='d'||k==='D')keys.right=false;
-  if(k==='ArrowUp'||k===' '||k==='z'||k==='Z')keys.up=false;
-  if(k==='ArrowDown'||k==='s'||k==='S')keys.down=false;
-  if(k==='f'||k==='F'||k==='x'||k==='X'||k==='Enter')keys.shot=false;
+  if(k==='ArrowLeft'||k==='a'||k==='A')setHold('left','kb',false);
+  if(k==='ArrowRight'||k==='d'||k==='D')setHold('right','kb',false);
+  if(k==='ArrowUp'||k===' '||k==='z'||k==='Z')setHold('up','kb',false);
+  if(k==='ArrowDown'||k==='s'||k==='S')setHold('down','kb',false);
+  if(k==='f'||k==='F'||k==='x'||k==='X'||k==='Enter')setHold('shot','kb',false);
 });
 
 /* mute */
@@ -2388,6 +2469,7 @@ function startGame(stageId){
   if(endDungeon)endDungeon.classList.remove('show');
   P.x=200; P.y=floorY(200); P.vy=0; P.speed=BASE; P.grounded=true; P.jumps=0; P.phase=0;
   keys.left=false; keys.right=false; keys.up=false; keys.down=false; keys.shot=false;
+  clearHolds();
   MSL.list.length=0; MSL.cool=0;
   trav.camY=0; trav.zone=-1; trav.bubbleT=0;
   const tmode0=travelMode();
@@ -10882,6 +10964,7 @@ const trav={camY:0,bubbleT:0,zone:-1,ringMax:0};
 /* --- 縦方向の物理（モード別） --- */
 function groundPhys(dt){
   P.vy+=GRAV*dt;
+  if(keys.down&&!P.grounded)P.vy+=GRAV*1.2*dt;   /* ▼で 急降下 */
   if(P.vy>1500)P.vy=1500;
   P.y+=P.vy*dt;
   const fy=floorY(P.x);
@@ -12044,6 +12127,12 @@ window.__dash={
   skipRival(){RIVAL.active=false;RIVAL.done=true;RIVAL.phase='done';FOE.shots.length=0;if(bossBar)bossBar.classList.remove('on');return true;},
   quiet(){st.msg='';st.msgT=0;st.telop='';st.telopT=0;st.telopSub='';return true;},
   obstaclesNear(x,r){return LV.obstacles.filter(o=>!o.dead&&Math.abs(o.x-x)<(r||400)).map(o=>({type:o.type,x:Math.round(o.x)}));},
+  input(){return {left:keys.left,right:keys.right,up:keys.up,down:keys.down,shot:keys.shot,
+    dpad:[...dpadPtrs].map(([id,d])=>({id,dir:d})),counts:Object.assign({},dpadCount),
+    pads:{up:document.getElementById('bU').classList.contains('on'),
+          down:document.getElementById('bD').classList.contains('on'),
+          left:document.getElementById('bL').classList.contains('on'),
+          right:document.getElementById('bR').classList.contains('on')}};},
   travel(){return {mode:travelMode(),stage:STAGE.id,y:Math.round(P.y),vy:Math.round(P.vy),camY:Math.round(trav.camY),top:Math.round(groundY-(travelMode()==='swim'?SWIM_TOP:(travelMode()==='fly'?FLY_TOP:0))),surface:groundY-SWIM_TOP,up:keys.up,down:keys.down};},
   rivalFire(){rivalShot(RIVAL.helmet?3:1);return FOE.shots.length;},
   kartInfo(){return {active:KART.active,cool:Math.round(KART.cool*10)/10,x:Math.round(KART.x),

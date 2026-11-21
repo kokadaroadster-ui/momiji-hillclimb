@@ -2457,7 +2457,7 @@ function recordClear(){
 /* --- FEVER TIME 突入 --- */
 function startFever(){
   st.feverT=FEVER_DUR;st.feverCount++;
-  st.telop='FEVER TIME!!';st.telopT=2.8;
+  st.telop='FEVER TIME!!';st.telopT=3.2;
   st.telopSub='スコア×2・コイン自動吸引・スピードアップ — 8秒間!!';
   st.flash=.95;st.flashCol='255,238,150';st.shake=.85;
   st.pops.push({x:P.x,y:P.y-140,text:'FEVER!!',t:0,life:1.3,col:'#fff3b0'});
@@ -2584,10 +2584,16 @@ function drawFeverFX(){
   const hue=(st.t*130)%360;
   ctx.save();
   const g=ctx.createLinearGradient(0,0,VW,VH);
-  g.addColorStop(0,'hsla('+hue+',95%,62%,.16)');
-  g.addColorStop(.5,'hsla('+((hue+110)%360)+',95%,62%,.10)');
-  g.addColorStop(1,'hsla('+((hue+220)%360)+',95%,62%,.16)');
+  g.addColorStop(0,'hsla('+hue+',95%,62%,.20)');
+  g.addColorStop(.5,'hsla('+((hue+110)%360)+',95%,62%,.13)');
+  g.addColorStop(1,'hsla('+((hue+220)%360)+',95%,62%,.20)');
   ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
+  /* 画面のふちを 脈打つ 黄金の光で かこむ */
+  const pulse=.22+.12*Math.sin(st.t*6);
+  const vg=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*0.34,VW/2,VH/2,Math.max(VW,VH)*0.78);
+  vg.addColorStop(0,'rgba(255,220,120,0)');
+  vg.addColorStop(1,'rgba(255,196,90,'+pulse.toFixed(3)+')');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,VW,VH);
   /* 舞う黄金の もみじ */
   ctx.globalAlpha=.55;
   for(let i=0;i<22;i++){
@@ -2611,23 +2617,7 @@ function drawFeverFX(){
   const lg=ctx.createLinearGradient(0,0,VW,0);
   lg.addColorStop(0,'#ffd45e');lg.addColorStop(.5,'#ff6bd0');lg.addColorStop(1,'#9be6ff');
   ctx.fillStyle=lg;ctx.fillRect(0,VH-6,VW*clamp(st.feverT/FEVER_DUR,0,1),6);
-  /* 突入テロップ */
-  const el=FEVER_DUR-st.feverT;
-  if(el<1.7){
-    const p=Math.min(1,el*5);
-    const sc2=0.55+0.45*p+Math.sin(st.t*10)*0.03;
-    ctx.translate(VW*0.5,VH*0.3);
-    ctx.rotate(-0.05);ctx.scale(sc2,sc2);
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='900 '+Math.round(clamp(VW*0.058,24,52))+'px system-ui,sans-serif';
-    ctx.lineWidth=9;ctx.strokeStyle='rgba(60,20,0,.7)';
-    ctx.strokeText('FEVER TIME!!',0,0);
-    const tg=ctx.createLinearGradient(0,-30,0,24);
-    tg.addColorStop(0,'#fffbe0');tg.addColorStop(.5,'#ffd24a');tg.addColorStop(1,'#ff5a1f');
-    ctx.fillStyle=tg;ctx.fillText('FEVER TIME!!',0,0);
-    ctx.font='900 '+Math.round(clamp(VW*0.016,10,15))+'px system-ui,sans-serif';
-    ctx.fillStyle='#fff3c0';ctx.fillText('SCORE ×2 — 8 SECONDS',0,Math.round(clamp(VW*0.045,20,34)));
-  }
+  /* 突入テロップは drawMessages の telop が担当（重複を避ける） */
   ctx.restore();
 }
 

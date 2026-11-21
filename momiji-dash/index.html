@@ -1581,12 +1581,6 @@ function buildLevel(){
     if(badPos())continue;
     LV.obstacles.push(makeObstacle(type,ex));
   }
-  if(rv){
-    for(let i=LV.items.length-1;i>=0;i--){
-      const it=LV.items[i];
-      if(it.x>rv.x0-40&&it.x<rv.x1+40&&(it.type==='star'||it.type==='power'||it.type==='capsule'||it.type==='battery'))LV.items.splice(i,1);
-    }
-  }
   // emblems (higher, need a double jump)
   const em=d.emblems;
   for(let i=0;i<16;i++){
@@ -1634,6 +1628,13 @@ function buildLevel(){
   // スコアブースト（×2）
   for(const bst of (d.boosts||[])){
     LV.items.push({type:'boost',x:clearX(bst+108),y:groundYRef-80,taken:false,ph:rnd()*6.283});
+  }
+  /* ライバルボスの 闘技場には パワー系アイテムを 置かない（星・POWER・Wカプセル・バッテリーで 瞬殺にならないように） */
+  if(rv){
+    for(let i=LV.items.length-1;i>=0;i--){
+      const it=LV.items[i];
+      if(it.x>rv.x0-40&&it.x<rv.x1+40&&(it.type==='star'||it.type==='power'||it.type==='capsule'||it.type==='battery'))LV.items.splice(i,1);
+    }
   }
   // checkpoint torii-ish flags get drawn from LV.checkpoints
 }

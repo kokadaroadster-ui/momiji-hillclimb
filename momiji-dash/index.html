@@ -3184,7 +3184,7 @@ function rivalUpdate(dt){
   /* 突進（予備動作 → 超高速ダッシュ） */
   if(RIVAL.dashT>0){
     RIVAL.dashT-=dt;
-    RIVAL.x=clamp(RIVAL.x+RIVAL.dashDir*(RIVAL.helmet?1080:620)*dt,d.x0,d.x1);
+    RIVAL.x=clamp(RIVAL.x+RIVAL.dashDir*(RIVAL.helmet?880:600)*dt,d.x0,d.x1);
     if(Math.random()<dt*40)spark(RIVAL.x-RIVAL.dashDir*22,groundY-RIVAL.jy-rr(10,150),2.6,RIVAL.helmet?'#cfe9ff':'#ff8f9b');
     if(RIVAL.dashT<=0){
       RIVAL.dashT=0;RIVAL.dashCd=RIVAL.helmet?rr(.55,.95):rr(1.5,2.3);
@@ -3194,11 +3194,11 @@ function rivalUpdate(dt){
     if(RIVAL.teleT<=0){RIVAL.teleT=0;RIVAL.dashT=RIVAL.helmet?.42:.32;Sfx.foeDash();}
   }else{
     /* プレイヤーに 歩み寄る（密着はしない） */
-    const stand=RIVAL.helmet?56:80;
-    const chase=(RIVAL.helmet?430:240)*RIVAL.spd;
+    const stand=RIVAL.helmet?58:82;
+    const chase=RIVAL.helmet?330:230;
     if(dist>stand)RIVAL.x=clamp(RIVAL.x+RIVAL.dir*Math.min(chase*dt,dist-stand),d.x0+8,d.x1-8);
-    if(RIVAL.dashCd<=0&&dist>88&&dist<430){
-      RIVAL.teleT=RIVAL.helmet?.16:.28;RIVAL.dashCd=99;
+    if(RIVAL.dashCd<=0&&dist>88&&dist<420){
+      RIVAL.teleT=RIVAL.helmet?.30:.30;RIVAL.dashCd=99;
     }
   }
   /* ジャンプ急襲 */
@@ -3211,15 +3211,15 @@ function rivalUpdate(dt){
       for(let i=0;i<10;i++)spark(RIVAL.x+rr(-44,44),groundY-6,rr(2,4),RIVAL.helmet?'#cfe9ff':'#ffd0a0');
     }
   }else if(RIVAL.jumpCd<=0&&dist<340&&RIVAL.dashT<=0){
-    RIVAL.jvy=RIVAL.helmet?1180:800;
-    RIVAL.jumpVx=clamp(dx*1.3,-320,320)*(RIVAL.helmet?1.5:1);
-    RIVAL.jumpCd=RIVAL.helmet?rr(1.1,1.8):rr(2.4,3.6);
+    RIVAL.jvy=RIVAL.helmet?1050:780;
+    RIVAL.jumpVx=clamp(dx*1.2,-300,300)*(RIVAL.helmet?1.4:1);
+    RIVAL.jumpCd=RIVAL.helmet?rr(1.6,2.4):rr(2.4,3.6);
     Sfx.jump(2);
   }
   /* 小弾（本気モードは 3連射） */
   if(RIVAL.atkT<=0&&RIVAL.dashT<=0&&RIVAL.teleT<=0){
     rivalShot(RIVAL.helmet?3:1);
-    RIVAL.atkT=RIVAL.helmet?rr(.6,1.0):rr(1.5,2.4);
+    RIVAL.atkT=RIVAL.helmet?rr(.85,1.3):rr(1.6,2.4);
   }
   RIVAL.lean=lerp(RIVAL.lean,RIVAL.dashT>0?-RIVAL.dashDir*0.24:0,Math.min(1,dt*10));
 
@@ -3238,11 +3238,17 @@ function rivalUpdate(dt){
       damageRival(2,'slam');
       RIVAL.hitCd=Math.max(RIVAL.hitCd,1.0);
       P.vy=-320;P.grounded=false;P.speed=-90;
-    }else if(st.invulnT<=0){
-      hurt();
-      RIVAL.hitCd=Math.max(RIVAL.hitCd,.55);
-      P.speed=-140;
-      RIVAL.dashT=0;RIVAL.dashCd=Math.max(RIVAL.dashCd,.9);
+    }else if(RIVAL.dashT>0||RIVAL.jy>30){
+      /* 危険なのは 突進と 急襲だけ。ぶつかったら しっかり ダメージ */
+      if(st.invulnT<=0){
+        hurt();
+        RIVAL.hitCd=Math.max(RIVAL.hitCd,.7);
+        P.speed=-160;
+        RIVAL.dashT=0;RIVAL.dashCd=Math.max(RIVAL.dashCd,1.2);
+      }
+    }else{
+      /* 密着しているだけなら 押し返すだけ（理不尽な 連続ダメージを 防ぐ） */
+      P.x=clamp(P.x+(P.x<RIVAL.x?-110:110)*dt,d.x0,d.x1);
     }
   }
 }

@@ -589,7 +589,7 @@
   </div>
 </div>
 
-<script>window.onerror=function(m,src,l,c){document.title="JSERR "+m+" @"+l+":"+c;return false;};</script>
+<script>window.__errLog=[];window.onerror=function(m,src,l,c){window.__errLog.push("onerror: "+m+" @"+l+":"+c);document.title="JSERR "+m+" @"+l+":"+c;return false;};(function(){var ce=console.error.bind(console);console.error=function(){window.__errLog.push("console.error: "+[].slice.call(arguments).join(" "));ce.apply(null,arguments);};})();</script>
 <script>
 (function(){
 'use strict';

@@ -1542,6 +1542,7 @@ function buildLevel(){
   });
   const spawnEnd=d.boss.trigger-700;
   const rv=RIVAL_DEFS[d.id]||null;
+  /* ライバルボスの 闘技場には パワー系アイテムを 置かない（星・POWER・Wカプセルで 瞬殺にならないように） */
   let x=STAGE.id===2?1000:1080;
   while(x<spawnEnd){
     const z=zoneAt(x);
@@ -1579,6 +1580,12 @@ function buildLevel(){
     while(badPos()&&n++<26)ex+=95;
     if(badPos())continue;
     LV.obstacles.push(makeObstacle(type,ex));
+  }
+  if(rv){
+    for(let i=LV.items.length-1;i>=0;i--){
+      const it=LV.items[i];
+      if(it.x>rv.x0-40&&it.x<rv.x1+40&&(it.type==='star'||it.type==='power'||it.type==='capsule'||it.type==='battery'))LV.items.splice(i,1);
+    }
   }
   // emblems (higher, need a double jump)
   const em=d.emblems;
@@ -3228,6 +3235,7 @@ function rivalUpdate(dt){
       Sfx.stomp();
     }else if(st.giantT>0||st.warpT>0||st.turboT>0){
       damageRival(2,'slam');
+      RIVAL.hitCd=Math.max(RIVAL.hitCd,1.0);
       P.vy=-320;P.grounded=false;P.speed=-90;
     }else if(st.invulnT<=0){
       hurt();

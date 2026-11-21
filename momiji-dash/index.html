@@ -2588,6 +2588,12 @@ window.addEventListener('keyup',e=>{
   if(k==='Enter'){setHold('shot','kEnter',false);if(!keys.shot)shotRelease();}
 });
 
+/* ウィンドウが フォーカスを 失ったら（アプリ切替など）押しっぱなしを 解除し、チャージは キャンセル */
+window.addEventListener('blur',()=>{
+  if(WC.charging)wcCancel();
+  clearHolds();
+});
+
 /* mute */
 const muteBtn=document.getElementById('mute');
 function toggleMute(){

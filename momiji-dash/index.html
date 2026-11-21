@@ -372,6 +372,47 @@
   #endingEntry:active{transform:scale(.97)}
   body.ending #hud,body.ending #pad,body.ending #bossBar{opacity:0;pointer-events:none}
   #hud,#pad,#bossBar{transition:opacity .35s ease}
+
+  /* ---------- COMBO倍率／FEVER ---------- */
+  #comboPill .mult{margin-left:4px;font-weight:900;font-size:11px;color:#ffd76a;letter-spacing:.02em}
+  #comboPill.x15{background:rgba(255,190,60,.3);border-color:#ffd76a;color:#fff3c4}
+  #comboPill.x2{background:rgba(255,140,50,.38);border-color:#ffb45e;color:#fff}
+  #comboPill.x3{background:linear-gradient(90deg,rgba(255,110,40,.5),rgba(255,60,120,.45));
+    border-color:#ffb0d0;color:#fff;box-shadow:0 0 12px rgba(255,120,90,.6)}
+  #comboPill.fever{background:linear-gradient(90deg,rgba(255,150,30,.62),rgba(255,60,130,.6),rgba(120,90,255,.62));
+    border:1px solid #fff6c0;color:#fff;box-shadow:0 0 16px rgba(255,190,90,.85);animation:feverPill .55s infinite}
+  #comboPill.fever #comboLbl,#comboPill.fever #combo,#comboPill.fever #comboMult{display:none}
+  #comboPill.fever #feverTag{display:inline !important;font-weight:900;letter-spacing:.05em;white-space:nowrap}
+  #comboPill.fever #feverTag b{font-size:13px}
+  @keyframes feverPill{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  /* ---------- 実績バッジ（タイトル） ---------- */
+  .trophyBox{margin:0 0 12px;border-radius:12px;overflow:hidden;text-align:left;
+    background:linear-gradient(180deg,rgba(32,18,42,.9),rgba(12,8,20,.9));
+    border:1px solid rgba(255,200,120,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+  .trophyHead{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+    padding:8px 10px;border:none;background:none;color:#ffe6b0;cursor:pointer;font:900 11px/1.25 system-ui,sans-serif;
+    letter-spacing:.06em;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .trophyHead:active{background:rgba(255,255,255,.07)}
+  .trophyHead .thR{color:#ffc98a;font-weight:800;font-size:10px;letter-spacing:.02em;white-space:nowrap}
+  .trophyBody{padding:0 9px 9px}
+  .badgeGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:8px}
+  .badge{padding:5px 2px 4px;border-radius:9px;border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.045);text-align:center;opacity:.45;filter:grayscale(1)}
+  .badge b{display:block;font-size:15px;line-height:1.05}
+  .badge span{display:block;font-size:8.5px;line-height:1.25;margin-top:2px;color:#e8dccf;letter-spacing:.01em}
+  .badge.on{opacity:1;filter:none;border-color:#ffd07a;
+    background:linear-gradient(180deg,rgba(255,190,80,.26),rgba(255,140,40,.1));
+    box-shadow:0 0 10px rgba(255,180,70,.35)}
+  .badge.on span{color:#ffe9b8;font-weight:800}
+  .goldRow{display:flex;gap:4px;flex-wrap:wrap}
+  .gchip{padding:3px 5px;border-radius:7px;font:800 9.5px/1.2 system-ui,sans-serif;color:#ffd9a0;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);white-space:nowrap}
+  .gchip.full{background:rgba(255,190,70,.26);border-color:#ffd07a;color:#fff2c4}
+  @media (max-width:480px){
+    .badgeGrid{gap:4px}.badge span{font-size:8px}.trophyBox{margin-bottom:9px}
+    .gchip{font-size:9px;padding:2px 4px}
+  }
 </style>
 </head>
 <body>
@@ -391,7 +432,7 @@
       <div id="gaugeWrap"><div id="gauge"><i id="gaugeFill"></i></div><span>W</span></div>
       <div class="pill" id="batWrap">⚡<b id="bat">0</b></div>
       <div class="pill" id="powerPill" hidden>BIG</div>
-      <div class="pill" id="comboPill">COMBO <b id="combo">0</b></div>
+      <div class="pill" id="comboPill"><span id="comboLbl">COMBO</span> <b id="combo">0</b><span id="comboMult" class="mult" hidden>×1.5</span><span id="feverTag" hidden>🔥FEVER <b id="feverT">8</b>s</span></div>
       <div class="pill" id="travPill" hidden>深度 <b id="travVal">0</b>m</div>
     </div>
     <div id="prog"><i id="progFill"></i></div>
@@ -436,6 +477,16 @@
         <div class="rbNet loading" id="rankNet"><span class="rbNetDot" aria-hidden="true"></span><span id="rankNetTxt">🌐 共有ランキングを読み込み中…</span></div>
         <ol class="rbList" id="rankList"></ol>
         <div class="rbFoot" id="rankFoot">★=ステージクリア　10位まで記録</div>
+      </div>
+      <div class="trophyBox" id="trophyBox">
+        <button class="trophyHead" id="trophyToggle" type="button" aria-expanded="false" aria-controls="trophyBody">
+          <span>🏅 実績 <b id="trophyCount">0/8</b></span>
+          <span class="thR" id="trophyGold">🍁 0/24 ▾</span>
+        </button>
+        <div class="trophyBody" id="trophyBody" hidden>
+          <div class="badgeGrid" id="badgeGrid"></div>
+          <div class="goldRow" id="goldRow"></div>
+        </div>
       </div>
       <div id="ovStats" hidden></div>
       <div id="entrySlot">
@@ -496,6 +547,9 @@
         <li><span class="k w">W</span><span>ゲージ満タンで巨大化（BIG）！ もう一度で 超巨大化（MEGA）！無敵で体当たり</span></li>
         <li><span class="k w">W</span><span>⚡バッテリー所持中なら 88MPH タイムワープ加速</span></li>
         <li><span class="k">MAPLE</span><span>紅葉コイン・エンブレムを集めて、ドクのディスコで回復</span></li>
+        <li><span class="k w">COMBO</span><span>コイン・敵撃破を つなげると 倍率UP（×1.5→×2→×3）。10コンボで FEVER TIME 突入（8秒間：スコア×2・コイン自動吸引・スピードUP）</span></li>
+        <li><span class="k w">DODGE</span><span>敵の弾や突進を ギリギリで かわすと JUST DODGE!!（一瞬スロー＋+500＋Wゲージ大幅回復）</span></li>
+        <li><span class="k w">GOLD</span><span>各ステージに 黄金のモミジが 3枚（谷の上・高所・終盤の難所）。3枚そろえて クリアすると PERFECT!! +2,000。タイトルの「🏅実績」で 記録が残る</span></li>
         <li><span class="k">ITEM</span><span>♥ハート・🧲マグネット・⭐スター・💥POWERオーブ（即パワーアップ）・🛡シールド・×2スコアブースト</span></li>
         <li><span class="k w">HELP</span><span>お助けマンが 1号・2号の 2人で かけつける。回復・パワー・敵一掃で 助けてくれる</span></li>
         <li><span class="k w">ENEMY</span><span>写真からアニメ化した 4人の刺客。緑・白・黄の レーシングスーツの 1〜3人目が 全ステージの道中に登場（踏みつけ／巨大化・タイムワープ・ターボの体当たりで 倒せる）</span></li>
@@ -987,6 +1041,29 @@ const Sfx={
     this.tone(120,.42,'sawtooth',.12,520);
     this.noise(.42,.14,600,1.1,0,2600);
     this.tone(70,.34,'sine',.14,40,.02);
+  },
+  /* --- FEVER TIME 突入（上昇アルペジオ＋きらめき） --- */
+  fever(){
+    const arp=[523.25,659.25,783.99,1046.5,1318.5,1568,2093];
+    arp.forEach((f,i)=>this.tone(f,.14,'square',.075,null,i*.055));
+    [261.63,329.63,392,523.25].forEach(f=>this.tone(f,.9,'triangle',.06,null,.36));
+    this.noise(.5,.06,3200,1.2,.3,9000);
+  },
+  /* --- JUST DODGE（風を切る音＋キラッ） --- */
+  justDodge(){
+    this.noise(.24,.10,1600,1.6,0,420);
+    this.tone(880,.12,'sine',.09,1760);
+    this.tone(1318.5,.16,'triangle',.06,2093,.06);
+  },
+  /* --- 黄金のモミジ --- */
+  goldCoin(){
+    [1046.5,1318.5,1568,2093,2637].forEach((f,i)=>this.tone(f,.16,'triangle',.08,null,i*.055));
+    this.noise(.22,.05,5200,1.6,0,9800);
+  },
+  /* --- 実績解除 --- */
+  badge(){
+    [784,1046.5,1318.5].forEach((f,i)=>this.tone(f,.12,'square',.06,null,i*.06));
+    this.tone(1568,.3,'sine',.05,2093,.2);
   }
 };
 
@@ -2167,6 +2244,14 @@ function buildLevel(){
   for(const bst of (d.boosts||[])){
     LV.items.push({type:'boost',x:clearX(bst+108),y:groundYRef-80,taken:false,ph:rnd()*6.283});
   }
+  /* 黄金のモミジ（各ステージに3枚）：谷の上・高所・終盤の難所に 仕込む */
+  const goldings=goldSpotsFor(d);
+  for(let gi=0;gi<goldings.length;gi++){
+    let gx=goldings[gi].x, gn=0;
+    while(rv&&gx>rv.x0-150&&gx<rv.x1+150&&gn++<12)gx+=180;
+    if(gx>=d.goalX-420)continue;
+    LV.items.push({type:'gold',x:gx,y:groundYRef-goldings[gi].off,taken:false,ph:rnd()*6.283,goldIdx:gi+1});
+  }
   /* ライバルボスの 闘技場には パワー系アイテムを 置かない（星・POWER・Wカプセル・バッテリーで 瞬殺にならないように） */
   if(rv){
     for(let i=LV.items.length-1;i>=0;i--){
@@ -2207,17 +2292,344 @@ const SHIELD_DUR=12, BOOST_DUR=11;
 const st={
   mode:'title', t:0, runT:0, camX:0, shake:0, flash:0, flashCol:'255,255,255',
   score:0, coins:0, hearts:4, maxHearts:4, gauge:0, bats:0,
-  combo:0, comboMax:0, lastAward:0,
+  combo:0, comboMax:0, lastAward:0, feverT:0, feverCount:0, dodgeCd:0, dodgeCount:0,
+  slowT:0, hitstop:0, dodgeFxT:0, goldCoins:0,
   giantT:0, giantScale:1, giantCount:0, warpT:0, warpCount:0,
   powerLv:0, maxPowerLv:0, megaCount:0, powerCount:0,
   shieldT:0, boostT:0, shieldCount:0, boostCount:0,
   turboT:0, turboCount:0, magT:0, magCount:0, parts:0, slipT:0,
   invulnT:0, msg:'', msgT:0, telop:'', telopSub:'', telopT:0,
   docNear:0, checkpoint:0, hits:0, stomps:0, kills:0, finishT:0,
-  leaves:[], sparks:[], debris:[], puffs:[], pops:[], ghosts:[],
+  leaves:[], sparks:[], debris:[], puffs:[], pops:[], ghosts:[], rings:[],
   ghostT:0, leafT:0, hudT:0, goalShown:false
 };
 const P={x:200,y:0,vy:0,speed:BASE,grounded:true,jumps:0,phase:0,lean:0};
+
+/* ======================= COMBO倍率／FEVER／JUST DODGE／実績バッジ ======================= */
+const FEVER_DUR=8;                 /* FEVER TIME の長さ（秒） */
+const FEVER_SPEED=BASE+92;         /* 発動中の加速 */
+const GOLD_PER_STAGE=3;            /* 各ステージの 黄金のモミジ */
+
+function comboMult(){
+  const c=st.combo;
+  if(c>=20)return 3;
+  if(c>=10)return 2;
+  if(c>=5)return 1.5;
+  return 1;
+}
+function feverOn(){return st.feverT>0;}
+
+/* --- 実績／黄金モミジ／クリア記録（localStorage） --- */
+const BADGES=[
+  {id:'first', icon:'🍁', name:'初クリア',   desc:'ステージを はじめて クリア'},
+  {id:'nomiss',icon:'💖', name:'ノーミス',   desc:'一度も ミスせず ステージクリア'},
+  {id:'gold',  icon:'👑', name:'黄金コンプ', desc:'黄金のモミジ 3枚を そろえて クリア'},
+  {id:'fever', icon:'🔥', name:'FEVER達成',  desc:'FEVER TIME に 突入する'},
+  {id:'dodge', icon:'💨', name:'JUST回避',   desc:'JUST DODGE を 決める'},
+  {id:'wave',  icon:'🚀', name:'波動砲',     desc:'波動砲を MAXまで チャージして 発射'},
+  {id:'combo', icon:'⛓', name:'50コンボ',   desc:'50コンボを つなげる'},
+  {id:'all',   icon:'🏆', name:'全8面制覇',  desc:'8ステージ すべて クリア'}
+];
+const SAVE_KEY='momiji-dash.records.v1';
+const REC={
+  badges:{}, gold:{}, cleared:{}, loaded:false,
+  init(){
+    let o=null;
+    try{o=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){o=null;}
+    if(o&&typeof o==='object'){
+      if(o.badges&&typeof o.badges==='object')for(const k in o.badges)if(o.badges[k])this.badges[k]=1;
+      if(o.gold&&typeof o.gold==='object')for(const k in o.gold){const v=parseInt(o.gold[k],10);if(v>0)this.gold[k]=Math.min(GOLD_PER_STAGE,v);}
+      if(o.cleared&&typeof o.cleared==='object')for(const k in o.cleared)if(o.cleared[k])this.cleared[k]=1;
+    }
+    this.loaded=true;
+    renderTrophies();
+  },
+  save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({badges:this.badges,gold:this.gold,cleared:this.cleared}));}catch(e){}},
+  goldTotal(){let n=0;for(const k in this.gold)n+=this.gold[k]||0;return n;},
+  badgeCount(){let n=0;for(const b of BADGES)if(this.badges[b.id])n++;return n;}
+};
+let trophyOpen=false;
+function renderTrophies(){
+  const grid=document.getElementById('badgeGrid'), row=document.getElementById('goldRow');
+  const cnt=document.getElementById('trophyCount'), tg=document.getElementById('trophyGold');
+  if(grid){
+    let h='';
+    for(const b of BADGES){
+      const on=!!REC.badges[b.id];
+      h+='<div class="badge'+(on?' on':'')+'" title="'+b.desc+'"><b>'+b.icon+'</b><span>'+b.name+'</span></div>';
+    }
+    grid.innerHTML=h;
+  }
+  if(row){
+    let h='';
+    for(let i=1;i<=8;i++){
+      const g=REC.gold[i]||0;
+      h+='<span class="gchip'+(g>=GOLD_PER_STAGE?' full':'')+'">ST'+i+' 🍁 '+g+'/'+GOLD_PER_STAGE+'</span>';
+    }
+    row.innerHTML=h;
+  }
+  if(cnt)cnt.textContent=REC.badgeCount()+'/'+BADGES.length;
+  if(tg)tg.textContent='🍁 '+REC.goldTotal()+'/'+(8*GOLD_PER_STAGE)+' '+(trophyOpen?'▴':'▾');
+}
+function unlockBadge(id){
+  if(REC.badges[id])return false;
+  const b=BADGES.find(x=>x.id===id);
+  if(!b)return false;
+  REC.badges[id]=1;REC.save();renderTrophies();
+  st.pops.push({x:P.x+rr(-20,20),y:P.y-152,text:'🏅 '+b.name,t:0,life:1.7,col:'#ffe9a0'});
+  Sfx.badge();
+  return true;
+}
+(function bindTrophy(){
+  const btn=document.getElementById('trophyToggle'), body=document.getElementById('trophyBody');
+  if(!btn||!body)return;
+  btn.addEventListener('click',e=>{
+    e.preventDefault();e.stopPropagation();
+    trophyOpen=!trophyOpen;
+    body.hidden=!trophyOpen;
+    btn.setAttribute('aria-expanded',trophyOpen?'true':'false');
+    renderTrophies();
+  });
+})();
+
+/* --- 黄金のモミジの配置（各ステージ3枚：谷の上・高所・終盤の難所） --- */
+function goldSpotsFor(d){
+  const out=[];
+  const gaps=(d.gaps||[]).slice();
+  const L=d.len;
+  const add=(x,off)=>{
+    if(out.length>=GOLD_PER_STAGE)return;
+    if(!(x>700)||x>d.goalX-460)return;
+    out.push({x:Math.round(x),off:Math.round(off)});
+  };
+  if(gaps.length>=2){
+    add((gaps[0].x0+gaps[0].x1)/2,152);
+    add(L*0.53,206);
+    add((gaps[gaps.length-1].x0+gaps[gaps.length-1].x1)/2,156);
+  }else if(gaps.length===1){
+    add((gaps[0].x0+gaps[0].x1)/2,154);
+    add(L*0.47,206);
+    add(L*0.75,166);
+  }else{
+    add(L*0.30,158);
+    add(L*0.55,206);
+    add(L*0.80,166);
+  }
+  let k=0;
+  while(out.length<GOLD_PER_STAGE){
+    const x=L*(0.38+k*0.19);k++;
+    if(x<d.goalX-460)out.push({x:Math.round(x),off:170});else break;
+  }
+  /* 3枚が くっつきすぎないように 間隔をあける */
+  const used=[];
+  for(const s of out){
+    let x=s.x;
+    for(let n=0;n<24;n++){
+      if(!used.some(u=>Math.abs(u-x)<1000))break;
+      x+=420;
+    }
+    if(x>d.goalX-480){
+      x=s.x;
+      for(let n=0;n<24;n++){
+        if(!used.some(u=>Math.abs(u-x)<1000))break;
+        x-=420;
+      }
+    }
+    if(x<700)x=s.x;
+    used.push(x);
+    s.x=Math.round(x);
+  }
+  return out;
+}
+
+/* --- クリア記録と 実績の更新 --- */
+function recordClear(){
+  REC.cleared[STAGE.id]=1;
+  REC.gold[STAGE.id]=Math.max(REC.gold[STAGE.id]||0,st.goldCoins);
+  REC.save();renderTrophies();
+  unlockBadge('first');
+  if(st.hits===0)unlockBadge('nomiss');
+  if(st.goldCoins>=GOLD_PER_STAGE)unlockBadge('gold');
+  let all=true;
+  for(let i=1;i<=8;i++)if(!REC.cleared[i])all=false;
+  if(all)unlockBadge('all');
+}
+/* --- FEVER TIME 突入 --- */
+function startFever(){
+  st.feverT=FEVER_DUR;st.feverCount++;
+  st.telop='FEVER TIME!!';st.telopT=2.8;
+  st.telopSub='スコア×2・コイン自動吸引・スピードアップ — 8秒間!!';
+  st.flash=.95;st.flashCol='255,238,150';st.shake=.85;
+  st.pops.push({x:P.x,y:P.y-140,text:'FEVER!!',t:0,life:1.3,col:'#fff3b0'});
+  Sfx.fever();
+  const cols=['#ffd45e','#ff8a3d','#ff5ad1','#9be6ff','#7ce0c8','#fff3b0'];
+  for(let i=0;i<64;i++)spark(P.x+rr(-150,150),P.y-rr(0,240),rr(2,6),cols[i%cols.length]);
+  for(let i=0;i<18;i++)st.debris.push({x:P.x+rr(-140,140),y:P.y-rr(10,190),vx:rr(-120,120),vy:rr(-320,-90),
+    rot:rr(0,6.28),vr:rr(-8,8),r:rr(3,6),life:rr(1.0,1.8),t:0,col:cols[i%cols.length]});
+  ringFX(P.x,P.y-70,26,260,.65,'255,240,170');
+  unlockBadge('fever');
+}
+/* --- JUST DODGE（ギリギリ回避） --- */
+function justDodge(x,y){
+  st.dodgeCount++;
+  st.gauge=Math.min(100,st.gauge+30);
+  addScore(500,x,y);
+  st.slowT=Math.max(st.slowT,.22);
+  st.hitstop=Math.max(st.hitstop,.055);
+  st.flash=Math.max(st.flash,.35);st.flashCol='150,220,255';
+  st.dodgeFxT=.45;
+  st.pops.push({x:P.x,y:P.y-128,text:'JUST DODGE!!',t:0,life:1.15,col:'#bfe9ff'});
+  st.ghosts.push({x:P.x,y:P.y,sc:st.giantScale,t:0,ph:P.phase,dodge:1});
+  for(let i=0;i<16;i++)st.sparks.push({x:P.x+rr(-26,26),y:P.y-rr(20,110),vx:rr(-120,120),vy:rr(-90,60),r:rr(1.6,4),life:rr(.3,.7),t:0,col:'#9be6ff'});
+  ringFX(P.x,P.y-58,14,120,.4,'150,220,255');
+  Sfx.justDodge();
+  unlockBadge('dodge');
+}
+/* 敵弾の ギリギリ回避 判定（当たった弾は 判定前に消える） */
+function justDodgeCheck(dt){
+  if(st.mode!=='run')return;
+  if(st.dodgeCd>0)st.dodgeCd-=dt;
+  const lock=(st.giantT>0||st.warpT>0||st.turboT>0||st.invulnT>0);
+  const cx=P.x, cy=P.y-56;
+  for(const g of [FOE.shots,BOSS.shots,MID.shots]){
+    for(const s of g){
+      if(s.delay&&s.t<s.delay)continue;
+      const hitR=(s.r||14)+20;
+      const dx=s.x-cx, dy=s.y-cy, d=Math.sqrt(dx*dx+dy*dy);
+      const prev=s._pd;
+      s._pd=d;
+      if(lock||s.grazed||st.dodgeCd>0||prev==null)continue;
+      if(d>hitR&&prev>hitR&&prev<hitR+34&&d>prev&&d<hitR+34){
+        s.grazed=1;
+        st.dodgeCd=.55;
+        justDodge(s.x,s.y);
+        return;
+      }
+    }
+  }
+  /* 突進してくる ライバル／ボスの ギリギリかわし */
+  if(RIVAL.active){
+    if(RIVAL.dash<=0.15)RIVAL._dodge=0;
+    else if(!lock&&!RIVAL._dodge&&st.dodgeCd<=0&&Math.abs(RIVAL.x-P.x)<74){
+      RIVAL._dodge=1;st.dodgeCd=.55;justDodge(RIVAL.x,groundY-RIVAL.jy-80);return;
+    }
+  }
+  if(BOSS.active){
+    if(BOSS.dash<=0.15)BOSS._dodge=0;
+    else if(!lock&&!BOSS._dodge&&st.dodgeCd<=0&&Math.abs(BOSS.x-P.x)<80){
+      BOSS._dodge=1;st.dodgeCd=.55;justDodge(BOSS.x,BOSS.y-90);return;
+    }
+  }
+}
+/* --- 破片／花火／リング --- */
+const PARTY_COLS=['#ffd45e','#ff6b5e','#9be6ff','#7ce0c8','#ff5ad1','#fff3b0'];
+function ringFX(x,y,r0,r1,life,col){
+  st.rings.push({x,y,r0,r1,t:0,life:life||.5,col:col||'255,230,170'});
+}
+function fireworks(x,y,n){
+  n=n||40;
+  for(let i=0;i<n;i++){
+    const a=rr(0,6.283), sp=rr(120,430);
+    st.sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-130,r:rr(2,5),life:rr(.65,1.4),t:0,col:PARTY_COLS[i%PARTY_COLS.length]});
+  }
+  for(let i=0;i<Math.round(n*0.6);i++){
+    st.debris.push({x:x+rr(-110,110),y:y+rr(-70,40),vx:rr(-170,170),vy:rr(-380,-120),
+      rot:rr(0,6.28),vr:rr(-10,10),r:rr(3,6),life:rr(1.0,1.8),t:0,col:PARTY_COLS[i%PARTY_COLS.length]});
+  }
+  ringFX(x,y,24,240,.6,'255,240,180');
+}
+/* --- 黄金のモミジの 描画 --- */
+function drawGoldMaple(x,y,t){
+  const bob=Math.sin(t*2.2)*3, pulse=1+Math.sin(t*5)*.07;
+  ctx.save();
+  const halo=ctx.createRadialGradient(x,y+bob,2,x,y+bob,34);
+  halo.addColorStop(0,'rgba(255,240,160,.8)');
+  halo.addColorStop(.5,'rgba(255,185,50,.34)');
+  halo.addColorStop(1,'rgba(255,150,30,0)');
+  ctx.fillStyle=halo;ctx.beginPath();ctx.arc(x,y+bob,34,0,6.284);ctx.fill();
+  ctx.translate(x,y+bob);
+  ctx.strokeStyle='rgba(255,240,170,'+(.3+.25*Math.sin(t*6))+')';ctx.lineWidth=2;
+  for(let i=0;i<8;i++){
+    const a=t*0.9+i*0.785;
+    ctx.beginPath();ctx.moveTo(Math.cos(a)*15,Math.sin(a)*15);ctx.lineTo(Math.cos(a)*25,Math.sin(a)*25);ctx.stroke();
+  }
+  ctx.scale(pulse,pulse);
+  const g=ctx.createLinearGradient(0,-13,0,13);
+  g.addColorStop(0,'#fff8cc');g.addColorStop(.45,'#ffd24a');g.addColorStop(1,'#dd860e');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,13,0,6.284);ctx.fill();
+  ctx.strokeStyle='#8a4a06';ctx.lineWidth=1.4;ctx.stroke();
+  ctx.fillStyle='#a85a08';mapleLeaf(0,-.5,12.2,t*1.1);ctx.fill();
+  ctx.strokeStyle='rgba(255,250,210,.8)';ctx.lineWidth=.9;ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,'+(.45+.4*Math.sin(t*8))+')';
+  ctx.beginPath();ctx.arc(x+9,y+bob-9,2.2,0,6.284);ctx.fill();
+}
+/* --- リングの 描画 --- */
+function drawRings(){
+  for(const r of st.rings){
+    const p=r.t/r.life;
+    const rad=r.r0+(r.r1-r.r0)*p;
+    ctx.save();
+    ctx.globalAlpha=Math.max(0,1-p)*.75;
+    ctx.strokeStyle='rgba('+r.col+',1)';
+    ctx.lineWidth=Math.max(.8,4*(1-p));
+    ctx.beginPath();ctx.arc(r.x-st.camX,r.y,rad,0,6.284);ctx.stroke();
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+/* --- FEVER TIME の 画面演出 --- */
+function drawFeverFX(){
+  if(st.feverT<=0)return;
+  const hue=(st.t*130)%360;
+  ctx.save();
+  const g=ctx.createLinearGradient(0,0,VW,VH);
+  g.addColorStop(0,'hsla('+hue+',95%,62%,.16)');
+  g.addColorStop(.5,'hsla('+((hue+110)%360)+',95%,62%,.10)');
+  g.addColorStop(1,'hsla('+((hue+220)%360)+',95%,62%,.16)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
+  /* 舞う黄金の もみじ */
+  ctx.globalAlpha=.55;
+  for(let i=0;i<22;i++){
+    const sd=hash(i*3.7);
+    const x=VW-((st.t*(120+sd*190)+i*137)%(VW+120))-40;
+    const y=((st.t*(70+sd*130)+sd*900+i*61)%(VH+80))-30;
+    ctx.fillStyle='hsla('+((hue+i*24)%360)+',95%,66%,.85)';
+    mapleLeaf(x,y,5+sd*5,st.t*1.6+i);
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  /* 上下の 発光帯 */
+  const band=ctx.createLinearGradient(0,0,0,26);
+  band.addColorStop(0,'rgba(255,236,150,.5)');band.addColorStop(1,'rgba(255,236,150,0)');
+  ctx.fillStyle=band;ctx.fillRect(0,0,VW,26);
+  const band2=ctx.createLinearGradient(0,VH,0,VH-26);
+  band2.addColorStop(0,'rgba(255,236,150,.42)');band2.addColorStop(1,'rgba(255,236,150,0)');
+  ctx.fillStyle=band2;ctx.fillRect(0,VH-26,VW,26);
+  /* 残り時間バー */
+  ctx.fillStyle='rgba(10,6,14,.5)';ctx.fillRect(0,VH-6,VW,6);
+  const lg=ctx.createLinearGradient(0,0,VW,0);
+  lg.addColorStop(0,'#ffd45e');lg.addColorStop(.5,'#ff6bd0');lg.addColorStop(1,'#9be6ff');
+  ctx.fillStyle=lg;ctx.fillRect(0,VH-6,VW*clamp(st.feverT/FEVER_DUR,0,1),6);
+  /* 突入テロップ */
+  const el=FEVER_DUR-st.feverT;
+  if(el<1.7){
+    const p=Math.min(1,el*5);
+    const sc2=0.55+0.45*p+Math.sin(st.t*10)*0.03;
+    ctx.translate(VW*0.5,VH*0.3);
+    ctx.rotate(-0.05);ctx.scale(sc2,sc2);
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='900 '+Math.round(clamp(VW*0.058,24,52))+'px system-ui,sans-serif';
+    ctx.lineWidth=9;ctx.strokeStyle='rgba(60,20,0,.7)';
+    ctx.strokeText('FEVER TIME!!',0,0);
+    const tg=ctx.createLinearGradient(0,-30,0,24);
+    tg.addColorStop(0,'#fffbe0');tg.addColorStop(.5,'#ffd24a');tg.addColorStop(1,'#ff5a1f');
+    ctx.fillStyle=tg;ctx.fillText('FEVER TIME!!',0,0);
+    ctx.font='900 '+Math.round(clamp(VW*0.016,10,15))+'px system-ui,sans-serif';
+    ctx.fillStyle='#fff3c0';ctx.fillText('SCORE ×2 — 8 SECONDS',0,Math.round(clamp(VW*0.045,20,34)));
+  }
+  ctx.restore();
+}
 
 /* ======================= BOSS（タイムトラベラー・ドク） ======================= */
 const BOSS={
@@ -2411,6 +2823,7 @@ function fireWaveCannon(small){
   WC.beams.push({x0:P.x+22,y,front:P.x+72,w:small?30:82,t:0,life:small?.42:.60,
                  dmg,small,hitB:false,hitM:false,hitR:false,kills:0});
   WC.fired++;WC.shots++;WC.lastDmg=dmg;WC.maxDmg=Math.max(WC.maxDmg,dmg);
+  if(!small)unlockBadge('wave');
   st.shake=Math.max(st.shake,small?.75:1.7);
   st.flash=Math.max(st.flash,small?.20:.42);
   st.flashCol=small?'170,235,255':'255,252,235';
@@ -2525,7 +2938,14 @@ function doJump(){
   P.vy=(P.jumps===1?-JUMPV:-JUMPV*0.86);
   P.grounded=false;
   Sfx.jump(P.jumps);
-  for(let i=0;i<5;i++)puff(P.x-6+Math.random()*12,P.y,2.2);
+  if(P.jumps===1){
+    for(let i=0;i<7;i++)puff(P.x-8+Math.random()*16,P.y,2.4);
+    ringFX(P.x,P.y-2,10,46,.26,'255,235,190');
+  }else{
+    ringFX(P.x,P.y-42,14,82,.4,'170,235,255');
+    for(let i=0;i<14;i++)spark(P.x+rr(-20,20),P.y-rr(6,46),rr(1.6,3.6),['#bfe9ff','#fff','#ffd45e'][i%3]);
+    st.pops.push({x:P.x,y:P.y-98,text:'AIR JUMP!',t:0,life:.55,col:'#c8f0ff'});
+  }
 }
 function doDive(){
   if(st.mode!=='run')return;
@@ -2533,6 +2953,8 @@ function doDive(){
   /* 潜水：押した瞬間に ぐっと もぐる（押し続けると さらに加速） */
   P.vy=Math.max(P.vy,150)+190;
   Sfx.dive();
+  ringFX(P.x,P.y-16,10,58,.3,'150,225,255');
+  for(let i=0;i<6;i++)spark(P.x+rr(-18,18),P.y-rr(0,18),rr(1.6,3.2),'#bfe9ff');
   for(let i=0;i<8;i++)st.puffs.push({x:P.x+rr(-16,16),y:P.y-rr(0,26),vx:rr(-26,26),vy:rr(40,120),r:rr(1.3,3.2),life:rr(.3,.65),t:0});
 }
 function pressW(){
@@ -2747,6 +3169,9 @@ function showTitle(){
   btnStart.hidden=true;
   entryHide();closeEntryModal();renderRanking();
   if(rankBoardEl)rankBoardEl.hidden=false;
+  const tb=document.getElementById('trophyBox');
+  if(tb)tb.hidden=false;
+  renderTrophies();
   onlineRefresh();
   overlay.classList.remove('hidden');
 }
@@ -2766,10 +3191,14 @@ function showGoal(){
     '<div><span>MAPLE COINS</span><b>'+st.coins+'</b></div>'+
     '<div><span>COMBO MAX</span><b>'+st.comboMax+'</b></div>'+
     '<div><span>巨大化 / ワープ</span><b>'+st.giantCount+' / '+st.warpCount+'</b></div>'+
+    '<div><span>🏅 FEVER</span><b>'+st.feverCount+' 回</b></div>'+
+    '<div><span>🍁 黄金モミジ</span><b>'+st.goldCoins+'/'+GOLD_PER_STAGE+(st.goldCoins>=GOLD_PER_STAGE?' PERFECT':'')+'</b></div>'+
     '<div><span>ミス</span><b>'+st.hits+'</b></div>';
   btnStart.textContent=(STAGE.id===8)?'もう一度 挑む ▶':'もう一度 ▶';
   btnStart.hidden=false;
   if(rankBoardEl)rankBoardEl.hidden=true;
+  const tbG=document.getElementById('trophyBox');
+  if(tbG)tbG.hidden=true;
   closeEntryModal();
   entryShow({score:st.score,stage:STAGE.id,cleared:true,run:runN});
   if(btnNext){
@@ -2797,10 +3226,13 @@ function showOver(){
     '<div><span>SCORE</span><b>'+st.score.toLocaleString('ja-JP')+'</b></div>'+
     '<div><span>DISTANCE</span><b>'+Math.floor(P.x/100)+' m</b></div>'+
     '<div><span>MAPLE COINS</span><b>'+st.coins+'</b></div>'+
-    '<div><span>COMBO MAX</span><b>'+st.comboMax+'</b></div>';
+    '<div><span>COMBO MAX</span><b>'+st.comboMax+'</b></div>'+
+    '<div><span>🍁 黄金モミジ</span><b>'+st.goldCoins+'/'+GOLD_PER_STAGE+'</b></div>';
   btnStart.textContent='リトライ ▶';
   btnStart.hidden=false;
   if(rankBoardEl)rankBoardEl.hidden=true;
+  const tbO=document.getElementById('trophyBox');
+  if(tbO)tbO.hidden=true;
   closeEntryModal();
   entryShow({score:st.score,stage:STAGE.id,cleared:false,run:runN});
   overlay.classList.remove('hidden');
@@ -3090,13 +3522,14 @@ function startGame(stageId){
   st.mode='run'; st.t=0; st.runT=0; st.camX=-40; st.shake=0; st.flash=0;
   st.score=0; st.coins=0; st.hearts=4; st.gauge=0; st.bats=0;
   st.combo=0; st.comboMax=0; st.lastAward=0;
+  st.feverT=0; st.feverCount=0; st.dodgeCd=0; st.dodgeCount=0; st.slowT=0; st.hitstop=0; st.dodgeFxT=0; st.goldCoins=0;
   st.giantT=0; st.giantScale=1; st.warpT=0; st.invulnT=0;
   st.powerLv=0; st.maxPowerLv=0; st.megaCount=0; st.powerCount=0;
   st.shieldT=0; st.boostT=0; st.shieldCount=0; st.boostCount=0;
   st.turboT=0; st.magT=0; st.parts=0; st.slipT=0;
   st.msg=''; st.msgT=0; st.telop=''; st.telopSub=''; st.telopT=0; st.docNear=0;
   st.checkpoint=0; st.hits=0; st.stomps=0; st.kills=0; st.finishT=0;
-  st.leaves.length=0;st.sparks.length=0;st.debris.length=0;st.puffs.length=0;st.pops.length=0;st.ghosts.length=0;
+  st.leaves.length=0;st.sparks.length=0;st.debris.length=0;st.puffs.length=0;st.pops.length=0;st.ghosts.length=0;st.rings.length=0;
   st.goalShown=false;
   /* エンディング状態を初期化 */
   HELPER.active=false;HELPER.t=0;HELPER.burst=0;HELPER.cool=18;HELPER.count=0;HELPER.rescue=0;HELPER.who=1;HELPER.who2=2;
@@ -3366,6 +3799,8 @@ function damageMid(n,how){
   if(MID.phase!=='fight'||MID.hitCd>0)return;
   MID.hp=Math.max(0,MID.hp-n);MID.hitCd=.45;MID.flash=1;
   st.shake=Math.max(st.shake,.6);
+  st.hitstop=Math.max(st.hitstop,.05);
+  if(n>=2){st.pops.push({x:MID.x+rr(-24,24),y:MID.y-110,text:'CRITICAL!',t:0,life:.95,col:'#fff0a0'});ringFX(MID.x,MID.y-70,16,110,.35,'255,240,160');}
   addScore(200,MID.x,MID.y-60);st.combo++;trackCombo();
   Sfx.bossHit();
   for(let i=0;i<12;i++)spark(MID.x+rr(-50,50),MID.y+rr(-60,50),rr(2,5),['#ffe45a','#ff8a3d','#fff'][i%3]);
@@ -3379,6 +3814,8 @@ function defeatMid(){
   st.telop='中ボス撃破!!';st.telopT=3.0;
   st.telopSub=MID.def.name+'を うちたおした！ ボーナス!!';
   st.shake=1.4;st.flash=1;st.flashCol='255,238,180';
+  st.slowT=Math.max(st.slowT,.7);
+  fireworks(MID.x,MID.y-40,44);
   st.score+=2000;st.gauge=100;st.bats=Math.min(3,st.bats+1);
   if(st.hearts<st.maxHearts)st.hearts++;
   Sfx.bossDown();
@@ -3393,6 +3830,8 @@ function damageBoss(n,how){
   if(BOSS.phase!=='fight'||BOSS.hitCd>0)return;
   BOSS.hp=Math.max(0,BOSS.hp-n);BOSS.hitCd=.5;BOSS.flash=1;
   st.shake=Math.max(st.shake,.75);
+  st.hitstop=Math.max(st.hitstop,.055);
+  if(n>=2){st.pops.push({x:BOSS.x+rr(-26,26),y:BOSS.y-130,text:'CRITICAL!',t:0,life:.95,col:'#fff0a0'});ringFX(BOSS.x,BOSS.y-90,18,125,.35,'255,240,160');}
   addScore(n>=2?400:250,BOSS.x,BOSS.y-70);
   st.combo++;trackCombo();
   Sfx.bossHit();
@@ -3654,6 +4093,8 @@ function defeatBoss(){
     st.telopSub='ドクは改心した！ ゴールへ突入!!';
   }
   st.shake=k==='final'?2.2:(k==='truelast'?2.6:1.6);st.flash=1;st.flashCol=dun?'210,170,255':(k==='truelast'?'255,210,120':(k==='final'?'255,240,190':(k==='chick'?'255,245,180':'255,242,190')));
+  st.slowT=Math.max(st.slowT,.9);
+  fireworks(BOSS.x,BOSS.y-90,k==='truelast'?72:(k==='final'?64:48));
   st.score+=k==='truelast'?8000:3000;
   st.bats=Math.min(3,st.bats+1);
   Sfx.bossDown();
@@ -4385,6 +4826,7 @@ function rivalShot(n){
 function damageRival(n){
   if(!RIVAL.active||RIVAL.phase!=='fight'||RIVAL.hitCd>0)return;
   RIVAL.hp=Math.max(0,RIVAL.hp-n);RIVAL.hitCd=.45;RIVAL.flash=1;
+  st.hitstop=Math.max(st.hitstop,.05);
   updateBossBar();
   if(bossBar){bossBar.classList.add('hit');setTimeout(()=>{if(bossBar)bossBar.classList.remove('hit');},140);}
   addScore(200,RIVAL.x,groundY-rivalDH()*0.7);st.combo++;trackCombo();
@@ -4418,6 +4860,8 @@ function defeatRival(){
   st.gauge=Math.min(100,st.gauge+40);
   addScore(2500,RIVAL.x,groundY-150);
   st.flash=.85;st.flashCol='255,220,150';st.shake=1.0;
+  st.slowT=Math.max(st.slowT,.7);
+  fireworks(RIVAL.x,groundY-120,42);
   Sfx.foeDown();Sfx.fanfare();
   for(let i=0;i<50;i++)spark(RIVAL.x+rr(-90,90),groundY-rr(10,170),rr(2,6),['#ffd45e','#ff8a3d','#fff','#9be6ff'][i%4]);
   for(let i=0;i<16;i++)debris(RIVAL.x+rr(-60,60),groundY-rr(20,140),['#2b2f3a','#c9ced8','#ff4d5e'][i%3]);
@@ -5141,6 +5585,12 @@ function update(dt){
   if(st.flash>0)st.flash=Math.max(0,st.flash-dt*2.6);
   if(st.shake>0)st.shake=Math.max(0,st.shake-dt*2.4);
   if(st.invulnT>0)st.invulnT-=dt;
+  if(st.feverT>0){
+    st.feverT-=dt;
+    if(st.feverT<=0){st.feverT=0;msg('FEVER TIME 終了！ またコンボを つなげよう');}
+  }
+  if(st.dodgeFxT>0)st.dodgeFxT-=dt;
+  if(st.dodgeCd>0)st.dodgeCd-=dt;
   if(st.turboT>0)st.turboT-=dt;
   if(st.slipT>0)st.slipT-=dt;
   if(st.magT>0)st.magT-=dt;
@@ -5159,7 +5609,8 @@ function update(dt){
   for(let i=st.debris.length-1;i>=0;i--){const d2=st.debris[i];d2.t+=dt;d2.x+=d2.vx*dt;d2.y+=d2.vy*dt;d2.vy+=1400*dt;d2.rot+=d2.vr*dt;if(d2.t>d2.life)st.debris.splice(i,1);}
   for(let i=st.puffs.length-1;i>=0;i--){const p=st.puffs[i];p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=dt*26;if(p.t>p.life)st.puffs.splice(i,1);}
   for(let i=st.pops.length-1;i>=0;i--){const p=st.pops[i];p.t+=dt;p.y-=dt*54;if(p.t>p.life)st.pops.splice(i,1);}
-  for(let i=st.ghosts.length-1;i>=0;i--){st.ghosts[i].t+=dt;if(st.ghosts[i].t>.34)st.ghosts.splice(i,1);}
+  for(let i=st.ghosts.length-1;i>=0;i--){const gh=st.ghosts[i];gh.t+=dt;if(gh.t>(gh.dodge ? 0.45 : 0.34))st.ghosts.splice(i,1);}
+  for(let i=st.rings.length-1;i>=0;i--){const rg=st.rings[i];rg.t+=dt;if(rg.t>rg.life)st.rings.splice(i,1);}
 
   if(st.mode==='ending'){ endingUpdate(dt); return; }
 
@@ -5211,6 +5662,7 @@ function update(dt){
   if(st.warpT>0)target=WARP_SPEED;
   else if(st.turboT>0)target=Math.max(target,TURBO_SPEED);
   else if(st.slipT>0)target=Math.max(target,BASE+150);
+  if(st.feverT>0)target=Math.max(target,FEVER_SPEED);
   const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='warning');
   const bossStop=BOSS.active&&BOSS.phase==='defeat';
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight');
@@ -5290,7 +5742,7 @@ function update(dt){
   }
 
   /* --- items --- */
-  if(st.magT>0){
+  if(st.magT>0||st.feverT>0){
     for(const it of LV.items){
       if(it.taken||it.type!=='coin')continue;
       const mdx=P.x-it.x, mdy=(P.y-56)-it.y, d2=mdx*mdx+mdy*mdy;
@@ -5304,10 +5756,21 @@ function update(dt){
     if(it.taken)continue;
     if(Math.abs(it.x-P.x)>120)continue;
     const dy=(P.y-56)-it.y, dx=it.x-P.x;
-    const rad=it.type==='capsule'?40:(it.type==='star'||it.type==='magnet'||it.type==='heart')?36:it.type==='emblem'?34:30;
+    const rad=it.type==='capsule'?40:(it.type==='star'||it.type==='magnet'||it.type==='heart')?36:it.type==='emblem'?34:it.type==='gold'?38:30;
     if(dx*dx+dy*dy<rad*rad){
       it.taken=true;
       if(it.type==='coin'){st.coins++;addScore(50,it.x,it.y);st.gauge=Math.min(100,st.gauge+5);st.combo++;trackCombo();Sfx.coin();spark(it.x,it.y,3,'#ffd45e');}
+      else if(it.type==='gold'){
+        st.goldCoins++;st.combo++;trackCombo();
+        addScore(500,it.x,it.y);st.gauge=Math.min(100,st.gauge+15);
+        Sfx.goldCoin();
+        st.pops.push({x:it.x,y:it.y-36,text:'🍁 GOLD '+st.goldCoins+'/'+GOLD_PER_STAGE,t:0,life:1.25,col:'#fff3b0'});
+        ringFX(it.x,it.y,18,120,.5,'255,235,150');
+        st.flash=Math.max(st.flash,.28);st.flashCol='255,235,150';
+        st.shake=Math.max(st.shake,.22);
+        for(let k=0;k<26;k++)spark(it.x+rr(-30,30),it.y+rr(-30,30),rr(2,5),['#fff8cc','#ffd24a','#ff8a3d','#fff'][k%4]);
+        msg('✨ 黄金のモミジ '+st.goldCoins+'/'+GOLD_PER_STAGE+' 枚目！');
+      }
       else if(it.type==='emblem'){addScore(300,it.x,it.y);st.gauge=Math.min(100,st.gauge+12);st.combo++;trackCombo();Sfx.emblem();spark(it.x,it.y,4,'#dff1ff');}
       else if(it.type==='battery'){st.bats=Math.min(3,st.bats+1);addScore(200,it.x,it.y);Sfx.battery();msg('⚡1.21GWバッテリー GET！ Wでタイムワープ');spark(it.x,it.y,4,'#9be6ff');}
       else if(it.type==='capsule'){st.gauge=100;addScore(100,it.x,it.y);Sfx.powerUp();msg('Wカプセル！ ゲージ満タン → Wで巨大化');spark(it.x,it.y,5,'#ff9a6b');}
@@ -5387,6 +5850,9 @@ function update(dt){
   if(!BOSS.done&&!BOSS.active&&P.x>=BOSS.trigger)startBoss();
   if(BOSS.active)bossUpdate(dt);
 
+  /* --- JUST DODGE（敵弾・突進の ギリギリ回避） --- */
+  justDodgeCheck(dt);
+
   /* --- camera --- */
   if(!isTravelStage())trav.camY=lerp(trav.camY,0,Math.min(1,dt*3.4));
   else if(travelMode()==='descent')trav.camY=lerp(trav.camY,floorOff(P.x)*0.62,Math.min(1,dt*3.2));
@@ -5410,6 +5876,15 @@ function update(dt){
     st.telopT=3;
     st.telopSub=(STAGE.def&&STAGE.def.clearTitle)||(dun?'非案内人を うちたおした！':'— DOC is on the pole! —');
     st.score+=Math.max(0,1500-Math.floor(st.hits*150));
+    /* 黄金モミジ 3枚コンプリート → PERFECT ボーナス */
+    if(st.goldCoins>=GOLD_PER_STAGE){
+      st.score+=2000;
+      st.pops.push({x:P.x+40,y:groundY-220,text:'PERFECT!! +2,000',t:0,life:1.9,col:'#fff3b0'});
+      st.telopSub=(st.telopSub||'')+'  🍁 黄金モミジ コンプ PERFECT!!';
+      st.flash=Math.max(st.flash,.7);st.flashCol='255,232,140';
+      fireworks(P.x+120,groundY-180,46);
+    }
+    recordClear();
     for(let i=0;i<50;i++)spark(P.x+rr(-120,200),groundY-rr(20,240),rr(2,6),dun?['#c9a3ff','#ffd45e','#7ce0c8'][i%3]:['#ffd45e','#ff6b5e','#9be6ff'][i%3]);
   }
 }
@@ -5457,16 +5932,24 @@ function obTop(o){
 }
 function trackCombo(){
   if(st.combo>st.comboMax)st.comboMax=st.combo;
+  if(st.combo>=50)unlockBadge('combo');
   if(st.combo>=10&&st.combo%10===0&&st.combo!==st.lastAward){
     st.lastAward=st.combo;
+    st.pops.push({x:P.x+rr(-16,16),y:P.y-156,text:st.combo+' COMBO!',t:0,life:1.25,col:'#fff3a0'});
+    ringFX(P.x,P.y-64,18,150,.5,'255,220,120');
     if(st.bats<3){st.bats++;msg('COMBO '+st.combo+'！ ⚡バッテリー+1');Sfx.battery();}
     else{addScore(200,P.x,P.y-120);msg('COMBO '+st.combo+'！ ボーナス');}
+    if(st.feverT<=0)startFever();
   }
 }
 function addScore(n,x,y){
-  if(st.boostT>0)n=Math.round(n*2);
-  st.score+=n;
-  st.pops.push({x:(x==null?P.x:x),y:(y==null?P.y-90:y),text:'+'+n,t:0,life:.9,col:st.boostT>0?'#c8f0ff':'#ffe9b0'});
+  const m=comboMult();
+  let total=Math.round(n*m);
+  if(st.feverT>0)total=Math.round(total*2);
+  if(st.boostT>0)total=Math.round(total*2);
+  st.score+=total;
+  const col=st.feverT>0?'#fff3b0':(st.boostT>0?'#c8f0ff':(m>=3?'#ffd0a0':(m>=2?'#ffd76a':'#ffe9b0')));
+  st.pops.push({x:(x==null?P.x:x),y:(y==null?P.y-90:y),text:'+'+total,t:0,life:.9,col});
 }
 /* 巨大化中の着地：振動＋（MEGAは）周囲の敵をふき飛ばす */
 function giantLanding(){
@@ -6716,6 +7199,7 @@ if(endRestart)endRestart.addEventListener('click',e=>{e.preventDefault();e.stopP
 const elScore=document.getElementById('score'),elTime=document.getElementById('time'),
       elHearts=document.getElementById('hearts'),elBat=document.getElementById('bat'),
       elCombo=document.getElementById('combo'),elComboPill=document.getElementById('comboPill'),
+      elComboMult=document.getElementById('comboMult'),elFeverT=document.getElementById('feverT'),
       elPower=document.getElementById('powerPill'),
       elFill=document.getElementById('gaugeFill'),elGaugeWrap=document.getElementById('gaugeWrap'),
       elProg=document.getElementById('progFill'),elW=bW;
@@ -6728,7 +7212,17 @@ function updateHUD(force){
   elHearts.innerHTML=h;
   elBat.textContent=st.bats;
   elCombo.textContent=st.combo;
-  elComboPill.classList.toggle('hot',st.combo>=10);
+  const mult=comboMult();
+  if(elComboMult){
+    elComboMult.hidden=!(mult>1&&st.feverT<=0);
+    if(mult>1)elComboMult.textContent='×'+mult;
+  }
+  if(elFeverT)elFeverT.textContent=Math.max(0,Math.ceil(st.feverT));
+  elComboPill.classList.toggle('fever',st.feverT>0);
+  elComboPill.classList.toggle('hot',st.combo>=10&&st.feverT<=0);
+  elComboPill.classList.toggle('x15',mult===1.5&&st.feverT<=0);
+  elComboPill.classList.toggle('x2',mult===2&&st.feverT<=0);
+  elComboPill.classList.toggle('x3',mult===3&&st.feverT<=0);
   elFill.style.width=st.gauge.toFixed(1)+'%';
   elGaugeWrap.classList.toggle('full',st.gauge>=99.5);
   elProg.style.width=clamp(P.x/LV.goalX*100,0,100).toFixed(1)+'%';
@@ -7975,6 +8469,7 @@ function drawItems(){
     if(x<-60||x>VW+60)continue;
     const y=it.y+(it.type==='coin'?Math.sin(st.t*3+it.ph)*4:0);
     if(it.type==='coin')drawMapleCoin(x,y,9,st.t+it.ph);
+    else if(it.type==='gold')drawGoldMaple(x,it.y,st.t+it.ph);
     else if(it.type==='emblem')drawEmblem(x,y,st.t+it.ph);
     else if(it.type==='battery')drawBattery(x,y,st.t+it.ph);
     else if(it.type==='capsule')drawCapsule(x,y,st.t+it.ph);
@@ -10589,16 +11084,17 @@ function drawPlayer(){
   }
 
   // afterimages
-  if(st.warpT>0){
+  if(st.warpT>0||st.dodgeFxT>0){
     for(const gh of st.ghosts){
-      const a=1-gh.t/0.34;
+      const life=gh.dodge?0.45:0.34;
+      const a=1-gh.t/life;
       ctx.save();
-      ctx.globalAlpha=0.22*a;
+      ctx.globalAlpha=(gh.dodge?0.34:0.22)*a;
       ctx.translate(gh.x-st.camX,gh.y);
       ctx.scale(gh.sc,gh.sc);
       if(imgRunner.naturalWidth>0){
         const bh2=84,bw2=bh2*540/806;
-        ctx.filter='saturate(0.3) brightness(1.4)';
+        ctx.filter=gh.dodge?'saturate(1.9) brightness(1.55) hue-rotate(150deg)':'saturate(0.3) brightness(1.4)';
         ctx.drawImage(imgRunner,-bw2/2,-30-bh2,bw2,bh2);
         ctx.filter='none';
       }
@@ -10835,6 +11331,7 @@ function drawParticles(){
     ctx.fillStyle=p.col;ctx.fillText(p.text,p.x-st.camX,p.y);
   }
   ctx.globalAlpha=1;
+  drawRings();
 }
 
 /* giant / warp screen effects */
@@ -11733,7 +12230,12 @@ function groundPhys(dt){
   if(!inGap&&P.y>=fy){
     if(P.y-fy>52)return false;
     const landV=P.vy, wasAir=!P.grounded;
-    if(landV>240)for(let i=0;i<4;i++)puff(P.x-8+i*5,fy,2.4);
+    if(landV>240){
+      const n=landV>760?9:5;
+      for(let i=0;i<n;i++)puff(P.x-15+i*(30/n),fy,2.4+Math.random()*1.3);
+      for(let i=0;i<(landV>760?10:5);i++)st.sparks.push({x:P.x+rr(-22,22),y:fy-2,vx:rr(-95,95),vy:rr(-70,-8),r:rr(1.4,3),life:rr(.2,.45),t:0,col:'#e8d8c8'});
+      if(landV>860)ringFX(P.x,fy,12,64,.26,'255,240,200');
+    }
     P.y=fy;P.vy=0;
     P.grounded=true;P.jumps=0;
     if(wasAir&&st.giantT>0&&landV>420)giantLanding();
@@ -12749,19 +13251,25 @@ function render(){
     ctx.fillRect(0,0,VW,VH);
   }
   ctx.restore();
+  /* FEVER TIME の 画面演出は 揺れの外側で 描く（画面全体を 覆う） */
+  drawFeverFX();
 }
 
 /* ======================= loop ======================= */
 let last=performance.now();
 let fpsAcc=0,fpsN=0,fpsVal=0;
 function frame(now){
-  const dt=Math.min(0.045,(now-last)/1000);
+  const realdt=Math.min(0.045,(now-last)/1000);
   last=now;
-  fpsAcc+=dt;fpsN++;
+  /* ヒットストップ（攻撃命中の一瞬の停止）と スローモーション（撃破・JUST DODGE） */
+  let dt=realdt;
+  if(st.slowT>0){st.slowT=Math.max(0,st.slowT-realdt);dt*=0.32;}
+  if(st.hitstop>0){st.hitstop=Math.max(0,st.hitstop-realdt);dt*=0.08;}
+  fpsAcc+=realdt;fpsN++;
   if(fpsAcc>0.5){fpsVal=Math.round(fpsN/fpsAcc);fpsAcc=0;fpsN=0;}
   update(dt);
   render();
-  hudAcc+=dt;
+  hudAcc+=realdt;
   if(hudAcc>0.08){hudAcc=0;updateHUD();}
   requestAnimationFrame(frame);
 }
@@ -12772,6 +13280,7 @@ resize();
 buildLevel();
 relocateItems();
 P.y=groundY;
+REC.init();
 showTitle();
 updateHUD(true);
 requestAnimationFrame(frame);
@@ -12781,7 +13290,9 @@ window.__dash={
   get status(){
     return {
       mode:st.mode, x:Math.round(P.x), y:Math.round(P.y), score:st.score, coins:st.coins,
-      hearts:st.hearts, gauge:Math.round(st.gauge), bats:st.bats, combo:st.combo, kills:st.kills, stomps:st.stomps, foeShots:FOE.shots.length,
+      hearts:st.hearts, gauge:Math.round(st.gauge), bats:st.bats, combo:st.combo, comboMult:comboMult(), kills:st.kills, stomps:st.stomps, foeShots:FOE.shots.length,
+      fever:Math.max(0,Math.round(st.feverT*10)/10), feverCount:st.feverCount, gold:st.goldCoins, dodge:st.dodgeCount,
+      slow:Math.round(st.slowT*100)/100, hitstop:Math.round(st.hitstop*100)/100,
       giant:st.giantT>0, warp:st.warpT>0, mag:Math.max(0,Math.round(st.magT*10)/10), turbo:Math.max(0,Math.round(st.turboT*10)/10),
       powerLv:st.powerLv, giantScale:Math.round(st.giantScale*100)/100, giantT:Math.max(0,Math.round(st.giantT*10)/10),
       shield:Math.max(0,Math.round(st.shieldT*10)/10), boost:Math.max(0,Math.round(st.boostT*10)/10),
@@ -12813,6 +13324,23 @@ window.__dash={
   obInfo(x){const o=LV.obstacles.find(o=>!o.dead&&Math.abs(o.x-x)<80);return o?{type:o.type,x:Math.round(o.x),top:Math.round(obTop(o)),w:o.w,h:o.h,hp:o.hp}:null;},
   obstacleList(){return LV.obstacles.filter(o=>!o.dead).map(o=>({type:o.type,x:Math.round(o.x)}));},
   start:startGame,
+  /* --- 新要素（検証用） --- */
+  fever(){startFever();return {feverT:st.feverT,count:st.feverCount};},
+  setCombo(n){st.combo=Math.max(0,n|0);trackCombo();return st.combo;},
+  feverInfo(){return {t:Math.max(0,Math.round(st.feverT*10)/10),max:FEVER_DUR,count:st.feverCount,mult:comboMult(),
+    pill:elComboPill.className,text:elComboPill.innerText.replace(/\n/g,' '),rings:st.rings.length};},
+  goldInfo(){return {coins:st.goldCoins,items:LV.items.filter(i=>i.type==='gold').map(i=>({x:Math.round(i.x),y:Math.round(i.y),taken:!!i.taken}))};},
+  goldTeleport(){const g=LV.items.find(i=>i.type==='gold'&&!i.taken);if(!g)return null;
+    P.x=g.x;P.y=g.y+56;P.vy=0;P.grounded=false;st.camX=g.x-VW*0.31;return {x:g.x,y:g.y};},
+  goldAll(){for(const it of LV.items)if(it.type==='gold'&&!it.taken){it.taken=true;st.goldCoins++;}return st.goldCoins;},
+  records(){return {badges:Object.assign({},REC.badges),gold:Object.assign({},REC.gold),cleared:Object.assign({},REC.cleared),
+    count:REC.badgeCount(),goldTotal:REC.goldTotal(),storage:(()=>{try{return localStorage.getItem(SAVE_KEY);}catch(e){return null;}})()};},
+  unlock(id){return unlockBadge(id);},
+  resetRecords(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}REC.badges={};REC.gold={};REC.cleared={};renderTrophies();return this.records();},
+  dodgeNow(){justDodge(P.x,P.y-60);return st.dodgeCount;},
+  slowNow(v){st.slowT=(v==null?0.8:v);return st.slowT;},
+  trophyOpen(v){trophyOpen=!!v;const b=document.getElementById('trophyBody');if(b)b.hidden=!trophyOpen;renderTrophies();
+    return {open:trophyOpen,text:(document.getElementById('badgeGrid')||{innerText:''}).innerText.replace(/\n/g,' / ')};},
   startStage(n){startGame(n);},
   stageId(){return STAGE.id;},
   bossShots(){return BOSS.shots.map(s=>({kind:s.kind,x:Math.round(s.x),y:Math.round(s.y),t:Math.round(s.t*100)/100}));},

@@ -13625,9 +13625,11 @@ function render(){
 /* ======================= loop ======================= */
 let last=performance.now();
 let fpsAcc=0,fpsN=0,fpsVal=0;
+let dbgPause=false;   /* 検証用の一時停止（__dash.pause() からのみ） */
 function frame(now){
   const realdt=Math.min(0.045,(now-last)/1000);
   last=now;
+  if(dbgPause){render();requestAnimationFrame(frame);return;}
   /* ヒットストップ（攻撃命中の一瞬の停止）と スローモーション（撃破・JUST DODGE） */
   let dt=realdt;
   if(st.slowT>0){st.slowT=Math.max(0,st.slowT-realdt);dt*=0.32;}
@@ -13753,6 +13755,7 @@ window.__dash={
   },
   rideClearInvuln(){st.invulnT=0;return 0;},
   hold(v){const n=v||0;keys.right=n>0;keys.left=n<0;return {right:keys.right,left:keys.left,speed:Math.round(P.speed)};},
+  pause(v){dbgPause=!!v;return dbgPause;},
   obstacleTypes(){const m={};for(const o of LV.obstacles){if(o.dead)continue;m[o.type]=(m[o.type]||0)+1;}return m;},
   foeInfo(){
     const list=LV.obstacles.filter(o=>o.type==='assassin'&&!o.dead);

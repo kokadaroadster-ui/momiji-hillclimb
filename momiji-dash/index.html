@@ -298,7 +298,9 @@
         <li><span class="k">MAPLE</span><span>紅葉コイン・エンブレムを集めて、ドクのディスコで回復</span></li>
         <li><span class="k">ITEM</span><span>♥ハート・🧲マグネット・⭐スター・💥POWERオーブ（即パワーアップ）・🛡シールド・×2スコアブースト</span></li>
         <li><span class="k w">HELP</span><span>お助けマンが 1号・2号の 2人で かけつける。回復・パワー・敵一掃で 助けてくれる</span></li>
-        <li><span class="k w">ENEMY</span><span>写真からアニメ化した 4人の刺客（丸メガネ／青シャツ／腕組み／タートル）が 全ステージの道中に登場。踏みつけ／巨大化・タイムワープ・ターボの体当たりで 倒せる</span></li>
+        <li><span class="k w">ENEMY</span><span>写真からアニメ化した 4人の刺客。緑・白・黄の レーシングスーツの 1〜3人目が 全ステージの道中に登場（踏みつけ／巨大化・タイムワープ・ターボの体当たりで 倒せる）</span></li>
+        <li><span class="k w">RIVAL</span><span>4人目の刺客は ライバルボス！ ステージ中盤〜終盤に 立ちふさがり、ライフ半分で ヘルメットを装着して 白のレーシングスーツに 着替え、残像つき超高速攻撃！</span></li>
+        <li><span class="k w">KART</span><span>ときどき 左後方から カートの ライダーが すごい勢いで 追い抜いていく（追い抜かれたら スリップストリームで 加速！）</span></li>
         <li><span class="k w">BOSS</span><span>5つのボスは 途中から本気モード！ 動き・連射・突進が速くなる</span></li>
         <li><span class="k w">TRUE</span><span>ステージ5の スター魔王を 倒すと、真のラストボスが 降臨！ ドーナツ🍩・コーヒー☕・タイヤホイールを 投げてくる（倒すと ロードスターを 授かる）</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
@@ -368,15 +370,22 @@ const imgFinalBoss=new Image();  imgFinalBoss.decoding='async';  imgFinalBoss.sr
 const imgFishing=new Image();    imgFishing.decoding='async';    imgFishing.src='boss_fishing.png';
 const imgHelper=new Image();     imgHelper.decoding='async';     imgHelper.src='helper_man.png';
 const imgHelper2=new Image();    imgHelper2.decoding='async';    imgHelper2.src='helper_man2.png';
-/* 写真の4人を アニメ化した 「4人の刺客」— 全ステージの道中に 敵キャラとして 登場する */
-const imgParty1=new Image();     imgParty1.decoding='async';     imgParty1.src='party_p1.png';const imgParty2=new Image();     imgParty2.decoding='async';     imgParty2.src='party_p2.png';
-const imgParty3=new Image();     imgParty3.decoding='async';     imgParty3.src='party_p3.png';
+/* 写真の4人を アニメ化した 「4人の刺客」— 1〜3人目は緑・白・黄の レーシングスーツで 道中に、
+   4人目は ライバルボスとして ステージ中盤〜終盤に 登場する */
+const imgParty1=new Image();     imgParty1.decoding='async';     imgParty1.src='party_p1.png?v=racing';
+const imgParty2=new Image();     imgParty2.decoding='async';     imgParty2.src='party_p2.png?v=racing';
+const imgParty3=new Image();     imgParty3.decoding='async';     imgParty3.src='party_p3.png?v=racing';
 const imgParty4=new Image();     imgParty4.decoding='async';     imgParty4.src='party_p4.png';
-/* 4人の刺客の 設定（who=1〜4）。style は キャラごとの 得意な動き：突進／ジャンプ／小弾投げ／突進＋投げ */
+/* 4人目の 本気モード（白ヘルメット＋白×紅黒ラインの レーシングスーツ） */
+const imgParty4H=new Image();    imgParty4H.decoding='async';    imgParty4H.src='party_p4_helmet.png?v=racing';
+/* 左から 追い抜いていく カートの ライダー */
+const imgKart=new Image();       imgKart.decoding='async';       imgKart.src='kart_racer.png?v=kart';
+/* 4人の刺客の 設定（who=1〜4）。style は キャラごとの 得意な動き：突進／ジャンプ／小弾投げ／突進＋投げ
+   who=1〜3 は 道中の 通常刺客（緑・白・黄の レーシングスーツ）。who=4 は ライバルボス専用。 */
 const ASSASSINS=[
-  {who:1,name:'丸メガネの刺客',dh:112,ar:520/1197,style:'charge',accent:'#ff4d5e'},
-  {who:2,name:'青シャツの刺客',dh:120,ar:520/1569,style:'jump',  accent:'#4dc8ff'},
-  {who:3,name:'腕組みの刺客',  dh:126,ar:520/2026,style:'throw', accent:'#c98bff'},
+  {who:1,name:'緑のレーシングスーツの刺客',dh:112,ar:520/1405,style:'charge',accent:'#4ade80'},
+  {who:2,name:'白のレーシングスーツの刺客',dh:120,ar:520/1546,style:'jump',  accent:'#bfe6ff'},
+  {who:3,name:'黄のレーシングスーツの刺客',dh:126,ar:520/1967,style:'throw', accent:'#ffd633'},
   {who:4,name:'タートルの刺客',dh:122,ar:520/1628,style:'dash',  accent:'#ffd34d'}
 ];
 function assassinDef(who){return ASSASSINS[clamp(who||1,1,4)-1];}
@@ -390,7 +399,7 @@ const imgEunos=new Image();      imgEunos.decoding='async';      imgEunos.src='e
 /* グランドフィナーレに降臨する神 */
 /* 5面のスター魔王の さらに奥に 現れる 真のラストボス（ドーナツ＆コーヒー） */
 const imgTrueLast=new Image();  imgTrueLast.decoding='async';  imgTrueLast.src='true_last_boss.png';
-let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false,truelast:false,party1:false,party2:false,party3:false,party4:false,ironchef:false,finalegod:false,eunos:false};
+let assetsOK={runner:false,doc:false,boss:false,chick:false,unadon:false,okonomi:false,final:false,fishing:false,helper:false,helper2:false,truelast:false,party1:false,party2:false,party3:false,party4:false,party4h:false,kart:false,ironchef:false,finalegod:false,eunos:false};
 const BOSS_IMG={chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,truelast:imgTrueLast,ironchef:imgIronChef};
 const PARADE_IMG={helper:imgHelper,helper2:imgHelper2,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4};
 /* バストアップ画像の下端をふわっと溶かして、脚と自然につなぐ */
@@ -426,6 +435,8 @@ imgParty1.onload=()=>assetsOK.party1=imgParty1.naturalWidth>0;
 imgParty2.onload=()=>assetsOK.party2=imgParty2.naturalWidth>0;
 imgParty3.onload=()=>assetsOK.party3=imgParty3.naturalWidth>0;
 imgParty4.onload=()=>assetsOK.party4=imgParty4.naturalWidth>0;
+imgParty4H.onload=()=>assetsOK.party4h=imgParty4H.naturalWidth>0;
+imgKart.onload=()=>assetsOK.kart=imgKart.naturalWidth>0;
 imgIronChef.onload=()=>assetsOK.ironchef=imgIronChef.naturalWidth>0;
 imgFinaleGod.onload=()=>assetsOK.finalegod=imgFinaleGod.naturalWidth>0;
 imgEunos.onload=()=>assetsOK.eunos=imgEunos.naturalWidth>0;
@@ -523,6 +534,8 @@ const Sfx={
   foeThrow(){this.tone(300,.10,'square',.07,175);this.noise(.09,.05,1200,1.4,0,400);},
   foeDash(){this.noise(.20,.10,520,1.4,0,180);this.tone(160,.16,'sawtooth',.07,90);},
   foeDown(){[659,523,415].forEach((f,i)=>this.tone(f,.09,'square',.08,null,i*.05));this.noise(.16,.10,900,.9,0,300);},
+  kart(){this.noise(.55,.13,620,1.1,0,120);this.tone(84,.5,'sawtooth',.11,250);this.tone(168,.35,'square',.05,330,.05);},
+  slipstream(){this.noise(.42,.10,1500,1.4,0,5200);this.tone(520,.18,'triangle',.09,1040);this.tone(1046,.2,'square',.06,null,.1);},
   /* 2段階目（MEGA）用の派手な8bitパワーアップ音 */
   powerUp2(){
     const notes=[392,523,659,784,988,1174,1318,1568,2093,2637];
@@ -1245,7 +1258,7 @@ const STAGE_DEFS={
             ['minicar',11960],['tire',14260],['boar',16020],['minicar',17460],
             ['hawk',2980],['deer',5240],['hawk',7460],['deer',11420],['hawk',12980],
             ['deer',15240],['hawk',16920],['deer',18360],
-            ['assassin1',3600],['assassin2',7100],['assassin3',10100],['assassin4',13100],
+            ['assassin1',3600],['assassin2',7100],['assassin3',10100],['assassin3',13100],
             ['assassin1',17200],['assassin3',17700]],
     emblems:{start:1200,step:[950,1080],max:18600},
     batteries:[3300,6900,7900,9900,11800,13800,15400,17600,18800],
@@ -1287,7 +1300,7 @@ const STAGE_DEFS={
             ['bat',6080],['boulder',7160],['skeleton',8240],['spike',9480],
             ['boulder',10780],['bat',11840],['spike',12780],['skeleton',13660],
             ['wisp',2560],['lantern',4260],['wisp',6620],['lantern',9460],['wisp',12540],
-            ['assassin2',3600],['assassin4',7900],['assassin1',11400],['assassin3',13600]],
+            ['assassin2',3600],['assassin3',7900],['assassin1',11400],['assassin3',13600]],
     emblems:{start:880,step:[760,880],max:14700},
     batteries:[3100,6400,9700,12900,14200],
     capsules:[2600,7600,11200,14000],
@@ -1327,7 +1340,7 @@ const STAGE_DEFS={
             ['campfire',4900],['cooler',5400],['raccoon',6100],['bee',6550],
             ['logroll',7900],['cooler',8700],['raccoon',9500],['campfire',10200],
             ['bee',10900],['cooler',11500],['logroll',12300],['raccoon',12900],
-            ['assassin3',2900],['assassin1',5100],['assassin2',8900],['assassin4',12500]],
+            ['assassin3',2900],['assassin1',5100],['assassin2',8900],['assassin3',12500]],
     emblems:{start:900,step:[780,940],max:13200},
     batteries:[2400,5600,8800,11600,13000],
     capsules:[2050,6300,9900,12500],
@@ -1372,7 +1385,7 @@ const STAGE_DEFS={
             ['grill',4300],['crate',5600],['cat',6400],['paperLantern',7000],
             ['takoyaki',7600],['grill',8400],['crate',9000],['cat',9600],
             ['paperLantern',10300],['takoyaki',11000],['crate',11800],['grill',12500],
-            ['assassin4',2600],['assassin1',4200],['assassin3',7300],['assassin2',10100],['assassin4',13000]],
+            ['assassin3',2600],['assassin1',4200],['assassin3',7300],['assassin2',10100],['assassin3',13000]],
     emblems:{start:950,step:[800,960],max:15000},
     batteries:[2500,5900,9400,12400,14000],
     capsules:[2200,6700,10600,13600],
@@ -1417,7 +1430,7 @@ const STAGE_DEFS={
             ['wraith',4600],['knight',6000],['starcore',6800],['crystal',7500],
             ['knight',8300],['wraith',8900],['starcore',9600],['crystal',10400],
             ['knight',11100],['wraith',12300],['crystal',13000],['starcore',13800],
-            ['assassin2',2800],['assassin1',4200],['assassin3',9000],['assassin4',11300],
+            ['assassin2',2800],['assassin1',4200],['assassin3',9000],['assassin3',11300],
             ['assassin2',14500],['assassin1',16000]],
     emblems:{start:1000,step:[820,1000],max:17000},
     batteries:[2800,6200,9800,12800,15000],
@@ -1462,6 +1475,7 @@ function applyStage(id){
   BOSS.trigger=d.boss.trigger; BOSS.x0=d.boss.x0; BOSS.x1=d.boss.x1; BOSS.cx=d.boss.cx;
   BOSS.maxHp=d.boss.maxHp; BOSS.hp=d.boss.maxHp; BOSS.def=d.boss; BOSS.said=0; BOSS.sayT=0;
   resetMid(d.mid||null);
+  rivalReset(RIVAL_DEFS[d.id]||null);
   const bn=document.getElementById('bossName');
   if(bn)bn.textContent=d.boss.bar;
 }
@@ -1499,9 +1513,9 @@ function makeObstacle(type,x){
   if(type==='knight')return {type:'knight',x,w:58,h:66,fam:'static',dead:false};
   if(type==='starcore')return {type:'starcore',x,w:40,h:40,fam:'fly',alt:rr(96,150),phase:rnd()*6.283,amp:rr(10,22),dead:false};
   if(type==='crystal')return {type:'crystal',x,w:52,h:44,fam:'static',phase:rnd()*6.283,dead:false};
-  /* ---- 4人の刺客（写真の4人 / 全ステージ共通の敵キャラ） ---- */
+  /* ---- 4人の刺客（1〜3人目 = 緑・白・黄の レーシングスーツ / 全ステージ共通の 敵キャラ） ---- */
   if(type==='assassin'||type.indexOf('assassin')===0){
-    const who=(type==='assassin')?(1+Math.floor(rnd()*4)):clamp(parseInt(type.slice(8),10)||1,1,4);
+    const who=(type==='assassin')?(1+Math.floor(rnd()*3)):clamp(parseInt(type.slice(8),10)||1,1,3);
     const def=assassinDef(who);
     const dh=def.dh;
     return {type:'assassin',who,x,w:Math.max(28,Math.round(dh*def.ar*0.95)),h:dh,fam:'foe',dead:false,
@@ -1527,6 +1541,7 @@ function buildLevel(){
     return Math.abs(x-ox)<dist2;
   });
   const spawnEnd=d.boss.trigger-700;
+  const rv=RIVAL_DEFS[d.id]||null;
   let x=STAGE.id===2?1000:1080;
   while(x<spawnEnd){
     const z=zoneAt(x);
@@ -1538,6 +1553,7 @@ function buildLevel(){
       !near(x,LV.gaps,560) && !near(x,DOC_X,620) && !near(x,CP_X,460) &&
       !LV.tunnels.some(t=>x>t.x0-150&&x<t.x1+150) &&
       !(mid&&x>mid.trigger-620&&x<mid.x1+520) &&
+      !(rv&&x>rv.x0-140&&x<rv.x1+140) &&
       !(x>d.boss.trigger-700);
     if(okSpot){
       LV.obstacles.push(makeObstacle(type,x));
@@ -1559,7 +1575,7 @@ function buildLevel(){
       LV.tunnels.some(t=>ex>t.x0-190&&ex<t.x1+190)||
       LV.obstacles.some(o=>Math.abs(o.x-ex)<135)||
       DOC_X.some(dd=>Math.abs(dd-ex)<210)||CP_X.some(c=>Math.abs(c-ex)<170)||
-      (mid&&ex>mid.trigger-620&&ex<mid.x1+520)||ex>d.boss.trigger-820;
+      (mid&&ex>mid.trigger-620&&ex<mid.x1+520)||(rv&&ex>rv.x0-150&&ex<rv.x1+150)||ex>d.boss.trigger-820;
     while(badPos()&&n++<26)ex+=95;
     if(badPos())continue;
     LV.obstacles.push(makeObstacle(type,ex));
@@ -1639,7 +1655,7 @@ const st={
   giantT:0, giantScale:1, giantCount:0, warpT:0, warpCount:0,
   powerLv:0, maxPowerLv:0, megaCount:0, powerCount:0,
   shieldT:0, boostT:0, shieldCount:0, boostCount:0,
-  turboT:0, turboCount:0, magT:0, magCount:0, parts:0,
+  turboT:0, turboCount:0, magT:0, magCount:0, parts:0, slipT:0,
   invulnT:0, msg:'', msgT:0, telop:'', telopSub:'', telopT:0,
   docNear:0, checkpoint:0, hits:0, stomps:0, kills:0, finishT:0,
   leaves:[], sparks:[], debris:[], puffs:[], pops:[], ghosts:[],
@@ -1664,6 +1680,26 @@ const MID={
   t:0, stateT:0, x:0, y:0, low:0, hitCd:0, flash:0, atkT:2.2,
   rage:0, spd:1, dash:0, dashFrom:0, dashDir:1, said:0, sayT:0, sayIdx:0, defeatedT:0,
   shots:[]
+};
+
+/* ======================= ライバルボス（4人目の刺客） ======================= */
+/* 各ステージの 中盤〜終盤に 1回だけ 立ちふさがる 強敵。
+   はじめは 黒タートルネックの 通常姿、ライフが 半分（50%）になると 閃光とともに
+   ヘルメットを装着して 白の レーシングスーツに 着替え、残像を 引きながら
+   超高速の 突進・連射・ジャンプ急襲を くりだす。踏みつけ／W巨大化・ワープ・ターボで 倒せる。 */
+const RIVAL_DEFS={
+  1:{trigger:10420,x0:10300,x1:10780,cx:10520,maxHp:12},
+  2:{trigger:11120,x0:11040,x1:11560,cx:11300,maxHp:12},
+  3:{trigger:12620,x0:12480,x1:13000,cx:12740,maxHp:13},
+  4:{trigger:13620,x0:13480,x1:14000,cx:13740,maxHp:14},
+  5:{trigger:15520,x0:15380,x1:15900,cx:15640,maxHp:14}
+};
+const RIVAL={
+  def:null, active:false, phase:'idle', done:false, hp:0, maxHp:0,
+  x:0, dir:-1, t:0, stateT:0, hitCd:0, flash:0,
+  helmet:false, spd:1, atkT:2.2, dashCd:1.6, dashT:0, teleT:0, dashDir:-1,
+  jy:0, jvy:0, jumpVx:0, jumpCd:2.0, lean:0, defeatedT:0, ghostT:0, ghost:[],
+  name:'4人目の刺客 タートル'
 };
 
 /* ======================= input ======================= */
@@ -1865,7 +1901,7 @@ function startGame(stageId){
   st.giantT=0; st.giantScale=1; st.warpT=0; st.invulnT=0;
   st.powerLv=0; st.maxPowerLv=0; st.megaCount=0; st.powerCount=0;
   st.shieldT=0; st.boostT=0; st.shieldCount=0; st.boostCount=0;
-  st.turboT=0; st.magT=0; st.parts=0;
+  st.turboT=0; st.magT=0; st.parts=0; st.slipT=0;
   st.msg=''; st.msgT=0; st.telop=''; st.telopSub=''; st.telopT=0; st.docNear=0;
   st.checkpoint=0; st.hits=0; st.stomps=0; st.kills=0; st.finishT=0;
   st.leaves.length=0;st.sparks.length=0;st.debris.length=0;st.puffs.length=0;st.pops.length=0;st.ghosts.length=0;
@@ -1882,6 +1918,7 @@ function startGame(stageId){
   P.x=200; P.y=groundY; P.vy=0; P.speed=BASE; P.grounded=true; P.jumps=0; P.phase=0;
   keys.left=false; keys.right=false;
   resetBoss();
+  KART.active=false;KART.cool=rr(15,22);KART.smoke.length=0;
   hideOverlay();
   updateHUD(true);
   msg((STAGE.def&&STAGE.def.startMsg)||'スタート！');
@@ -1979,8 +2016,10 @@ function nearDocStage(){
 const bossBar=document.getElementById('bossBar'),bossFill=document.getElementById('bossFill');
 function updateBossBar(){
   if(!bossFill)return;
-  const hp=MID.active?MID.hp:BOSS.hp;
-  const mx=MID.active?(MID.maxHp||1):(BOSS.maxHp||1);
+  let hp,mx;
+  if(RIVAL.active||RIVAL.phase==='defeat'){hp=RIVAL.hp;mx=RIVAL.maxHp||1;}
+  else if(MID.active){hp=MID.hp;mx=MID.maxHp||1;}
+  else{hp=BOSS.hp;mx=BOSS.maxHp||1;}
   bossFill.style.width=((hp/mx)*100).toFixed(1)+'%';
 }
 function resetBoss(){
@@ -3004,6 +3043,363 @@ function midUpdate(dt){
   }
 }
 
+/* ======================= ライバルボス本体（4人目の刺客） ======================= */
+function rivalDH(){return RIVAL.helmet?160:172;}
+function rivalImg(){return RIVAL.helmet?imgParty4H:imgParty4;}
+function rivalDW(){
+  const im=rivalImg();
+  const r=(im&&im.naturalWidth&&im.naturalHeight)?im.naturalWidth/im.naturalHeight:(RIVAL.helmet?520/654:520/1628);
+  return rivalDH()*r;
+}
+function rivalHalfW(){return Math.max(26,rivalDW()*0.40);}
+function rivalTop(){return groundY-rivalDH()-RIVAL.jy;}
+function rivalReset(def){
+  RIVAL.def=def||null;
+  RIVAL.active=false;RIVAL.phase='idle';RIVAL.done=false;
+  RIVAL.hp=def?def.maxHp:0;RIVAL.maxHp=def?def.maxHp:0;
+  RIVAL.x=def?def.cx+110:0;RIVAL.dir=-1;RIVAL.t=0;RIVAL.stateT=0;
+  RIVAL.hitCd=0;RIVAL.flash=0;RIVAL.helmet=false;RIVAL.spd=1;
+  RIVAL.atkT=2.2;RIVAL.dashCd=1.6;RIVAL.dashT=0;RIVAL.teleT=0;RIVAL.dashDir=-1;
+  RIVAL.jy=0;RIVAL.jvy=0;RIVAL.jumpVx=0;RIVAL.jumpCd=2.0;RIVAL.lean=0;
+  RIVAL.defeatedT=0;RIVAL.ghostT=0;RIVAL.ghost.length=0;
+  if(bossBar)bossBar.classList.remove('on','rage','hit');
+}
+function rivalStart(){
+  const d=RIVAL.def;
+  if(!d||RIVAL.active||RIVAL.done)return;
+  RIVAL.active=true;RIVAL.phase='intro';RIVAL.stateT=0;RIVAL.t=0;RIVAL.hp=RIVAL.maxHp;
+  RIVAL.x=d.cx+120;RIVAL.dir=-1;RIVAL.helmet=false;RIVAL.spd=1;RIVAL.lean=0;
+  RIVAL.atkT=1.8;RIVAL.dashCd=1.6;RIVAL.dashT=0;RIVAL.teleT=0;
+  RIVAL.jy=0;RIVAL.jvy=0;RIVAL.jumpCd=1.8;RIVAL.ghost.length=0;
+  st.telop='RIVAL BOSS';st.telopT=2.8;
+  st.telopSub='4人目の刺客 タートル 参上!!';
+  st.flash=.5;st.flashCol='255,140,90';st.shake=Math.max(st.shake,.5);
+  Sfx.docSting();
+  const bn=document.getElementById('bossName');if(bn)bn.textContent='RIVAL：4人目の刺客 タートル';
+  if(bossBar){bossBar.classList.add('on');bossBar.classList.remove('rage','hit');}
+  const w=document.getElementById('bossWarn');if(w)w.textContent='';
+  updateBossBar();
+  msg('4人目の刺客が 立ちふさがった！ 踏みつけか Wで たたけ！');
+}
+function rivalShot(n){
+  const sx=RIVAL.x+RIVAL.dir*16, sy=groundY-RIVAL.jy-rivalDH()*0.55;
+  const base=Math.atan2((P.y-56)-sy,P.x-sx);
+  const sp=RIVAL.helmet?470:330;
+  for(let i=0;i<n;i++){
+    const a=base+(i-(n-1)/2)*0.20;
+    FOE.shots.push({x:sx,y:sy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp+30,r:11,t:0,life:3.2,who:4,ph:rnd()*6.283,big:true});
+  }
+  Sfx.foeThrow();
+  for(let i=0;i<5;i++)spark(sx,sy,2.2,'#ffd34d');
+}
+function damageRival(n){
+  if(!RIVAL.active||RIVAL.phase!=='fight'||RIVAL.hitCd>0)return;
+  RIVAL.hp=Math.max(0,RIVAL.hp-n);RIVAL.hitCd=.45;RIVAL.flash=1;
+  updateBossBar();
+  if(bossBar){bossBar.classList.add('hit');setTimeout(()=>{if(bossBar)bossBar.classList.remove('hit');},140);}
+  addScore(200,RIVAL.x,groundY-rivalDH()*0.7);st.combo++;trackCombo();
+  st.shake=Math.max(st.shake,.5);
+  for(let i=0;i<12;i++)spark(RIVAL.x+rr(-40,40),groundY-RIVAL.jy-rr(20,150),rr(2,5),['#ffe45a','#ff8a3d','#fff'][i%3]);
+  Sfx.thud(1);
+  if(RIVAL.hp<=0){defeatRival();return;}
+  if(!RIVAL.helmet&&RIVAL.hp<=RIVAL.maxHp*0.5)startRivalTransform();
+}
+function startRivalTransform(){
+  RIVAL.phase='transform';RIVAL.stateT=0;
+  RIVAL.helmet=true;RIVAL.spd=1.9;
+  RIVAL.dashT=0;RIVAL.teleT=0;RIVAL.jy=0;RIVAL.jvy=0;RIVAL.jumpCd=1.0;
+  RIVAL.lean=0;RIVAL.ghost.length=0;
+  st.telop='本気モード！ヘルメット装着！！';st.telopT=3.2;
+  st.telopSub='白の レーシングスーツに 着替えた！ 超高速バトル!!';
+  st.flash=1;st.flashCol='255,255,255';st.shake=1.2;
+  Sfx.rage(2);
+  if(bossBar){bossBar.classList.add('rage');const w=document.getElementById('bossWarn');if(w)w.textContent='⚠ 超高速モード — 残像つき 突進！';}
+  msg('4人目の刺客「本気で いくぞ…！」');
+  for(let i=0;i<44;i++)spark(RIVAL.x+rr(-70,70),groundY-rr(10,180),rr(2,6),['#ffffff','#ffd45e','#ff4d5e'][i%3]);
+}
+function defeatRival(){
+  RIVAL.phase='defeat';RIVAL.stateT=0;RIVAL.hp=0;RIVAL.defeatedT=0;
+  FOE.shots.length=0;
+  st.kills++;
+  st.telop='RIVAL DOWN!!';st.telopT=3.0;
+  st.telopSub='4人目の刺客を うちたおした！ BONUS +2500';
+  st.hearts=Math.min(st.maxHearts,st.hearts+1);
+  st.gauge=Math.min(100,st.gauge+40);
+  addScore(2500,RIVAL.x,groundY-150);
+  st.flash=.85;st.flashCol='255,220,150';st.shake=1.0;
+  Sfx.foeDown();Sfx.fanfare();
+  for(let i=0;i<50;i++)spark(RIVAL.x+rr(-90,90),groundY-rr(10,170),rr(2,6),['#ffd45e','#ff8a3d','#fff','#9be6ff'][i%4]);
+  for(let i=0;i<16;i++)debris(RIVAL.x+rr(-60,60),groundY-rr(20,140),['#2b2f3a','#c9ced8','#ff4d5e'][i%3]);
+  if(bossBar)bossBar.classList.remove('rage','hit');
+}
+function rivalUpdate(dt){
+  if(!RIVAL.active||!RIVAL.def)return;
+  const d=RIVAL.def;
+  RIVAL.t+=dt;RIVAL.stateT+=dt;
+  if(RIVAL.hitCd>0)RIVAL.hitCd-=dt;
+  if(RIVAL.flash>0)RIVAL.flash=Math.max(0,RIVAL.flash-dt*2.4);
+  /* 本気モードの 残像 */
+  if(RIVAL.phase==='fight'&&RIVAL.helmet){
+    RIVAL.ghostT-=dt;
+    if(RIVAL.ghostT<=0){RIVAL.ghostT=.045;RIVAL.ghost.push({x:RIVAL.x,y:groundY-RIVAL.jy,t:0});}
+  }
+  for(let i=RIVAL.ghost.length-1;i>=0;i--){const g=RIVAL.ghost[i];g.t+=dt;if(g.t>.28)RIVAL.ghost.splice(i,1);}
+
+  if(RIVAL.phase==='intro'){
+    RIVAL.x=lerp(RIVAL.x,d.cx+90,Math.min(1,dt*3));
+    if(RIVAL.stateT>1.5){RIVAL.phase='fight';RIVAL.stateT=0;RIVAL.atkT=1.2;}
+    return;
+  }
+  if(RIVAL.phase==='transform'){
+    if(RIVAL.stateT>1.5){RIVAL.phase='fight';RIVAL.stateT=0;RIVAL.atkT=.9;RIVAL.dashCd=.7;}
+    if(Math.random()<dt*20)spark(RIVAL.x+rr(-56,56),groundY-rr(20,170),rr(2,5),'#fff3c4');
+    return;
+  }
+  if(RIVAL.phase==='defeat'){
+    RIVAL.defeatedT+=dt;
+    if(Math.random()<dt*14)spark(RIVAL.x+rr(-60,60),groundY-rr(20,150),rr(2,5),['#ffd45e','#ff8a3d','#fff'][Math.floor(Math.random()*3)]);
+    if(RIVAL.stateT>2.4){
+      RIVAL.active=false;RIVAL.done=true;RIVAL.phase='done';RIVAL.ghost.length=0;
+      if(bossBar)bossBar.classList.remove('on','rage','hit');
+    }
+    return;
+  }
+  if(RIVAL.phase!=='fight')return;
+
+  const dx=P.x-RIVAL.x, dist=Math.abs(dx);
+  RIVAL.dir=dx<0?-1:1;
+  if(RIVAL.dashCd>0)RIVAL.dashCd-=dt;
+  if(RIVAL.atkT>0)RIVAL.atkT-=dt;
+  if(RIVAL.jumpCd>0)RIVAL.jumpCd-=dt;
+
+  /* 突進（予備動作 → 超高速ダッシュ） */
+  if(RIVAL.dashT>0){
+    RIVAL.dashT-=dt;
+    RIVAL.x=clamp(RIVAL.x+RIVAL.dashDir*(RIVAL.helmet?1080:620)*dt,d.x0,d.x1);
+    if(Math.random()<dt*40)spark(RIVAL.x-RIVAL.dashDir*22,groundY-RIVAL.jy-rr(10,150),2.6,RIVAL.helmet?'#cfe9ff':'#ff8f9b');
+    if(RIVAL.dashT<=0){
+      RIVAL.dashT=0;RIVAL.dashCd=RIVAL.helmet?rr(.55,.95):rr(1.5,2.3);
+    }
+  }else if(RIVAL.teleT>0){
+    RIVAL.teleT-=dt;RIVAL.dashDir=RIVAL.dir;
+    if(RIVAL.teleT<=0){RIVAL.teleT=0;RIVAL.dashT=RIVAL.helmet?.42:.32;Sfx.foeDash();}
+  }else{
+    /* プレイヤーに 歩み寄る（密着はしない） */
+    const stand=RIVAL.helmet?56:80;
+    const chase=(RIVAL.helmet?430:240)*RIVAL.spd;
+    if(dist>stand)RIVAL.x=clamp(RIVAL.x+RIVAL.dir*Math.min(chase*dt,dist-stand),d.x0+8,d.x1-8);
+    if(RIVAL.dashCd<=0&&dist>88&&dist<430){
+      RIVAL.teleT=RIVAL.helmet?.16:.28;RIVAL.dashCd=99;
+    }
+  }
+  /* ジャンプ急襲 */
+  if(RIVAL.jy>0||RIVAL.jvy>0){
+    RIVAL.jvy-=2400*dt;RIVAL.jy+=RIVAL.jvy*dt;
+    RIVAL.x=clamp(RIVAL.x+RIVAL.jumpVx*dt,d.x0,d.x1);
+    if(RIVAL.jy<=0){
+      RIVAL.jy=0;RIVAL.jvy=0;
+      puff(RIVAL.x,groundY,4);st.shake=Math.max(st.shake,.3);
+      for(let i=0;i<10;i++)spark(RIVAL.x+rr(-44,44),groundY-6,rr(2,4),RIVAL.helmet?'#cfe9ff':'#ffd0a0');
+    }
+  }else if(RIVAL.jumpCd<=0&&dist<340&&RIVAL.dashT<=0){
+    RIVAL.jvy=RIVAL.helmet?1180:800;
+    RIVAL.jumpVx=clamp(dx*1.3,-320,320)*(RIVAL.helmet?1.5:1);
+    RIVAL.jumpCd=RIVAL.helmet?rr(1.1,1.8):rr(2.4,3.6);
+    Sfx.jump(2);
+  }
+  /* 小弾（本気モードは 3連射） */
+  if(RIVAL.atkT<=0&&RIVAL.dashT<=0&&RIVAL.teleT<=0){
+    rivalShot(RIVAL.helmet?3:1);
+    RIVAL.atkT=RIVAL.helmet?rr(.6,1.0):rr(1.5,2.4);
+  }
+  RIVAL.lean=lerp(RIVAL.lean,RIVAL.dashT>0?-RIVAL.dashDir*0.24:0,Math.min(1,dt*10));
+
+  /* プレイヤーとの当たり */
+  const half=rivalHalfW(), top=rivalTop(), bot=groundY;
+  const pxh=st.giantT>0?(st.powerLv>=2?37:27):20;
+  const pxTop=st.giantT>0?(st.powerLv>=2?186:132):100;
+  if(Math.abs(P.x-RIVAL.x)<half+pxh && P.y>top+4 && P.y-pxTop<bot && RIVAL.hitCd<=0){
+    if(P.vy>0&&P.y<top+70){
+      damageRival(st.giantT>0?2:1,'stomp');
+      P.vy=-430;P.jumps=1;P.grounded=false;
+      st.invulnT=Math.max(st.invulnT,.45);
+      Sfx.stomp();
+    }else if(st.giantT>0||st.warpT>0||st.turboT>0){
+      damageRival(2,'slam');
+      P.vy=-320;P.grounded=false;P.speed=-90;
+    }else if(st.invulnT<=0){
+      hurt();
+      RIVAL.hitCd=Math.max(RIVAL.hitCd,.55);
+      P.speed=-140;
+      RIVAL.dashT=0;RIVAL.dashCd=Math.max(RIVAL.dashCd,.9);
+    }
+  }
+}
+function drawRival(){
+  if(!RIVAL.active||!RIVAL.def)return;
+  const x=RIVAL.x-st.camX;
+  if(x<-300||x>VW+300)return;
+  const img=rivalImg(), dh=rivalDH();
+  const dw=dh*((img&&img.naturalWidth&&img.naturalHeight)?img.naturalWidth/img.naturalHeight:0.38);
+  const fy=groundY-RIVAL.jy, t=st.t;
+  const charging=RIVAL.dashT>0, warning=RIVAL.teleT>0;
+  const hot=RIVAL.helmet?'255,70,60':'255,60,80';
+  /* 残像 */
+  for(const g of RIVAL.ghost){
+    const a=1-g.t/.28;
+    ctx.save();
+    ctx.globalAlpha=a*0.30;
+    const gx=g.x-st.camX;
+    if(img&&img.naturalWidth>0)ctx.drawImage(img,gx-dw/2,g.y-dh,dw,dh);
+    ctx.restore();
+  }
+  /* オーラ */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const ag=ctx.createRadialGradient(x,fy-dh*0.45,4,x,fy-dh*0.45,dh*0.85);
+  ag.addColorStop(0,'rgba('+hot+','+(charging?0.42:0.24)+')');
+  ag.addColorStop(.6,'rgba('+hot+',.10)');
+  ag.addColorStop(1,'rgba('+hot+',0)');
+  ctx.fillStyle=ag;ctx.beginPath();ctx.arc(x,fy-dh*0.45,dh*0.85,0,6.284);ctx.fill();
+  ctx.restore();
+  /* 足もとの リング */
+  ctx.save();
+  ctx.translate(x,groundY);
+  ctx.globalCompositeOperation='lighter';
+  const rg=ctx.createRadialGradient(0,0,2,0,0,dw*1.1);
+  rg.addColorStop(0,'rgba('+hot+',.44)');rg.addColorStop(.55,'rgba('+hot+',.15)');rg.addColorStop(1,'rgba(255,0,0,0)');
+  ctx.fillStyle=rg;ctx.beginPath();ctx.ellipse(0,0,dw*1.1,dw*0.46,0,0,6.284);ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.translate(x,groundY);
+  ctx.strokeStyle='rgba('+hot+','+(0.6+0.3*Math.sin(t*8))+')';ctx.lineWidth=2.6;
+  ctx.beginPath();ctx.ellipse(0,0,Math.max(24,dw*0.72),Math.max(8,dw*0.26),0,0,6.284);ctx.stroke();
+  ctx.setLineDash([7,8]);
+  ctx.strokeStyle='rgba(255,170,150,'+(0.32+0.24*Math.sin(-t*5))+')';ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.ellipse(0,0,Math.max(32,dw*0.94),Math.max(10,dw*0.34),0,0,6.284);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  /* 本体 */
+  if(RIVAL.jy>1){
+    ctx.save();ctx.globalAlpha=Math.max(.12,1-RIVAL.jy/160);ctx.fillStyle='#1a0a10';
+    ctx.beginPath();ctx.ellipse(x,groundY,dw*0.34,dw*0.13,0,0,6.284);ctx.fill();ctx.restore();
+  }
+  ctx.save();
+  ctx.translate(x,fy);
+  ctx.rotate((RIVAL.lean||0)+Math.sin(t*3)*0.02);
+  if(img&&img.naturalWidth>0)ctx.drawImage(img,-dw/2,-dh,dw,dh);
+  else{ctx.fillStyle='rgba(255,90,110,.9)';ctx.fillRect(-dw/2,-dh,dw,dh*0.8);}
+  if(RIVAL.flash>0){
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=RIVAL.flash*0.5;
+    if(img&&img.naturalWidth>0)ctx.drawImage(img,-dw/2,-dh,dw,dh);
+  }
+  ctx.restore();
+  /* 突進の スピード線 */
+  if(charging){
+    const n=RIVAL.helmet?6:3;
+    ctx.strokeStyle=RIVAL.helmet?'rgba(200,230,255,.75)':'rgba(255,130,140,.6)';
+    for(let i=0;i<n;i++){
+      const yy=fy-dh*(0.15+i*0.15);
+      ctx.lineWidth=RIVAL.helmet?2.6:2;
+      ctx.beginPath();
+      ctx.moveTo(x-RIVAL.dashDir*(dw*0.5+9),yy);
+      ctx.lineTo(x-RIVAL.dashDir*(dw*0.5+40+i*16),yy);
+      ctx.stroke();
+    }
+  }
+  /* 帯（RIVAL） */
+  const fs=Math.round(clamp(VW*0.015,9,13));
+  const ly=fy-dh-12;
+  const label=RIVAL.helmet?'RIVAL!!':'RIVAL';
+  ctx.save();
+  ctx.font='900 '+fs+'px system-ui,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const tw=ctx.measureText(label).width;
+  ctx.fillStyle='rgba(30,2,8,.82)';
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(x-tw/2-7,ly-fs*0.9,tw+14,fs*1.8,5);else ctx.rect(x-tw/2-7,ly-fs*0.9,tw+14,fs*1.8);
+  ctx.fill();
+  ctx.strokeStyle=RIVAL.helmet?'rgba(180,230,255,.95)':(warning?'rgba(255,210,90,.95)':'rgba(255,80,95,'+(0.7+0.3*Math.sin(t*8))+')');
+  ctx.lineWidth=1.4;ctx.stroke();
+  ctx.fillStyle=RIVAL.helmet?'#d7f0ff':(warning?'#ffe08a':'#ff97a2');
+  ctx.fillText(label,x,ly);
+  ctx.restore();
+}
+
+/* ======================= カートの 追い抜き（全ステージ共通の お楽しみ演出） ======================= */
+/* 15〜22秒ごとに 左後方から カートが エンジン音・排気・スピード線つきで 追い抜いていく。
+   当たり判定は なく、追い抜かれた 直後は スリップストリームで 少し加速＋スコア+100。 */
+const KART={active:false,t:0,cool:14,x:0,v:0,scale:1,bob:0,bubble:'',passed:false,smoke:[],ghostT:0};
+const KART_LINES=['お先に〜！','ブォン！！','スリップストリームだ！','よゆう〜','また あとで〜'];
+function kartStart(){
+  KART.active=true;KART.t=0;KART.passed=false;KART.smoke.length=0;
+  KART.x=-200;KART.v=900+Math.min(220,VW*0.16);
+  KART.scale=clamp(VW/1280,0.55,1)*0.66;
+  KART.bubble=KART_LINES[Math.floor(Math.random()*KART_LINES.length)];
+  KART.cool=rr(15,22);
+  Sfx.kart();
+}
+function kartUpdate(dt){
+  if(!KART.active)return;
+  if(st.mode!=='run'){KART.active=false;return;}
+  KART.t+=dt;
+  KART.x+=KART.v*dt;
+  KART.bob=Math.sin(st.t*24)*2.4;
+  if(Math.random()<dt*70){
+    KART.smoke.push({x:KART.x-84*KART.scale,y:groundY-26*KART.scale+rr(-5,5),vx:rr(-190,-90),vy:rr(-52,-10),r:rr(4,11),t:0,life:rr(.35,.8)});
+  }
+  for(let i=KART.smoke.length-1;i>=0;i--){
+    const s=KART.smoke[i];s.t+=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.r+=dt*40;
+    if(s.t>s.life)KART.smoke.splice(i,1);
+  }
+  if(!KART.passed&&KART.x>VW*0.31+40){
+    KART.passed=true;
+    st.slipT=1.6;
+    addScore(100,P.x,P.y-120);
+    st.pops.push({x:P.x,y:P.y-150,text:'SLIPSTREAM!',t:0,life:1.1,col:'#9be6ff'});
+    msg('スリップストリーム！ 加速＆+100');
+    for(let i=0;i<12;i++)spark(P.x+rr(-30,30),P.y-rr(20,110),rr(2,4),'#9be6ff');
+    Sfx.slipstream();
+  }
+  if(KART.x>VW+260)KART.active=false;
+}
+function drawKart(){
+  if(!KART.active)return;
+  const im=imgKart;
+  const w=(im.naturalWidth||520)*KART.scale, h=(im.naturalHeight||332)*KART.scale;
+  const x=KART.x, y=groundY-KART.bob;
+  /* 排気 */
+  ctx.save();
+  for(const s of KART.smoke){
+    const a=1-s.t/s.life;
+    ctx.globalAlpha=a*0.5;
+    ctx.fillStyle='#c9c4bd';
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.284);ctx.fill();
+  }
+  ctx.restore();
+  /* スピード線 */
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<7;i++){
+    const yy=y-h*(0.18+i*0.1), len=w*(0.5+0.5*Math.abs(Math.sin(st.t*7+i)));
+    ctx.strokeStyle='rgba(160,220,255,'+(0.16+0.18*Math.abs(Math.sin(st.t*9+i*1.7)))+')';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x-w*0.45,yy);ctx.lineTo(x-w*0.45-len,yy);ctx.stroke();
+  }
+  ctx.restore();
+  /* 影 */
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,.32)';
+  ctx.beginPath();ctx.ellipse(x,groundY+2,w*0.42,h*0.1,0,0,6.284);ctx.fill();
+  ctx.restore();
+  if(im&&im.naturalWidth>0)ctx.drawImage(im,x-w/2,y-h,w,h);
+  /* 吹き出し */
+  if(KART.x>VW*0.22&&KART.x<VW*0.92&&KART.bubble){
+    drawSpeech(clamp(x+w*0.06,140,VW-140),Math.max(96,y-h-14),KART.bubble);
+  }
+}
+
 /* ======================= お助けマン（全ステージ共通の味方・1号と2号の2人） ======================= */
 /* 1号=回復＆シールド、2号=パワー＆×2スコア。2人を順番に呼び、3回に1回は2人タッグで駆けつける。 */
 const HELPERS=[
@@ -3418,20 +3814,21 @@ function drawFoeShots(){
     const x=s.x-st.camX;
     if(x<-40||x>VW+40)continue;
     const def=assassinDef(s.who);
+    const r=s.big?s.r*1.15:s.r;
     ctx.save();
     ctx.globalCompositeOperation='lighter';
-    const g=ctx.createRadialGradient(x,s.y,1,x,s.y,s.r*2.6);
+    const g=ctx.createRadialGradient(x,s.y,1,x,s.y,r*2.6);
     g.addColorStop(0,'rgba(255,220,220,.9)');
     g.addColorStop(.45,def.accent);
     g.addColorStop(1,'rgba(255,0,40,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,s.y,s.r*2.6,0,6.284);ctx.fill();
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,s.y,r*2.6,0,6.284);ctx.fill();
     ctx.restore();
     ctx.save();
     ctx.translate(x,s.y);ctx.rotate(s.t*7+s.ph);
-    ctx.fillStyle='#ff4d5e';ctx.beginPath();
-    for(let i=0;i<6;i++){const a=-Math.PI/2+i*1.047,r=s.r;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
+    ctx.fillStyle=s.big?'#fff0c0':'#ff4d5e';ctx.beginPath();
+    for(let i=0;i<6;i++){const a=-Math.PI/2+i*1.047;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
     ctx.closePath();ctx.fill();
-    ctx.fillStyle='#ffe6e6';ctx.beginPath();ctx.arc(0,0,s.r*0.42,0,6.284);ctx.fill();
+    ctx.fillStyle=s.big?'#ffb43a':'#ffe6e6';ctx.beginPath();ctx.arc(0,0,r*0.42,0,6.284);ctx.fill();
     ctx.restore();
   }
 }
@@ -3445,12 +3842,17 @@ function update(dt){
   if(st.shake>0)st.shake=Math.max(0,st.shake-dt*2.4);
   if(st.invulnT>0)st.invulnT-=dt;
   if(st.turboT>0)st.turboT-=dt;
+  if(st.slipT>0)st.slipT-=dt;
   if(st.magT>0)st.magT-=dt;
   if(st.shieldT>0){st.shieldT-=dt;if(st.shieldT<=0)msg('🛡 シールドが きれた');}
   if(st.boostT>0)st.boostT-=dt;
   musicUpdate(dt);
   helperUpdate(dt);
   foeUpdate(dt);
+  if(st.mode==='run'){
+    if(!KART.active&&!BOSS.active&&!MID.active&&!RIVAL.active){KART.cool-=dt;if(KART.cool<=0)kartStart();}
+    kartUpdate(dt);
+  }else if(KART.active)KART.active=false;
 
   leaves(dt);
   for(let i=st.sparks.length-1;i>=0;i--){const s=st.sparks[i];s.t+=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=420*dt;if(s.t>s.life)st.sparks.splice(i,1);}
@@ -3508,16 +3910,20 @@ function update(dt){
   if(keys.left)target=SLOW;
   if(st.warpT>0)target=WARP_SPEED;
   else if(st.turboT>0)target=Math.max(target,TURBO_SPEED);
+  else if(st.slipT>0)target=Math.max(target,BASE+150);
   const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='warning');
   const bossStop=BOSS.active&&BOSS.phase==='defeat';
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight');
   const midStop=MID.active&&MID.phase==='defeat';
-  if(bossFight||midFight)target=keys.left?-135:(keys.right?330:70);
-  if(bossStop||midStop)target=0;
-  P.speed=lerp(P.speed,target,Math.min(1,dt*(st.warpT>0?4:(bossStop||midStop?5:7))));
+  const rivalFight=RIVAL.active&&(RIVAL.phase==='intro'||RIVAL.phase==='fight'||RIVAL.phase==='transform');
+  const rivalStop=RIVAL.active&&RIVAL.phase==='defeat';
+  if(bossFight||midFight||rivalFight)target=keys.left?-135:(keys.right?330:70);
+  if(bossStop||midStop||rivalStop)target=0;
+  P.speed=lerp(P.speed,target,Math.min(1,dt*(st.warpT>0?4:(bossStop||midStop||rivalStop?5:7))));
   P.x+=P.speed*dt;
   if(bossFight||bossStop)P.x=clamp(P.x,BOSS.x0,BOSS.x1);
   if((midFight||midStop)&&MID.def)P.x=clamp(P.x,MID.def.x0,MID.def.x1);
+  if((rivalFight||rivalStop)&&RIVAL.def)P.x=clamp(P.x,RIVAL.def.x0,RIVAL.def.x1);
   P.phase+=dt*(6.4+P.speed/95);
 
   /* --- vertical motion --- */
@@ -3673,16 +4079,20 @@ function update(dt){
   st.docNear=nearDocStage();
   discoStep(dt);
 
-  /* --- BOSS / 中ボス --- */
+  /* --- BOSS / 中ボス / ライバルボス --- */
   const md=STAGE.def&&STAGE.def.mid;
   if(md&&!MID.done&&!MID.active&&P.x>=md.trigger)startMid();
   if(MID.active)midUpdate(dt);
+  if(RIVAL.def&&!RIVAL.done&&!RIVAL.active&&P.x>=RIVAL.def.trigger)rivalStart();
+  if(RIVAL.active)rivalUpdate(dt);
   if(!BOSS.done&&!BOSS.active&&P.x>=BOSS.trigger)startBoss();
   if(BOSS.active)bossUpdate(dt);
 
   /* --- camera --- */
   if(MID.active&&MID.def){
     st.camX=lerp(st.camX,MID.def.cx-VW*0.5,Math.min(1,dt*3.4));
+  }else if(RIVAL.active&&RIVAL.def){
+    st.camX=lerp(st.camX,RIVAL.def.cx-VW*0.5,Math.min(1,dt*3.4));
   }else if(BOSS.active){
     st.camX=lerp(st.camX,BOSS.cx-VW*0.5,Math.min(1,dt*3.4));
   }else{
@@ -3691,7 +4101,7 @@ function update(dt){
   }
 
   /* --- goal --- */
-  if(!BOSS.active&&!MID.active&&P.x>=LV.goalX){
+  if(!BOSS.active&&!MID.active&&!RIVAL.active&&P.x>=LV.goalX){
     st.mode='goal';st.finishT=0;st.goalShown=false;
     Sfx.fanfare();
     const dun=STAGE.id===2;
@@ -3824,6 +4234,7 @@ function fall(){
   P.y=groundY-260;P.vy=0;P.grounded=false;P.jumps=0;P.speed=BASE*0.8;
   st.invulnT=1.8;
   st.camX=P.x-VW*0.31;
+  if(RIVAL.active){rivalReset(RIVAL_DEFS[STAGE.id]||null);FOE.shots.length=0;}
   msg('落ちた！ チェックポイントから再開');
 }
 
@@ -3987,12 +4398,15 @@ function creditEntries(){
     {t:'row',  r:'釣り名人と大魚コンビ', n:'中ボス（顔出しパネル）'},
     {t:'row',  r:'お助けマン', n:'回復と シールドの たよれる味方'},
     {t:'row',  r:'お助けマン2号', n:'ガッツで パワー＆×2スコア'},
-    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル（丸メガネ・青シャツ・腕組み・タートル）'},
+    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル（緑・白・黄の レーシングスーツ）'},
+    {t:'row',  r:'4人目の刺客（RIVAL）', n:'ライフ半分で 白ヘルメット＆白スーツに 変身'},
+    {t:'row',  r:'カートの ライダー', n:'青いスーツで ブォンと 追い抜いていく'},
     {t:'row',  r:'タイムトラベラー・ドク', n:'ドク（改心して なかまに）'},
     {t:'row',  r:'非案内人', n:'STAFFでは ありません'}
   ]:(dun?[
     {t:'row',  r:'非案内人', n:'STAFFでは ありません'},
-    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル'},
+    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル（緑・白・黄）'},
+    {t:'row',  r:'カートの ライダー', n:'ブォンと 追い抜いていく'},
     {t:'row',  r:'コウモリ', n:'天井から こんにちは'},
     {t:'row',  r:'スケルトン', n:'骨の おもてなし'},
     {t:'row',  r:'転がる岩', n:'案内は しません つぶします'},
@@ -4002,7 +4416,8 @@ function creditEntries(){
     {t:'row',  r:'暴走タイヤ', n:'タイヤ'},
     {t:'row',  r:'イノシシ', n:'イノシシ'},
     {t:'row',  r:'ドリフトミニカー', n:'ミニカー'},
-    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル'},
+    {t:'row',  r:'4人の刺客', n:'写真から アニメ化した ライバル（緑・白・黄）'},
+    {t:'row',  r:'カートの ライダー', n:'ブォンと 追い抜いていく'},
     {t:'row',  r:'カラス', n:'カラス'},
     {t:'row',  r:'NAロードスター', n:'高雄の なかまたち'}
   ]);
@@ -4704,6 +5119,19 @@ function drawEndingMarch(withWindow){
       ctx.translate(bx2,feet-bbob);ctx.rotate(Math.sin(END.t*4.2+i)*0.02);
       if(img&&img.naturalWidth>0)ctx.drawImage(img,-bdw/2,-bdh,bdw,bdh);
       else{ctx.fillStyle='#d9c08a';ctx.fillRect(-bdw/2,-bdh,bdw,bdh);}
+      ctx.restore();
+    }
+    /* カートの ライダーが パレードを 横切る */
+    if(imgKart.complete&&imgKart.naturalWidth>0){
+      const kw=heroH*1.95, kh=kw*imgKart.naturalHeight/imgKart.naturalWidth;
+      const lap=((END.t*0.20)%1.5)-0.25;
+      const kx=VW*lap;
+      const kbob=Math.abs(Math.sin(END.t*8.6))*2.2;
+      ctx.save();
+      ctx.globalAlpha=clamp(Math.min(lap*7,(1.5-lap)*7),0,1)*0.98;
+      ctx.fillStyle='rgba(0,0,0,.3)';
+      ctx.beginPath();ctx.ellipse(kx,feet+2,kw*0.40,5,0,0,6.284);ctx.fill();
+      ctx.drawImage(imgKart,kx-kw/2,feet-kh-kbob,kw,kh);
       ctx.restore();
     }
     /* 全5面制覇の横断幕 */
@@ -9540,6 +9968,8 @@ function render(){
   drawItems();
   drawObstacles();
   drawFoeShots();
+  drawRival();
+  drawKart();
   drawBoss();
   drawMid();
   drawBossFX();
@@ -9600,7 +10030,7 @@ window.__dash={
       items:LV.items.length, assets:{runner:imgRunner.naturalWidth,doc:imgDoc.naturalWidth,boss:imgBoss.naturalWidth,
         chick:imgChick.naturalWidth,unadon:imgUnadon.naturalWidth,okonomiyaki:imgOkonomi.naturalWidth,final:imgFinalBoss.naturalWidth,
         fishing:imgFishing.naturalWidth,helper:imgHelper.naturalWidth,helper2:imgHelper2.naturalWidth,truelast:imgTrueLast.naturalWidth,
-        party1:imgParty1.naturalWidth,party2:imgParty2.naturalWidth,party3:imgParty3.naturalWidth,party4:imgParty4.naturalWidth,ironchef:imgIronChef.naturalWidth,finalegod:imgFinaleGod.naturalWidth,eunos:imgEunos.naturalWidth},
+        party1:imgParty1.naturalWidth,party2:imgParty2.naturalWidth,party3:imgParty3.naturalWidth,party4:imgParty4.naturalWidth,party4helmet:imgParty4H.naturalWidth,kart:imgKart.naturalWidth,ironchef:imgIronChef.naturalWidth,finalegod:imgFinaleGod.naturalWidth,eunos:imgEunos.naturalWidth},
       vw:Math.round(VW), vh:Math.round(VH), ground:Math.round(groundY), fps:fpsVal,
       music:{track:Mus.track,step:Mus.step,notes:Mus.notes,ctx:Sfx.ac?Sfx.ac.state:null,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*100)/100:null},
       muted:Sfx.muted, masterGain:Sfx.master?Math.round(Sfx.master.gain.value*100)/100:null,
@@ -9655,7 +10085,7 @@ window.__dash={
   pressW(){pressW();},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
-  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4,ironchef:imgIronChef,finalegod:imgFinaleGod,eunos:imgEunos};
+  assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4,party4helmet:imgParty4H,kart:imgKart,ironchef:imgIronChef,finalegod:imgFinaleGod,eunos:imgEunos};
     const o={};for(const k in m)o[k]={complete:m[k].complete,w:m[k].naturalWidth,h:m[k].naturalHeight,ok:!!(m[k].complete&&m[k].naturalWidth>0)};return o;},
   bossSize(){return {kind:bossKind(),dh:Math.round(bossDH()),dw:Math.round(bossDW()),halfW:Math.round(bossHalfW()),hitTop:Math.round(bossHitTop())};},
   helperInfo(){return {active:HELPER.active,t:Math.round(HELPER.t*100)/100,cool:Math.round(HELPER.cool*10)/10,
@@ -9676,6 +10106,23 @@ window.__dash={
   },
   playerState(){return {x:Math.round(P.x),y:Math.round(P.y),vy:Math.round(P.vy),grounded:P.grounded,scale:Math.round(st.giantScale*100)/100,powerLv:st.powerLv,mode:st.mode,hearts:st.hearts};},
   setPlayer(x,y,vy){P.x=x;P.y=(y==null?groundY:y);P.vy=vy||0;return {x:P.x,y:P.y};},
+  /* --- ライバルボス（4人目の刺客）検証用 --- */
+  rivalInfo(){return {def:RIVAL.def?RIVAL.def.maxHp:null,active:RIVAL.active,phase:RIVAL.phase,done:RIVAL.done,
+    hp:RIVAL.hp,maxHp:RIVAL.maxHp,helmet:RIVAL.helmet,spd:Math.round(RIVAL.spd*100)/100,
+    x:Math.round(RIVAL.x),y:Math.round(groundY-RIVAL.jy),jy:Math.round(RIVAL.jy),
+    dashT:Math.round(RIVAL.dashT*100)/100,teleT:Math.round(RIVAL.teleT*100)/100,
+    shots:FOE.shots.length,ghosts:RIVAL.ghost.length,helmetImg:imgParty4H.naturalWidth,bodyImg:imgParty4.naturalWidth};},
+  rivalTriggerX(){return (RIVAL.def)?RIVAL.def.trigger+8:null;},
+  rivalSkip(){if(!RIVAL.done&&!RIVAL.active){P.x=(RIVAL.def?RIVAL.def.trigger+8:0);}return P.x;},
+  rivalStart(){rivalStart();return RIVAL.phase;},
+  rivalHit(n){damageRival(n||2);return {hp:RIVAL.hp,phase:RIVAL.phase,helmet:RIVAL.helmet};},
+  rivalTransform(){startRivalTransform();return RIVAL.phase;},
+  rivalKill(){if(RIVAL.active){defeatRival();}return RIVAL.phase;},
+  rivalFire(){rivalShot(RIVAL.helmet?3:1);return FOE.shots.length;},
+  kartInfo(){return {active:KART.active,cool:Math.round(KART.cool*10)/10,x:Math.round(KART.x),
+    v:Math.round(KART.v),scale:Math.round(KART.scale*100)/100,passed:KART.passed,bubble:KART.bubble,
+    slip:Math.max(0,Math.round(st.slipT*10)/10),imgW:imgKart.naturalWidth,imgH:imgKart.naturalHeight};},
+  kartNow(){KART.cool=0;kartStart();return this.kartInfo();},
   midInfo(){return {def:MID.def?MID.def.name:null,active:MID.active,phase:MID.phase,done:MID.done,hp:MID.hp,maxHp:MID.maxHp,
     x:Math.round(MID.x),y:Math.round(MID.y),shots:MID.shots.length,rage:MID.rage,low:Math.round(MID.low*100)/100,
     dh:Math.round(midDH()),dw:Math.round(midDW())};},

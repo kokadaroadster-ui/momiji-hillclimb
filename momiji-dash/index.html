@@ -3351,7 +3351,7 @@ const KART={active:false,t:0,cool:14,x:0,v:0,scale:1,bob:0,bubble:'',passed:fals
 const KART_LINES=['お先に〜！','ブォン！！','スリップストリームだ！','よゆう〜','また あとで〜'];
 function kartStart(){
   KART.active=true;KART.t=0;KART.passed=false;KART.smoke.length=0;
-  KART.x=-200;KART.v=900+Math.min(220,VW*0.16);
+  KART.x=-240;KART.v=740+Math.min(160,VW*0.12);
   KART.scale=clamp(VW/1280,0.55,1)*0.66;
   KART.bubble=KART_LINES[Math.floor(Math.random()*KART_LINES.length)];
   KART.cool=rr(15,22);

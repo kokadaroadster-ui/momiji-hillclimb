@@ -3120,6 +3120,7 @@ function startRivalTransform(){
 function defeatRival(){
   RIVAL.phase='defeat';RIVAL.stateT=0;RIVAL.hp=0;RIVAL.defeatedT=0;
   FOE.shots.length=0;
+  updateBossBar();
   st.kills++;
   st.telop='RIVAL DOWN!!';st.telopT=3.0;
   st.telopSub='4人目の刺客を うちたおした！ BONUS +2500';
@@ -3221,7 +3222,8 @@ function rivalUpdate(dt){
   if(Math.abs(P.x-RIVAL.x)<half+pxh && P.y>top+4 && P.y-pxTop<bot && RIVAL.hitCd<=0){
     if(P.vy>0&&P.y<top+70){
       damageRival(st.giantT>0?2:1,'stomp');
-      P.vy=-430;P.jumps=1;P.grounded=false;
+      P.vy=-430;P.jumps=1;P.grounded=false;P.speed=-240;
+      RIVAL.hitCd=Math.max(RIVAL.hitCd,.8);
       st.invulnT=Math.max(st.invulnT,.45);
       Sfx.stomp();
     }else if(st.giantT>0||st.warpT>0||st.turboT>0){

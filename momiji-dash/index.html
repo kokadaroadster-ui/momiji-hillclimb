@@ -4195,7 +4195,7 @@ function drawRewardScene(){
       ctx.restore();
     }
     /* 神のセリフ */
-    const gsay=clamp((t-1.35)/0.5,0,1)*(1-clamp((t-4.3)/0.4,0,1));
+    const gsay=clamp((t-1.35)/0.5,0,1)*(1-clamp((t-2.9)/0.3,0,1));
     if(gsay>0.02){
       ctx.save();ctx.globalAlpha=gsay;
       const fs=Math.round(clamp(VW*0.017,9.5,13));
@@ -4311,7 +4311,7 @@ function drawRewardScene(){
   const l2=clamp((t-3.9)/0.55,0,1);
   if(l2>0)drawGoldTelop('よくぞ ここまで 走り抜けた！',VH*0.245,clamp(VW*0.032,11.5,22),l2,1);
   const l3=clamp((t-5.0)/0.55,0,1);
-  if(l3>0)drawGoldTelop('神より この ユーノスロードスターを！',VH*0.318,clamp(VW*0.030,11,21),l3,1);
+  if(l3>0)drawGoldTelop('神より この ユーノスを 授けよう！',VH*0.318,clamp(VW*0.030,11,21),l3,1);
 
   /* フラッシュ */
   if(st.flash>0){

@@ -2313,8 +2313,13 @@ function dpadUnhold(id,dir){
   if(dpadCount[dir]>0&&--dpadCount[dir]===0&&dpadEls[dir])dpadEls[dir].classList.remove('on');
   setHold(dir,'p'+id,false);
 }
+function dpadInside(e){
+  const r=dpad.getBoundingClientRect(), m=8;
+  return e.clientX>=r.left-m&&e.clientX<=r.right+m&&e.clientY>=r.top-m&&e.clientY<=r.bottom+m;
+}
 function dpadMove(id,e){
   if(!dpadPtrs.has(id))return;
+  if(!dpadInside(e))return;            /* 指が十字キーの外へ出たら 直前の方向を保持 */
   const dir=dpadDirAt(e), prev=dpadPtrs.get(id)||null;
   if(dir===prev)return;
   if(prev)dpadUnhold(id,prev);

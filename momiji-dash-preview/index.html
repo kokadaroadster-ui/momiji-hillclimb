@@ -8738,7 +8738,8 @@ function drawRideItem(x,y,t,kind){
   ctx.beginPath();
   if(ctx.roundRect)ctx.roundRect(-29,-27,58,54,26);else ctx.rect(-29,-27,58,54);
   ctx.clip();
-  ctx.translate(0,18);ctx.scale(.5,.5);
+  const MS={car:.5,boar:.5,dolphin:.46,hawk:.32};
+  ctx.translate(0,18);ctx.scale(MS[kind]||.5,MS[kind]||.5);
   drawMount(kind,t);
   ctx.restore();
   ctx.restore();
@@ -8832,67 +8833,91 @@ function drawMount(kind,T0){
     ctx.strokeStyle='#2c1b0e';ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(-41,-26);ctx.quadraticCurveTo(-47+Math.sin(T*14)*2,-29,-48,-37);ctx.stroke();
   }else if(kind==='dolphin'){
-    /* ジェットイルカ */
-    const wob=Math.sin(T*4)*0.06;
+    /* ジェットイルカ：明るい水色の体＋白い腹＋ジェット噴射 */
+    const wob=Math.sin(T*4)*0.05;
     ctx.save();ctx.rotate(wob);
-    const dg=ctx.createLinearGradient(0,-36,0,-4);
-    dg.addColorStop(0,'#8fe4ff');dg.addColorStop(.45,'#3fa9d8');dg.addColorStop(1,'#1d5f8e');
+    /* 尾びれ */
+    const tw=Math.sin(T*9)*7;
+    ctx.fillStyle='#2f9fd6';
+    ctx.beginPath();ctx.moveTo(-40,-20);ctx.lineTo(-60,-30+tw);ctx.lineTo(-54,-19);ctx.lineTo(-60,-8+tw);ctx.closePath();ctx.fill();
+    /* 胴体 */
+    const dg=ctx.createLinearGradient(0,-38,0,-4);
+    dg.addColorStop(0,'#c8f6ff');dg.addColorStop(.35,'#7fdcf8');dg.addColorStop(.75,'#3aa6dd');dg.addColorStop(1,'#1d6fa8');
     ctx.fillStyle=dg;
+    ctx.strokeStyle='#16608f';ctx.lineWidth=1.6;
     ctx.beginPath();
-    ctx.moveTo(46,-20);
-    ctx.quadraticCurveTo(34,-34,10,-33);
-    ctx.quadraticCurveTo(-18,-32,-38,-22);
-    ctx.quadraticCurveTo(-46,-18,-38,-13);
-    ctx.quadraticCurveTo(-14,-6,12,-8);
-    ctx.quadraticCurveTo(36,-9,46,-20);
-    ctx.closePath();ctx.fill();
-    ctx.fillStyle='rgba(230,250,255,.7)';
-    ctx.beginPath();ctx.ellipse(4,-11,26,4.2,0,0,6.284);ctx.fill();
-    ctx.fillStyle='#2f83b0';
-    ctx.beginPath();ctx.moveTo(-26,-30);ctx.lineTo(-40,-48);ctx.lineTo(-10,-30);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#1d5f8e';ctx.lineWidth=7;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(-40,-19);ctx.lineTo(-50,-19);ctx.stroke();
-    ctx.fillStyle='#2f83b0';
-    const tw=Math.sin(T*9)*6;
-    ctx.beginPath();ctx.moveTo(-50,-19);ctx.lineTo(-62,-27+tw);ctx.lineTo(-58,-19);ctx.lineTo(-62,-11+tw);ctx.closePath();ctx.fill();
-    ctx.fillStyle='#0d2a3d';ctx.beginPath();ctx.arc(30,-24,2.4,0,6.284);ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.8)';ctx.beginPath();ctx.arc(30.8,-24.8,0.9,0,6.284);ctx.fill();
+    ctx.moveTo(48,-20);
+    ctx.quadraticCurveTo(36,-36,10,-35);
+    ctx.quadraticCurveTo(-16,-34,-36,-23);
+    ctx.quadraticCurveTo(-44,-19,-36,-14);
+    ctx.quadraticCurveTo(-12,-6,14,-8);
+    ctx.quadraticCurveTo(38,-9,48,-20);
+    ctx.closePath();ctx.fill();ctx.stroke();
+    /* 白い腹 */
+    ctx.fillStyle='rgba(240,253,255,.92)';
+    ctx.beginPath();ctx.ellipse(6,-10,24,4.4,0,0,6.284);ctx.fill();
+    /* 背びれ */
+    ctx.fillStyle='#3aa6dd';
+    ctx.beginPath();ctx.moveTo(-16,-31);ctx.lineTo(-26,-50);ctx.lineTo(-6,-31);ctx.closePath();ctx.fill();
+    /* 胸びれ */
+    ctx.fillStyle='#5cc4ea';
+    ctx.beginPath();ctx.moveTo(16,-16);ctx.lineTo(12,-4);ctx.lineTo(26,-12);ctx.closePath();ctx.fill();
+    /* 目・口 */
+    ctx.fillStyle='#0b2d42';ctx.beginPath();ctx.arc(32,-25,2.8,0,6.284);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(32.9,-25.9,1,0,6.284);ctx.fill();
+    ctx.strokeStyle='#16608f';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(45,-19);ctx.lineTo(40,-15);ctx.stroke();
+    /* ジェット噴射（尾の根元から 水色の 炎） */
+    const jf=1+Math.sin(T*30)*.35;
+    const jg=ctx.createLinearGradient(-40,0,-74,0);
+    jg.addColorStop(0,'rgba(210,250,255,.95)');jg.addColorStop(.45,'rgba(110,225,255,.7)');jg.addColorStop(1,'rgba(80,200,255,0)');
+    ctx.fillStyle=jg;
+    ctx.beginPath();ctx.moveTo(-38,-24);ctx.lineTo(-70-jf*10,-19);ctx.lineTo(-38,-14);ctx.closePath();ctx.fill();
     ctx.restore();
   }else{
-    /* スカイホーク（大ワシ） */
-    const flap=Math.sin(T*7)*0.34;
-    ctx.save();
+    /* スカイホーク（大ワシ）：大きく広げた翼 */
+    const flap=Math.sin(T*7)*0.3;
     for(const side of [-1,1]){
       ctx.save();ctx.scale(side,1);ctx.rotate(flap);
-      const wg=ctx.createLinearGradient(0,-30,60,-10);
-      wg.addColorStop(0,'#f3e6c8');wg.addColorStop(.55,'#c79a5a');wg.addColorStop(1,'#7a5326');
+      const wg=ctx.createLinearGradient(10,-34,96,-8);
+      wg.addColorStop(0,'#fff4dc');wg.addColorStop(.45,'#d8ab63');wg.addColorStop(.8,'#8a5f2c');wg.addColorStop(1,'#4f3416');
       ctx.fillStyle=wg;
+      ctx.strokeStyle='#4b3115';ctx.lineWidth=1.8;
       ctx.beginPath();
-      ctx.moveTo(2,-24);
-      ctx.quadraticCurveTo(26,-46,58,-38);
-      ctx.quadraticCurveTo(40,-26,30,-20);
-      ctx.quadraticCurveTo(16,-18,2,-24);
-      ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(90,60,25,.75)';ctx.lineWidth=1.4;
-      for(let i=0;i<4;i++){const a=0.18+i*0.16;
-        ctx.beginPath();ctx.moveTo(6,-23);ctx.lineTo(20+Math.cos(a)*36,-26-Math.sin(a)*12);ctx.stroke();}
+      ctx.moveTo(4,-26);
+      ctx.quadraticCurveTo(34,-56,74,-50);
+      ctx.quadraticCurveTo(96,-46,98,-38);
+      ctx.lineTo(84,-34);ctx.lineTo(92,-30);ctx.lineTo(78,-28);
+      ctx.lineTo(86,-22);ctx.lineTo(70,-22);ctx.lineTo(76,-16);
+      ctx.quadraticCurveTo(40,-16,4,-26);
+      ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.strokeStyle='rgba(70,44,18,.55)';ctx.lineWidth=1.2;
+      for(let i2=0;i2<5;i2++){
+        const t2=0.18+i2*0.17;
+        ctx.beginPath();ctx.moveTo(6+t2*58,-26-t2*16);ctx.lineTo(10+t2*74,-30-t2*14);ctx.stroke();
+      }
       ctx.restore();
     }
-    const bg2=ctx.createLinearGradient(0,-32,0,-4);
-    bg2.addColorStop(0,'#c79a5a');bg2.addColorStop(1,'#6b4519');
-    ctx.fillStyle=bg2;
-    ctx.beginPath();ctx.ellipse(0,-18,28,12,0,0,6.284);ctx.fill();
-    ctx.fillStyle='#f3e6c8';
-    ctx.beginPath();ctx.ellipse(2,-12,16,5,0,0,6.284);ctx.fill();
-    ctx.fillStyle='#a5793f';
-    ctx.beginPath();ctx.ellipse(31,-24,10,9,0.1,0,6.284);ctx.fill();
-    ctx.fillStyle='#f0b400';
-    ctx.beginPath();ctx.moveTo(38,-23);ctx.lineTo(50,-19);ctx.lineTo(38,-15);ctx.closePath();ctx.fill();
-    ctx.fillStyle='#f3e6c8';ctx.beginPath();ctx.arc(32,-26,2.3,0,6.284);ctx.fill();
-    ctx.fillStyle='#22140a';ctx.beginPath();ctx.arc(32.6,-26,1.1,0,6.284);ctx.fill();
+    /* 尾羽 */
     ctx.fillStyle='#8a5f2c';
-    ctx.beginPath();ctx.moveTo(-24,-16);ctx.lineTo(-46,-9+Math.sin(T*5)*3);ctx.lineTo(-40,-18);ctx.lineTo(-46,-24+Math.sin(T*5)*3);ctx.closePath();ctx.fill();
-    ctx.restore();
+    ctx.beginPath();ctx.moveTo(-22,-16);ctx.lineTo(-54,-6+Math.sin(T*5)*3);ctx.lineTo(-46,-18);ctx.lineTo(-54,-30+Math.sin(T*5)*3);ctx.closePath();ctx.fill();
+    /* 胴体 */
+    const bg2=ctx.createLinearGradient(0,-34,0,-4);
+    bg2.addColorStop(0,'#e0b878');bg2.addColorStop(.5,'#b0824a');bg2.addColorStop(1,'#5f3c16');
+    ctx.fillStyle=bg2;
+    ctx.strokeStyle='#4b3115';ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.ellipse(0,-19,30,13,0,0,6.284);ctx.fill();ctx.stroke();
+    ctx.fillStyle='rgba(255,250,240,.95)';
+    ctx.beginPath();ctx.ellipse(4,-12,16,4.6,0,0,6.284);ctx.fill();
+    ctx.fillStyle='#fffaf0';
+    ctx.beginPath();ctx.arc(33,-26,10.5,0,6.284);ctx.fill();
+    ctx.strokeStyle='#4b3115';ctx.lineWidth=1.4;ctx.stroke();
+    ctx.fillStyle='#f0b400';
+    ctx.beginPath();ctx.moveTo(40,-27);ctx.lineTo(54,-21);ctx.lineTo(40,-17);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#a87a00';ctx.lineWidth=1.1;ctx.stroke();
+    ctx.fillStyle='#22140a';ctx.beginPath();ctx.arc(35,-28,1.8,0,6.284);ctx.fill();
+    ctx.fillStyle='rgba(198,40,52,.92)';
+    ctx.beginPath();ctx.ellipse(-8,-31,13,4.6,0,0,6.284);ctx.fill();
   }
   ctx.restore();
 }

@@ -8897,14 +8897,25 @@ function drawMount(kind,T0){
   ctx.restore();
 }
 /* またがりポーズの 脚（乗り物の わきに 曲げて 下ろす） */
-function drawRideLeg(hx,ang,col){
+function drawRideLeg(hx,ang,col,tuck){
   ctx.save();
   ctx.translate(hx,-32);ctx.rotate(ang*0.55);
-  ctx.strokeStyle=col;ctx.lineWidth=10;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(9,11);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(9,11);ctx.lineTo(1,22);ctx.stroke();
-  ctx.fillStyle='#1b1d22';
-  ctx.beginPath();ctx.ellipse(3,25,8.5,4.8,0.25,0,6.284);ctx.fill();
+  ctx.strokeStyle=col;ctx.lineCap='round';
+  if(tuck){
+    /* 車：コックピットに 脚を たたむ */
+    ctx.lineWidth=9;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(8,8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(8,8);ctx.lineTo(3,16);ctx.stroke();
+    ctx.fillStyle='#1b1d22';
+    ctx.beginPath();ctx.ellipse(5,18,7.2,4.2,0.3,0,6.284);ctx.fill();
+  }else{
+    /* 動物：わき腹を またぐ */
+    ctx.lineWidth=10;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(9,11);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(9,11);ctx.lineTo(1,22);ctx.stroke();
+    ctx.fillStyle='#1b1d22';
+    ctx.beginPath();ctx.ellipse(3,25,8.5,4.8,0.25,0,6.284);ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -11421,8 +11432,9 @@ function drawPlayer(){
   /* RIDE：乗り物・動物を 足元に 描き、主人公が その上に またがる */
   if(RIDE.active)drawMount(RIDE.kind);
   if(RIDE.active){
-    drawRideLeg(-6,0.9,'#2f3a63');
-    drawRideLeg(6,0.45,'#3a4776');
+    const tuck=RIDE.kind==='car';
+    drawRideLeg(-6,0.9,'#2f3a63',tuck);
+    drawRideLeg(6,0.45,'#3a4776',tuck);
   }else{
     drawLeg(-5,swing,'#2f3a63');
     drawLeg(5,swing2,'#3a4776');

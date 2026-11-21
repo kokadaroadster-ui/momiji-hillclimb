@@ -4036,11 +4036,11 @@ function drawRewardScene(){
     const say=clamp((t-0.6)/0.5,0,1)*(1-clamp((t-4.2)/0.5,0,1));
     if(say>0.02&&bossA>0.2){
       ctx.save();ctx.globalAlpha=say;
-      const fs=Math.round(clamp(VW*0.017,9.5,13));
+      const fs=Math.round(clamp(VW*0.016,9,12.5));
       const txt='「…見事だ。 これを持っていけ」';
       ctx.font='800 '+fs+'px "Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif';
       const tw=ctx.measureText(txt).width;
-      const bxx=clamp(bxp-tw/2-10,VW*0.03,VW-tw-24), byy=feet-bh*0.98-20;
+      const bxx=clamp(bxp-tw/2-10,VW*0.02,VW-tw-34), byy=feet-bh*0.98-20;
       ctx.fillStyle='rgba(255,248,235,.92)';
       ctx.beginPath();
       if(ctx.roundRect)ctx.roundRect(bxx,byy,tw+20,fs*1.9,9);else ctx.rect(bxx,byy,tw+20,fs*1.9);
@@ -4106,7 +4106,7 @@ function drawRewardScene(){
   if(kp>0){
     const ke=1-Math.pow(1-kp,3);
     const kx0=VW*0.82, ky0=VH*0.50;
-    const kx1=hx+heroW*0.34, ky1=feet-heroH*0.86;
+    const kx1=hx+heroW*0.42, ky1=feet-heroH*0.55;
     const kx=lerp(kx0,kx1,ke), ky=lerp(ky0,ky1,ke)-Math.sin(ke*Math.PI)*VH*0.10;
     drawKey(kx,ky,clamp(heroH*0.013,1.05,2.0),Math.sin(t*2.4)*0.35,1);
     ctx.save();

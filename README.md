@@ -179,7 +179,17 @@
   - 名前は **10文字まで**（ローマ字・ひらがな・カタカナ可）。ローマ字は入力欄で自動的に大文字表示・保存時に大文字化。**前回入れた名前を既定表示**、空欄なら `GUEST`
   - **記録する ▶** で `localStorage` に保存し、`🏆 ○位ランクイン！`（1位は **NEW RECORD!!**）を表示。**同じリザルトで二重登録はしない**（登録後は `登録済み（○位）` に切り替わり、入力欄とボタンが無効化）。TOP10 に届かないスコアは「TOP10まで あと少し…」と出して保存しない
   - エンディングの THE END では右上の **🏆 ハイスコア登録** を押すと 同じ NAME ENTRY の窓が開く（THE END の絵はそのまま）
-- **タイトル画面**の最上部に **🏆 HIGH SCORE RANKING**（1位=金・2位=銀・3位=銅、`S3★` はステージ3クリア）。**TOP10 を保存**し、PC は10件・スマホ縦（幅480px以下）は5件を表示。名前とスコアの横に 到達ステージ、フッターに あなたの名前
+- **タイトル画面**の最上部に **🏆 HIGH SCORE RANKING**（1位=金・2位=銀・3位=銅、`S3★` はステージ3クリア）。**上位10件を表示**し、PC は10件・スマホ縦（幅480px以下）は5件を表示。名前とスコアの横に 到達ステージ、フッターに あなたの名前
 - 初回は 控えめなデモスコア3件（**サクラ 1,800／ドク 1,000／ハチ 600**）が入っていて、遊べばすぐ抜ける
-- 保存キー: `momiji-dash.hiscores.v1`（`[{n,s,st,c,id}]`）／`momiji-dash.playername.v1`（前回の名前）。**ブラウザごとの記録**なので、端末やブラウザを変えると別のランキングになる（全員で共有するランキングにするには サーバー側の保存先が別途必要）
-- 検証フック: `__dash.scores()` / `__dash.entryInfo()` / `__dash.entrySubmit('NAME')` / `__dash.resetScores()`
+- 保存キー: `momiji-dash.hiscores.v1`（`[{n,s,st,c,id}]`）／`momiji-dash.playername.v1`（前回の名前）／`momiji-dash.online.v1`（共有ランキングの最新スナップショット）
+
+### 🌐 オンライン共有ランキング（2026-11-21）
+
+- 順位表は **別の人のスマホとも共有**される。Google Apps Script のウェブアプリを共有サーバーにして、上位20件（スコア降順）を持っている
+  - エンドポイント: `https://script.google.com/macros/s/AKfycbznjuK_fsaeScf_ve1r1VX7Xh8EPNMdu9o1KnqxE0PRNcErQMWsZ_gXEz2I2Fc0JNy8Pg/exec`
+  - `GET`（`?t=Date.now()` でキャッシュ防止）→ `{ ok:true, scores:[{name,score,stage,clear,ts}, ...] }`
+  - `POST`（CORSプリフライト回避のため `Content-Type: text/plain;charset=utf-8` で JSON 文字列を送る、`redirect:'follow'`）→ `{ ok:true, rank, scores:[...] }`（`rank` は上位20位以内なら 1〜20、圏外は `null`）
+- **タイトル画面**: 起動時とタイトル表示時に `GET` して順位表と `BEST` を更新。取得できたら `🌐 共有ランキング（みんなの記録）`、取れなければ端末のキャッシュ（`momiji-dash.online.v1`＋ローカル記録）で表示し `📴 オフライン表示（この端末の記録）` と出す。ヘッダ右の小さな **↻** ボタンでいつでも読み直せる（読み込み中は回転）
+- **記録画面**: `記録する ▶` を押すとボタンが `送信中...` になり、共有サーバーへ `POST`。返ってきた `rank` で `🏆 ○位ランクイン！`（1位は **NEW RECORD!!**）、圏外は `上位20位まで あと少し…`。同時に返ってきた `scores` で順位表とキャッシュも更新
+- 通信できないときはローカル保存にフォールバックし、**「オフライン保存（○位）／ 共有ランキングに送れませんでした」** と正直に表示（二重登録防止・前回の名前の保持はそのまま）
+- 検証フック: `__dash.scores()` / `__dash.entryInfo()` / `__dash.entrySubmit('NAME')` / `__dash.resetScores()` / `__dash.online()` / `__dash.onlineRefresh()` / `__dash.onlineReset()`

@@ -281,6 +281,22 @@
   .rbEmpty{padding:7px 2px;font-size:11px;color:#9fb0e0}
   .rbFoot{margin-top:5px;padding-top:4px;border-top:1px dashed rgba(255,190,110,.3);
     font-size:9px;letter-spacing:.04em;color:#ffc98c}
+  .rbHead .rbTitle{display:flex;align-items:center;gap:5px;min-width:0}
+  .rbReload{flex:0 0 auto;width:18px;height:18px;padding:0;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;touch-action:manipulation;
+    border:1px solid rgba(255,200,110,.6);background:rgba(255,190,90,.14);color:#ffe6a8;
+    font:900 11px/1 system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  .rbReload:active{transform:scale(.9)}
+  .rbReload.busy{animation:rbSpin 1s linear infinite;opacity:.85}
+  @keyframes rbSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .rbNet{display:flex;align-items:center;gap:5px;margin:-1px 0 6px;font:700 9px/1.25 "Courier New",ui-monospace,monospace;
+    letter-spacing:.05em;color:#bfd0ff;white-space:nowrap;overflow:hidden}
+  .rbNet .rbNetDot{flex:0 0 auto;width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor}
+  .rbNet.on{color:#8ff0c0}
+  .rbNet.on .rbNetDot{animation:rbPulse 2.2s ease-in-out infinite}
+  .rbNet.off{color:#ffc07a}
+  .rbNet.loading .rbNetDot{animation:rbPulse .9s ease-in-out infinite}
+  @keyframes rbPulse{0%,100%{opacity:.45}50%{opacity:1}}
   @media (max-width:480px){.rbRow:nth-child(n+6){display:none}.rankBoard{margin-bottom:10px}}
 
   /* ---------- NAME ENTRY（ゲーセン風の名前入力） ---------- */
@@ -416,7 +432,8 @@
       <h1 id="ovTitle">紅葉ダッシュ！</h1>
       <p class="sub" id="ovSub">〜 巨大化 ＆ タイムワープ・アクション 〜</p>
       <div class="rankBoard" id="rankBoard" aria-label="ハイスコアランキング">
-        <div class="rbHead"><span>🏆 HIGH SCORE RANKING</span><span class="rbBest" id="rankBest">BEST —</span></div>
+        <div class="rbHead"><span class="rbTitle">🏆 HIGH SCORE RANKING<button id="rbReload" class="rbReload" type="button" aria-label="共有ランキングを読み直す" title="順位を読み直す">↻</button></span><span class="rbBest" id="rankBest">BEST —</span></div>
+        <div class="rbNet loading" id="rankNet"><span class="rbNetDot" aria-hidden="true"></span><span id="rankNetTxt">🌐 共有ランキングを読み込み中…</span></div>
         <ol class="rbList" id="rankList"></ol>
         <div class="rbFoot" id="rankFoot">★=ステージクリア　10位まで記録</div>
       </div>
@@ -2730,6 +2747,7 @@ function showTitle(){
   btnStart.hidden=true;
   entryHide();closeEntryModal();renderRanking();
   if(rankBoardEl)rankBoardEl.hidden=false;
+  onlineRefresh();
   overlay.classList.remove('hidden');
 }
 function showGoal(){
@@ -2796,7 +2814,7 @@ const RANK_KEY='momiji-dash.hiscores.v1',PNAME_KEY='momiji-dash.playername.v1',R
 const RANK_SEED=[{n:'サクラ',s:1800,st:1,c:0},{n:'ドク',s:1000,st:1,c:0},{n:'ハチ',s:600,st:1,c:0}];
 let runN=0;
 const SCORE={
-  list:[],last:'',done:false,pending:null,savedRank:0,lastId:0,
+  list:[],last:'',done:false,busy:false,pending:null,savedRank:0,lastId:0,lastScore:0,
   init(){
     let loaded=null;
     try{const raw=localStorage.getItem(RANK_KEY);if(raw){const a=JSON.parse(raw);if(Array.isArray(a))loaded=a;}}catch(e){loaded=null;}
@@ -2822,6 +2840,118 @@ function normName(v){
   s=s.replace(/[a-z]/g,ch=>ch.toUpperCase());
   return s||'GUEST';
 }
+
+/* ---------- ONLINE SHARED RANKING（Google Apps Script の共有ランキング） ---------- */
+const ONLINE_URL='https://script.google.com/macros/s/AKfycbznjuK_fsaeScf_ve1r1VX7Xh8EPNMdu9o1KnqxE0PRNcErQMWsZ_gXEz2I2Fc0JNy8Pg/exec',
+      ONLINE_KEY='momiji-dash.online.v1';
+const ONLINE={url:ONLINE_URL,status:'idle',err:'',scores:[],at:0,reqId:0};
+function normServerScores(a){
+  const out=[];
+  if(!Array.isArray(a))return out;
+  for(let i=0;i<a.length;i++){
+    const o=a[i];if(!o)continue;
+    const s=Number(o.score);if(!isFinite(s))continue;
+    const stRaw=Math.round(Number(o.stage));
+    const st=(isFinite(stRaw)&&stRaw>0)?Math.min(stRaw,99):1;
+    const n=String(o.name==null?'':o.name).replace(/[\r\n\t]/g,' ').replace(/\s+/g,' ').trim().slice(0,10)||'GUEST';
+    out.push({n:n,s:Math.max(0,Math.round(s)),st:st,c:o.clear?1:0,ts:Number(o.ts)||0});
+  }
+  out.sort((x,y)=>y.s-x.s);
+  return out.slice(0,20);
+}
+function loadOnlineCache(){
+  try{
+    const raw=localStorage.getItem(ONLINE_KEY);if(!raw)return;
+    const o=JSON.parse(raw);if(!o||!Array.isArray(o.scores))return;
+    ONLINE.scores=normServerScores(o.scores);ONLINE.at=Number(o.at)||0;
+  }catch(e){}
+}
+function saveOnlineCache(){
+  try{
+    localStorage.setItem(ONLINE_KEY,JSON.stringify({at:ONLINE.at,
+      scores:ONLINE.scores.map(r=>({name:r.n,score:r.s,stage:r.st,clear:!!r.c,ts:r.ts}))}));
+  }catch(e){}
+}
+/* 表示用の順位表: 共有ランキングが取れていればそれを、オフラインならローカル記録と最後のキャッシュを合成 */
+function onlineBoard(){
+  const out=[],seen={};
+  const push=(r,online)=>{
+    const k=r.n+'|'+r.s+'|'+r.st+'|'+r.c;
+    if(seen[k])return;seen[k]=1;
+    out.push({n:r.n,s:r.s,st:r.st,c:r.c,id:(r.id!=null?r.id:('o:'+k)),online:!!online});
+  };
+  for(let i=0;i<ONLINE.scores.length;i++)push(ONLINE.scores[i],true);
+  if(ONLINE.status!=='on'){for(let i=0;i<SCORE.list.length;i++)push(SCORE.list[i],false);}
+  out.sort((a,b)=>b.s-a.s);
+  return out.slice(0,RANK_MAX);
+}
+function renderNetStatus(){
+  const wrap=document.getElementById('rankNet'),txt=document.getElementById('rankNetTxt'),btn=document.getElementById('rbReload');
+  const s=ONLINE.status;
+  if(wrap){
+    wrap.classList.remove('on','off','loading');
+    wrap.classList.add(s==='on'?'on':(s==='off'?'off':'loading'));
+  }
+  if(txt)txt.textContent=(s==='on')?'🌐 共有ランキング（みんなの記録）'
+    :(s==='off'?'📴 オフライン表示（この端末の記録）':'🌐 共有ランキングを読み込み中…');
+  if(btn){
+    btn.classList.toggle('busy',s==='loading');
+    btn.setAttribute('aria-busy',s==='loading'?'true':'false');
+    btn.disabled=(s==='loading');
+  }
+}
+function onlineRefresh(){
+  const rid=++ONLINE.reqId;
+  ONLINE.status='loading';
+  renderNetStatus();
+  let ctl=null,t=null;
+  try{
+    if(typeof AbortController!=='undefined')ctl=new AbortController();
+    t=setTimeout(()=>{try{if(ctl)ctl.abort();}catch(e){}},9000);
+    fetch(ONLINE.url+'?t='+Date.now(),{method:'GET',cache:'no-store',redirect:'follow',signal:ctl?ctl.signal:undefined})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(d=>{
+        if(rid!==ONLINE.reqId)return;
+        if(!d||d.ok!==true||!Array.isArray(d.scores))throw new Error('invalid response');
+        ONLINE.scores=normServerScores(d.scores);ONLINE.at=Date.now();ONLINE.status='on';ONLINE.err='';
+        saveOnlineCache();renderRanking();
+      })
+      .catch(err=>{
+        if(rid!==ONLINE.reqId)return;
+        ONLINE.status='off';ONLINE.err=String((err&&err.message)||err||'error');
+        renderRanking();
+      })
+      .then(()=>{if(t)clearTimeout(t);});
+  }catch(e){
+    ONLINE.status='off';ONLINE.err=String((e&&e.message)||e||'error');renderRanking();
+  }
+}
+function onlinePost(payload){
+  return new Promise((resolve,reject)=>{
+    let ctl=null,t=null;
+    const done=()=>{if(t)clearTimeout(t);};
+    try{
+      if(typeof AbortController!=='undefined')ctl=new AbortController();
+      t=setTimeout(()=>{try{if(ctl)ctl.abort();}catch(e){}},12000);
+      const rid=++ONLINE.reqId;
+      fetch(ONLINE.url,{method:'POST',redirect:'follow',cache:'no-store',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),
+        signal:ctl?ctl.signal:undefined})
+        .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+        .then(d=>{
+          done();
+          if(!d||d.ok!==true)throw new Error('invalid response');
+          if(rid===ONLINE.reqId){
+            if(Array.isArray(d.scores)){ONLINE.scores=normServerScores(d.scores);ONLINE.at=Date.now();saveOnlineCache();}
+            ONLINE.status='on';ONLINE.err='';
+          }
+          const rk=Number(d.rank);
+          resolve({rank:(isFinite(rk)&&rk>0)?Math.round(Math.min(rk,20)):null,scores:ONLINE.scores});
+        })
+        .catch(err=>{done();reject(err);});
+    }catch(e){done();reject(e);}
+  });
+}
 const entrySlot=document.getElementById('entrySlot'),
       rankBoardEl=document.getElementById('rankBoard'),
       entryCard=document.getElementById('entryCard'),
@@ -2837,11 +2967,12 @@ const entrySlot=document.getElementById('entrySlot'),
 function renderRanking(){
   const ol=document.getElementById('rankList'),best=document.getElementById('rankBest'),foot=document.getElementById('rankFoot');
   if(!ol)return;
-  const L=SCORE.list;
+  const L=onlineBoard();
   let h='';
   for(let i=0;i<L.length;i++){
     const r=L[i],k=i+1;
-    h+='<li class="rbRow '+(k<=3?('rb'+k):'rbN')+(r.id===SCORE.lastId?' mine':'')+'">'+
+    const mine=(!!SCORE.last&&r.n===SCORE.last&&r.s===SCORE.lastScore)||(!!SCORE.lastId&&r.id===SCORE.lastId);
+    h+='<li class="rbRow '+(k<=3?('rb'+k):'rbN')+(mine?' mine':'')+'">'+
        '<span class="rbRk">'+k+'</span>'+
        '<span class="rbNm">'+escHtml(r.n)+'</span>'+
        '<span class="rbSc">'+r.s.toLocaleString('ja-JP')+'</span>'+
@@ -2851,6 +2982,7 @@ function renderRanking(){
   ol.innerHTML=h;
   if(best)best.textContent=L.length?('BEST '+L[0].s.toLocaleString('ja-JP')):'BEST —';
   if(foot)foot.textContent='★=ステージクリア　あなた：'+(SCORE.last||'—');
+  renderNetStatus();
 }
 function setEntryMsg(t,cls){if(!ecMsg)return;ecMsg.textContent=t||'';ecMsg.className='ecMsg'+(cls?' '+cls:'');}
 function entryKey(p){return p?((p.score||0)+'|'+(p.stage||1)+'|'+(p.cleared?1:0)+'|'+(p.run==null?'-':p.run)):'';}
@@ -2877,26 +3009,49 @@ function entryShow(pending,host){
 }
 function entryHide(){if(entryCard){entryCard.hidden=true;entryCard.classList.remove('done');}}
 function entrySubmit(){
-  if(!entryCard||SCORE.done||!SCORE.pending)return null;
+  if(!entryCard||SCORE.busy||SCORE.done||!SCORE.pending)return null;
   const name=normName(ecName?ecName.value:'');
   const p=SCORE.pending;
   const rec={n:name,s:Math.max(0,Math.round(p.score||0)),st:p.stage||1,c:p.cleared?1:0,id:Date.now()};
   SCORE.list.push(rec);SCORE.sortList();
   const idx=SCORE.list.indexOf(rec);
-  const rank=idx>=0?idx+1:0;
-  SCORE.done=true;SCORE.last=name;SCORE.savedRank=rank;SCORE.lastId=rank?rec.id:0;
-  if(rank)SCORE.saveList();
+  const localRank=idx>=0?idx+1:0;
+  SCORE.done=true;SCORE.busy=true;SCORE.last=name;SCORE.lastScore=rec.s;
+  SCORE.savedRank=localRank;SCORE.lastId=localRank?rec.id:0;
+  if(localRank)SCORE.saveList();
   SCORE.saveName(name);
   if(ecName){ecName.value=name;ecName.disabled=true;}
-  if(ecBtn){ecBtn.disabled=true;ecBtn.textContent=rank?('登録済み（'+rank+'位）'):'登録済み（圏外）';}
+  if(ecBtn){ecBtn.disabled=true;ecBtn.textContent='送信中...';}
   entryCard.classList.add('done');
-  try{
-    if(rank===1){setEntryMsg('🏆 NEW RECORD!! 1位ランクイン！','new');Sfx.fanfare();}
-    else if(rank>1){setEntryMsg('🏆 '+rank+'位ランクイン！','gold');Sfx.emblem();}
-    else {setEntryMsg('TOP10まで あと少し… もう一度 挑戦！','bad');Sfx.deny();}
-  }catch(e){}
+  setEntryMsg('共有ランキングに送信中...','');
   renderRanking();
-  return {name:name,rank:rank,score:rec.s,stored:!!rank};
+  const payload={name:name,score:rec.s,stage:rec.st,clear:!!rec.c};
+  const fallback=err=>{
+    SCORE.busy=false;
+    SCORE.savedRank=localRank;SCORE.lastId=localRank?rec.id:0;
+    if(ecBtn)ecBtn.textContent=localRank?('登録済み（'+localRank+'位）'):'登録済み（圏外）';
+    ONLINE.status='off';ONLINE.err=String((err&&err.message)||err||'error');
+    try{
+      setEntryMsg(localRank?('オフライン保存（'+localRank+'位）／ 共有ランキングに送れませんでした')
+        :'オフライン保存（圏外）／ 共有ランキングに送れませんでした','bad');
+    }catch(e){}
+    renderRanking();renderNetStatus();
+    return {name:name,rank:localRank,score:rec.s,stored:!!localRank,online:false,error:ONLINE.err};
+  };
+  return onlinePost(payload).then(res=>{
+    SCORE.busy=false;
+    const rank=res.rank||0;
+    SCORE.savedRank=rank;
+    if(rank===0)SCORE.lastId=0;
+    if(ecBtn)ecBtn.textContent=rank?('登録済み（'+rank+'位）'):'登録済み（圏外）';
+    try{
+      if(rank===1){setEntryMsg('🏆 NEW RECORD!! 1位ランクイン！','new');Sfx.fanfare();}
+      else if(rank>1){setEntryMsg('🏆 '+rank+'位ランクイン！','gold');Sfx.emblem();}
+      else {setEntryMsg('上位20位まで あと少し… もう一度 挑戦！','bad');Sfx.deny();}
+    }catch(e){}
+    renderRanking();
+    return {name:name,rank:rank,score:rec.s,stored:!!rank,online:true};
+  },fallback);
 }
 function openEndingEntry(){
   if(st.mode!=='ending')return;
@@ -2909,6 +3064,11 @@ function closeEntryModal(){
   if(entryCard){if(entrySlot)entrySlot.appendChild(entryCard);entryCard.hidden=true;}
 }
 if(ecBtn)ecBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();entrySubmit();});
+const rbReloadBtn=document.getElementById('rbReload');
+if(rbReloadBtn)rbReloadBtn.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  if(ONLINE.status!=='loading')onlineRefresh();
+});
 if(ecName)ecName.addEventListener('keydown',e=>{
   if(e.key==='Enter'||e.key==='NumpadEnter'){e.preventDefault();e.stopPropagation();entrySubmit();return;}
   e.stopPropagation();
@@ -2916,7 +3076,9 @@ if(ecName)ecName.addEventListener('keydown',e=>{
 if(emClose)emClose.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeEntryModal();});
 if(endEntry)endEntry.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openEndingEntry();});
 SCORE.init();
+loadOnlineCache();
 renderRanking();
+renderNetStatus();
 
 function startGame(stageId){
   applyStage(stageId||STAGE.id||1);
@@ -12777,6 +12939,15 @@ window.__dash={
     titleText:(document.getElementById('rankList')||{innerText:''}).innerText.replace(/\n/g,' / ')};},
   entrySubmit(v){if(v!=null&&ecName)ecName.value=v;return entrySubmit();},
   resetScores(){try{localStorage.removeItem(RANK_KEY);localStorage.removeItem(PNAME_KEY);}catch(e){}SCORE.init();renderRanking();return this.scores();},
+  online(){return {status:ONLINE.status,err:ONLINE.err,at:ONLINE.at,count:ONLINE.scores.length,
+    scores:ONLINE.scores.map(r=>({name:r.n,score:r.s,stage:r.st,clear:r.c,ts:r.ts})),
+    net:(document.getElementById('rankNetTxt')||{}).textContent||'',
+    netClass:(document.getElementById('rankNet')||{}).className||'',
+    reloadBusy:!!(document.getElementById('rbReload')&&document.getElementById('rbReload').classList.contains('busy')),
+    busy:!!SCORE.busy,
+    board:(document.getElementById('rankList')||{innerText:''}).innerText.replace(/\n/g,' / ')};},
+  onlineRefresh(){onlineRefresh();return true;},
+  onlineReset(){try{localStorage.removeItem(ONLINE_KEY);}catch(e){}ONLINE.scores=[];ONLINE.at=0;ONLINE.status='idle';renderRanking();return true;},
   setScore(n){st.score=Math.max(0,Math.round(n||0));updateHUD(true);return st.score;},
   result(kind){if(kind==='over'){st.mode='over';showOver();}else{st.mode='goal';showGoal();}return this.entryInfo();},
   midTriggerX(){return (STAGE.def&&STAGE.def.mid)?STAGE.def.mid.trigger+8:null;},

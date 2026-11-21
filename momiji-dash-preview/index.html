@@ -2288,23 +2288,38 @@ function buildLevel(){
     LV.items.push({type:'gold',x:gx,y:groundYRef-goldings[gi].off,taken:false,ph:rnd()*6.283,goldIdx:gi+1});
   }
   /* 乗り物・動物（RIDE）：各ステージの 道中 2箇所に 光るカプセルで 置く
-     谷・トンネル・ボス闘技場・中ボス／ライバルの 現場を よけて ずらす */
+     谷・トンネル・ボス闘技場・中ボス／ライバルの 現場を よけて、
+     目標位置の 前後から 障害物の すき間を さがす（見つからなければ 条件を ゆるめる） */
   const rides=RIDE_PLAN[d.id]||['boar','car'];
   const tm0=travelMode();
+  const ridePlaced=[];
+  const rideOK=(x,clear)=>{
+    if(x<700)return false;
+    if(x>d.boss.trigger-900)return false;
+    if(LV.gaps.some(g=>x>g.x0-200&&x<g.x1+200))return false;
+    if(LV.tunnels.some(t=>x>t.x0-220&&x<t.x1+220))return false;
+    if(LV.obstacles.some(o=>Math.abs(o.x-x)<clear))return false;
+    if(DOC_X.some(dd=>Math.abs(dd-x)<240))return false;
+    if(CP_X.some(c=>Math.abs(c-x)<180))return false;
+    if(d.mid&&x>d.mid.trigger-720&&x<d.mid.x1+620)return false;
+    if(rv&&x>rv.x0-220&&x<rv.x1+220)return false;
+    if(ridePlaced.some(o=>Math.abs(o-x)<900))return false;
+    return true;
+  };
   for(let ri=0;ri<rides.length;ri++){
     const kind=rides[ri];
-    let rx=d.len*(ri===0?0.30:0.66), rn=0;
-    const rideBad=()=>
-      LV.gaps.some(g=>rx>g.x0-200&&rx<g.x1+200)||
-      LV.tunnels.some(t=>rx>t.x0-220&&rx<t.x1+220)||
-      LV.obstacles.some(o=>Math.abs(o.x-rx)<260)||
-      DOC_X.some(dd=>Math.abs(dd-rx)<240)||
-      CP_X.some(c=>Math.abs(c-rx)<180)||
-      (d.mid&&rx>d.mid.trigger-720&&rx<d.mid.x1+620)||
-      (rv&&rx>rv.x0-220&&rx<rv.x1+220)||
-      rx>d.boss.trigger-900 || rx<700;
-    while(rideBad()&&rn++<40)rx+=150;
-    if(rideBad())continue;
+    const target=d.len*(ri===0?0.30:0.66);
+    let rx=null;
+    for(const clear of [260,190,130]){
+      for(let n=0;n<26&&rx==null;n++){
+        for(const cand of [target+n*130,target-n*130]){
+          if(rideOK(cand,clear)){rx=cand;break;}
+        }
+      }
+      if(rx!=null)break;
+    }
+    if(rx==null)continue;
+    ridePlaced.push(rx);
     const off=tm0==='swim'?205:(tm0==='fly'?215:66);
     LV.items.push({type:'ride',kind,x:rx,y:groundYRef-off,off,_banded:true,taken:false,ph:rnd()*6.283});
   }

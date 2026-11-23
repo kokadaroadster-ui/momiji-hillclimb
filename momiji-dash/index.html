@@ -891,6 +891,12 @@ const rr=(a,b)=>a+(b-a)*rnd();
 const MOMIJI=['#e8452c','#f2743a','#f2b02e','#c92f2a','#ff8a3d','#d9562b'];
 
 /* ======================= sound ======================= */
+/* 🔊 音量バランス（2026-11-23：GSミアタの 声が iPhoneでも はっきり 聞こえるように）
+   BGMは 基準を 少し下げ、声が 鳴っている間は さらに 22%まで 自動で 下げる（ダッキング） */
+const MASTER_MIX=0.42;        /* 全体の マスター音量 */
+const BGM_MIX=0.72;           /* BGMバスの 基準音量（以前は 0.9） */
+const VOICE_DUCK=0.22;        /* 声の間の BGM（通常の 22%） */
+const VOICE_TAIL_MS=2000;     /* 声が 終わってから BGMが 戻るまでの 余韻（約2秒） */
 const Sfx={
   ac:null,master:null,musBus:null,muted:false,nb:null,
   init(){
@@ -899,7 +905,7 @@ const Sfx={
       const AC=window.AudioContext||window.webkitAudioContext;
       this.ac=new AC();
       this.master=this.ac.createGain();
-      this.master.gain.value=this.muted?0:.42;
+      this.master.gain.value=this.muted?0:MASTER_MIX;
       this.master.connect(this.ac.destination);
       this._bus();
       const len=Math.floor(this.ac.sampleRate*1.2);
@@ -911,7 +917,7 @@ const Sfx={
   _bus(){
     if(!this.ac||!this.master||this.musBus)return;
     this.musBus=this.ac.createGain();
-    this.musBus.gain.value=.9;
+    this.musBus.gain.value=BGM_MIX;
     this.musBus.connect(this.master);
   },
   t(){return this.ac?this.ac.currentTime:0;},
@@ -944,7 +950,35 @@ const Sfx={
       s.start(t);s.stop(t+dur+.02);
     }catch(e){}
   },
-  setMuted(m){this.muted=m;if(this.master)this.master.gain.value=m?0:.42;},
+  setMuted(m){this.muted=m;if(this.master)this.master.gain.value=m?0:MASTER_MIX;},
+  /* 🔊 声の 合図（トークボックス風の 短いファンファーレ）：
+     speechSynthesis が OS・アプリ内ブラウザの 仕様で 鳴らない環境でも 「喋った感」が 出るように、
+     発話の 頭で 短く 鳴らす（声が 通る環境では BGMダッキングと 合わせて 声を 前に 出す） */
+  voiceCue(kind){
+    if(!this.ac||this.muted)return;
+    try{
+      const t=this.t();
+      const en=kind==='en';
+      const notes=en?[783.99,987.77,1318.51]:[659.25,880.00,1174.66];
+      const step=0.072,dur=0.085;
+      notes.forEach((f,i)=>{
+        const when=t+i*step;
+        const o=this.ac.createOscillator(),bp=this.ac.createBiquadFilter(),g=this.ac.createGain();
+        o.type='sawtooth';
+        o.frequency.setValueAtTime(f*0.88,when);
+        o.frequency.exponentialRampToValueAtTime(f,when+step*0.55);
+        bp.type='bandpass';bp.Q.value=4.2;
+        bp.frequency.setValueAtTime(1350,when);
+        bp.frequency.exponentialRampToValueAtTime(2100,when+dur);
+        g.gain.setValueAtTime(0.0001,when);
+        g.gain.linearRampToValueAtTime(.16,when+.010);
+        g.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+        o.connect(bp);bp.connect(g);g.connect(this.master);
+        o.start(when);o.stop(when+dur+.03);
+      });
+      this.noise(.05,.045,1400,1.1,0,3200);
+    }catch(e){}
+  },
   jump(n){this.tone(n>1?520:380,.14,'square',.14,n>1?900:720);this.noise(.07,.05,900,1,0,2200);},
   coin(){this.tone(1046,.06,'square',.10);this.tone(1568,.10,'square',.09,null,.055);},
   emblem(){[880,1174,1568,2093].forEach((f,i)=>this.tone(f,.10,'square',.09,null,i*.05));},
@@ -1963,8 +1997,12 @@ function musicUpdate(dt){
   let duck=1;
   if(BOSS.phase==='defeat'||MID.phase==='defeat')duck=.16;
   else if(st.mode==='run'&&nearDocStage()<700)duck=.20;
-  Mus.vol=lerp(Mus.vol,duck,Math.min(1,dt*3));
-  if(Sfx.musBus)Sfx.musBus.gain.value=.9*Mus.vol;
+  /* 🔊 GSミアタの 声：話し始め〜終了後 約2秒まで BGMを 通常の 22%まで 下げる（声が かき消されない） */
+  if(voiceDucking())duck=Math.min(duck,VOICE_DUCK);
+  /* 下げるのは 素早く、戻すのは ゆっくり（声の 余韻を 残す） */
+  const k=duck<Mus.vol?Math.min(1,dt*16):Math.min(1,dt*2.0);
+  Mus.vol=lerp(Mus.vol,duck,k);
+  if(Sfx.musBus)Sfx.musBus.gain.value=BGM_MIX*Mus.vol;
   if(!Mus.track)return;
   let bpm=MUS_BPM[Mus.track]||MRUN.bpm;
   /* ボスが本気を出すとBGMも速くなる */
@@ -3451,7 +3489,10 @@ function bindHold(el,on,off){
   const down=e=>{
     e.preventDefault();
     try{el.setPointerCapture&&el.setPointerCapture(e.pointerId);}catch(_){}
-    el.classList.add('on'); on();
+    el.classList.add('on');
+    /* 🔊 タップの ハンドラ内で 声の アンロック（resume）を 通してから アクションを 呼ぶ（iOS対策） */
+    try{voiceUnlock();}catch(_){}
+    on();
   };
   const up=()=>{el.classList.remove('on'); if(off)off();};
   el.addEventListener('pointerdown',down,{passive:false});
@@ -3481,6 +3522,8 @@ bindHold(bJ,()=>{setHold('up','jump',true);doJump();},()=>setHold('up','jump',fa
     e.preventDefault();
     try{el.setPointerCapture&&el.setPointerCapture(e.pointerId);}catch(_){}
     el.classList.add('on');
+    /* 🔊 Wの タップでも 声の アンロックを 通す（相方コンビの 声を 同期で 鳴らすため） */
+    try{voiceUnlock();}catch(_){}
     wPressStart();
   };
   const up=()=>{el.classList.remove('on');wPressEnd();};
@@ -3544,6 +3587,8 @@ if(dpad){
   dpad.addEventListener('pointerdown',e=>{
     e.preventDefault();
     try{dpad.setPointerCapture(e.pointerId);}catch(_){}
+    /* 🔊 ▼の タップで オーライの 声を 同期で 鳴らせるように アンロック */
+    try{voiceUnlock();}catch(_){}
     dpadPtrs.set(e.pointerId,null);
     dpadMove(e.pointerId,e);
   },{passive:false});
@@ -3971,8 +4016,9 @@ function startGame(stageId){
   entryHide();closeEntryModal();
   if(endEntry)endEntry.classList.remove('show');
   Sfx.init();
-  /* iOS Safari：STARTの タップで 声（speechSynthesis）を アンロック */
-  voiceUnlock();
+  /* iOS Safari：STARTの タップで 声（speechSynthesis）を アンロック
+     毎回 アンロックし直す（resume＋極短無音発話）ので、前の プレイで 無音に なっても 復活する */
+  if(!Voice.unlocked||performance.now()-Voice.unlockT>1500){Voice.unlocked=false;voiceUnlock(true);}
   buildLevel(); relocateItems();
   st.mode='run'; st.t=0; st.runT=0; st.camX=-40; st.shake=0; st.flash=0;
   st.score=0; st.coins=0; st.hearts=4; st.gauge=0; st.bats=0;
@@ -6535,10 +6581,18 @@ function rideTrail(dt){
    「ハイオク満タン！」「In Japan we say...!」「オーライ！オーライ！」を speechSynthesis で 喋る。
    イッセイ＝低めで 張りのある男性風（pitch 0.90）／ミニー＝明るく高い声（pitch 1.30）
    START・ボタンの タップで アンロック（iOS Safari 対策）、ミュート中は 喋らない、連続発話は 待って かぶらない */
+const VoiceDuck={until:0};
+/* 声が 鳴っている間（開始直前〜終了後 約2秒）は true ：BGMの ダッキングに 使う */
+function voiceDucking(){return VoiceDuck.until>performance.now();}
+function voiceDuckHold(ms){VoiceDuck.until=Math.max(VoiceDuck.until,performance.now()+Math.max(0,ms));}
+function voiceDuckClear(){VoiceDuck.until=0;}
+
 const Voice={
   supported:(typeof window!=='undefined')&&('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window),
-  unlocked:false, said:0, lastText:'', lastAt:0, seqAt:0,
-  timers:[], voices:[], last:null, lastVoiceName:''
+  unlocked:false, said:0, lastText:'', lastAt:0, seqAt:0, unlockT:0,
+  timers:[], voices:[], last:null, lastVoiceName:'',
+  utts:[],                 /* 発話オブジェクトの 保持（GCで 無音になるのを 防ぐ） */
+  busyCancel:0, queueWait:0, cue:0, blocked:0
 };
 function voiceVoices(){
   if(!Voice.supported)return Voice.voices;
@@ -6559,42 +6613,110 @@ function voicePick(en){
   if(heroKey==='issei')return c.find(v=>/otoya|hattori|takumi|male|man|男性|google 日本語/i.test(v.name||''))||c[0];
   return c[0];
 }
-function voiceUnlock(){
+/* アンロック：iOS Safari / アプリ内ブラウザ では 「ユーザーの操作（タップ）」の中で
+   speechSynthesis.resume() ＋ 極短の無音発話を 通さないと、以後の speak() が 無音になる。
+   START・ステージ選択・ボタンの pointerdown から 必ず 呼ぶ */
+function voiceUnlock(force){
   if(!Voice.supported)return false;
   try{
-    if(window.speechSynthesis.paused)window.speechSynthesis.resume();
+    const ss=window.speechSynthesis;
+    if(ss.paused)ss.resume();
     voiceVoices();
-    if(!Voice.unlocked){
+    if(!Voice.unlocked||force){
       const u=new SpeechSynthesisUtterance('ん');
       u.volume=0.01;u.lang='ja-JP';u.rate=1.1;u.pitch=1;
-      window.speechSynthesis.speak(u);
-      Voice.unlocked=true;
+      Voice.utts.push(u);
+      if(Voice.utts.length>8)Voice.utts.shift();
+      ss.speak(u);
+      try{ss.resume();}catch(e){}
+      Voice.unlocked=true;Voice.unlockT=performance.now();
+      /* 端末によっては resume() が 少し遅れて 効くので もう一度 かける */
+      Voice.timers.push(setTimeout(()=>{try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}},140));
     }
   }catch(e){}
   return Voice.unlocked;
 }
-function voiceCancel(){
+function voiceDropPending(){
   for(const t of Voice.timers)clearTimeout(t);
   Voice.timers.length=0;
+}
+function voiceCancel(){
+  voiceDropPending();
+  voiceDuckClear();
   if(!Voice.supported)return;
   try{window.speechSynthesis.cancel();}catch(e){}
 }
-function voiceSayOne(text){
-  if(!Voice.supported||!text||Sfx.muted||!Voice.unlocked)return false;
+function voiceForget(u){const i=Voice.utts.indexOf(u);if(i>=0)Voice.utts.splice(i,1);}
+/* 1こと 声に 出す時間の 見積り（ミリ秒）。ダッキングを 声の長さに 合わせる */
+function voiceEstMs(text,en){
+  const n=(text||'').length;
+  return clamp((en?62:118)*n+420,650,3400);
+}
+/* 実際に speak() する（同期）。音量は 1.0 を 明示し、声の間は BGMを 下げる */
+function voiceSpeakNow(text,en){
+  if(!Voice.supported||!text||Sfx.muted)return false;
   try{
-    const en=/^[\x20-\x7E]+$/.test(text);
+    const ss=window.speechSynthesis;
+    if(ss.paused)ss.resume();
     const u=new SpeechSynthesisUtterance(text);
     u.lang=en?'en-US':'ja-JP';
     u.pitch=heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0);
     u.rate=1.12;
-    u.volume=1;
+    u.volume=1.0;                            /* ← 最大音量を 明示（iOSの 既定音量対策） */
     const v=voicePick(en);
     if(v){u.voice=v;Voice.lastVoiceName=v.name||'';}else Voice.lastVoiceName='';
-    window.speechSynthesis.speak(u);
+    const est=voiceEstMs(text,en);
+    /* start で 伸ばし、end で 「終了後 約2秒」まで 保持する（onstart が 来ない端末対策で speak 時にも 押さえる） */
+    u.onstart=()=>{voiceDuckHold(est+VOICE_TAIL_MS);};
+    u.onend=()=>{voiceDuckHold(VOICE_TAIL_MS);voiceForget(u);};
+    u.onerror=()=>{voiceDuckHold(VOICE_TAIL_MS);voiceForget(u);Voice.blocked++;};
+    Voice.utts.push(u);
+    if(Voice.utts.length>8)Voice.utts.shift();
+    voiceDuckHold(est+VOICE_TAIL_MS);
+    Sfx.voiceCue(en?'en':'ja');               /* トークボックス風の 合図音（声が 鳴らない端末でも 喋った感） */
+    Voice.cue++;
+    ss.speak(u);
     Voice.said++;Voice.lastText=text;Voice.lastAt=performance.now();
-    Voice.last={text,lang:u.lang,pitch:u.pitch,rate:u.rate,voice:Voice.lastVoiceName};
+    Voice.last={text,lang:u.lang,pitch:u.pitch,rate:u.rate,volume:u.volume,voice:Voice.lastVoiceName,estMs:est};
     return true;
   }catch(e){return false;}
+}
+/* 1こと 喋る：
+   iOSで 「話している最中の cancel() → 直後の speak()」が 無音になるバグを 避けるため、
+   speaking || pending の ときだけ cancel() し、そのときは 40ms 待ってから speak()。
+   それ以外（通常）は そのまま 同期的に speak() する（タップの ハンドラ内でも そのまま 鳴る） */
+function voiceSayOne(text){
+  if(!Voice.supported||!text||Sfx.muted||!Voice.unlocked)return false;
+  const en=/^[\x20-\x7E]+$/.test(text);
+  let ss=null;
+  try{ss=window.speechSynthesis;}catch(e){}
+  const busy=!!(ss&&(ss.speaking||ss.pending));
+  if(busy){
+    Voice.busyCancel++;
+    try{ss.cancel();}catch(e){}
+    Voice.timers.push(setTimeout(()=>{if(!Sfx.muted)voiceSpeakNow(text,en);},40));
+    Voice.lastText=text;Voice.lastAt=performance.now();
+    return true;                             /* 40ms後に 鳴る約束 */
+  }
+  return voiceSpeakNow(text,en);
+}
+/* 待ってから 喋る（連続セリフの 2つ目以降：前の声を 切らずに 終わりを 待つ） */
+function voiceSpeakQueued(text,tries){
+  if(!Voice.supported||!text||Sfx.muted)return false;
+  const en=/^[\x20-\x7E]+$/.test(text);
+  let ss=null;
+  try{ss=window.speechSynthesis;}catch(e){}
+  if(ss&&(ss.speaking||ss.pending)){
+    if((tries|0)>=20){                       /* 1.6秒 待っても 終わらない → 入れ替える */
+      Voice.queueWait++;
+      try{ss.cancel();}catch(e){}
+      Voice.timers.push(setTimeout(()=>{if(!Sfx.muted)voiceSpeakNow(text,en);},40));
+      return true;
+    }
+    Voice.timers.push(setTimeout(()=>voiceSpeakQueued(text,(tries|0)+1),80));
+    return true;
+  }
+  return voiceSpeakNow(text,en);
 }
 /* 1こと（クールダウン 2.2秒で かぶりを 防ぐ） */
 function voiceSay(text){
@@ -6602,32 +6724,41 @@ function voiceSay(text){
   if(!Voice.unlocked)voiceUnlock();
   if(!Voice.unlocked)return false;
   const now=performance.now();
-  if(now-Voice.seqAt<2200)return false;
+  if(now-Voice.seqAt<2200&&Voice.seqAt>0)return false;
   Voice.seqAt=now;
-  voiceCancel();
+  voiceDropPending();
   return voiceSayOne(text);
 }
-/* 連続セリフ（例：ハイオク満タン！ → In Japan we say...!） */
+/* 連続セリフ（例：ハイオク満タン！ → In Japan we say...!）
+   1つ目は すぐ 喋り、続きは 前の声が 終わるのを 待ってから 喋る（かぶせて cancel しない） */
 function voiceSayLines(lines,gap){
   if(!Voice.supported||Sfx.muted||!lines||!lines.length)return false;
   if(!Voice.unlocked)voiceUnlock();
   if(!Voice.unlocked)return false;
   const now=performance.now();
-  if(now-Voice.seqAt<2600)return false;
+  if(now-Voice.seqAt<2600&&Voice.seqAt>0)return false;
   Voice.seqAt=now;
-  voiceCancel();
+  voiceDropPending();
   const g=gap==null?900:gap;
   const ok=voiceSayOne(lines[0]);
   for(let i=1;i<lines.length;i++){
-    const t=setTimeout(()=>{if(!Sfx.muted)voiceSayOne(lines[i]);},g*i);
+    const t=setTimeout(()=>{if(!Sfx.muted)voiceSpeakQueued(lines[i],0);},g*i);
     Voice.timers.push(t);
   }
   return ok;
 }
 if(Voice.supported){
   try{window.speechSynthesis.onvoiceschanged=()=>voiceVoices();}catch(e){}
-  try{window.addEventListener('pointerdown',()=>voiceUnlock(),{once:true});
-      window.addEventListener('keydown',()=>voiceUnlock(),{once:true});}catch(e){}
+  /* 最初の タップ／キーで アンロック（以後も ボタンの pointerdown から 呼び直す） */
+  try{window.addEventListener('pointerdown',()=>voiceUnlock());
+      window.addEventListener('keydown',()=>voiceUnlock());}catch(e){}
+  /* アプリ切替・バックグラウンド復归で iOSは speechSynthesis が paused になる → 戻ったら resume */
+  try{
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible'){try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}}
+    });
+    window.addEventListener('pageshow',()=>{try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}});
+  }catch(e){}
 }
 
 /* ======================= GSミアタ 4大アクション（2026-11-23） =======================
@@ -15036,8 +15167,13 @@ window.__dash={
   voiceInfo(){return {supported:Voice.supported,unlocked:Voice.unlocked,muted:Sfx.muted,said:Voice.said,
     last:Voice.last,lastText:Voice.lastText,seqAt:Math.round(Voice.seqAt),
     speaking:(Voice.supported?!!window.speechSynthesis.speaking:false),
+    pending:(Voice.supported?!!window.speechSynthesis.pending:false),
     voices:(Voice.supported?(window.speechSynthesis.getVoices()||[]).map(v=>v.name+'/'+v.lang).slice(0,8):[]),
-    hero:heroKey,pitch:heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0)};},
+    hero:heroKey,pitch:heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0),
+    ducking:voiceDucking(),duckMsLeft:Math.max(0,Math.round(VoiceDuck.until-performance.now())),
+    duckFactor:VOICE_DUCK,cue:Voice.cue,busyCancel:Voice.busyCancel,queueWait:Voice.queueWait,blocked:Voice.blocked};},
+  voiceDuckNow(ms){voiceDuckHold(ms==null?2000:ms);return voiceDucking();},
+  voiceDuckInfo(){return {ducking:voiceDucking(),left:Math.max(0,Math.round(VoiceDuck.until-performance.now())),vol:Math.round(Mus.vol*1000)/1000,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*1000)/1000:null,bgmMix:BGM_MIX,duckFactor:VOICE_DUCK};},
   voiceUnlock(){return voiceUnlock();},
   voiceTest(t){return voiceSay(t||'ハイオク満タン！');},
   voiceLines(){return voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);},

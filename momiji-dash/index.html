@@ -160,41 +160,6 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 3px 10px rgba(255,90,30,.45))}
   .panel .sub{margin:6px 0 14px;font-size:clamp(11px,2.6vmin,13px);color:#ffcaa0;letter-spacing:.06em}
-  /* ---------- 主人公セレクト（3択） ---------- */
-  .charSel{margin:0 0 12px;padding:8px 8px 7px;border-radius:14px;
-    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
-    border:1px solid rgba(255,180,130,.30)}
-  .charSel[hidden]{display:none}
-  .csTitle{margin:0 0 6px;font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#ffd0a8}
-  .csRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-  .csCard{position:relative;cursor:pointer;min-width:0;padding:3px 4px 4px;border-radius:11px;
-    border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#f3e7e0;
-    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;
-    font-family:inherit;transition:border-color .12s,background .12s,transform .12s;
-    -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-  .csCard:active{transform:scale(.97)}
-  .csThumb{display:flex;align-items:flex-end;justify-content:center;width:100%;
-    height:clamp(42px,11.4vmin,54px);pointer-events:none;overflow:hidden}
-  .csThumb img{max-height:100%;max-width:100%;object-fit:contain;
-    filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))}
-  /* GSの2人は 全身絵なので、サムネイルでは 顔〜胸までを 大きく見せる */
-  .csThumb.gs img{transform:scale(2.6);transform-origin:50% 8%}
-  .csName{font-size:clamp(9.5px,2.3vmin,11px);font-weight:800;line-height:1.15;white-space:nowrap;
-    max-width:100%;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-  .csTag{font-size:8.5px;font-weight:800;letter-spacing:.06em;color:#9fd8ff;opacity:.9;line-height:1;pointer-events:none}
-  .csCard.on{border-color:#ffb066;
-    background:linear-gradient(180deg,rgba(255,170,80,.32),rgba(255,110,40,.12));
-    box-shadow:0 0 0 2px rgba(255,140,60,.35),0 4px 14px rgba(255,120,40,.28)}
-  .csCard.on .csName{color:#fff6e8}
-  .csCard.on::after{content:'✓';position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
-    background:linear-gradient(180deg,#ffe08a,#ff9f2e);color:#4a1404;font-size:11px;font-weight:900;
-    line-height:18px;text-align:center;box-shadow:0 2px 7px rgba(0,0,0,.5)}
-  .charSel .csFoot{margin:5px 0 0;font-size:9.5px;color:#ffcaa0;opacity:.85;line-height:1.3}
-  @media (max-height:430px){
-    .charSel{margin-bottom:8px;padding:6px 6px 5px}
-    .csThumb{height:34px}
-    .charSel .csFoot{display:none}
-  }
   .how{list-style:none;margin:0 0 16px;padding:0;text-align:left;display:grid;gap:7px}
   .how li{display:flex;gap:9px;align-items:flex-start;font-size:clamp(11.5px,2.7vmin,13.5px);line-height:1.5;color:#f2e7e2}
   .how .k{flex:0 0 auto;min-width:52px;text-align:center;padding:2px 7px;border-radius:8px;
@@ -455,26 +420,7 @@
     .gchip{font-size:9px;padding:2px 4px}
   }
 
-  /* ---------- GSミアタ（イッセイ・ミニー）の 4大アクション ---------- */
-  #gsPill{color:#ffe9b0;font-weight:900;letter-spacing:.04em}
-  #gsPill.ready{background:linear-gradient(90deg,rgba(255,150,40,.5),rgba(255,70,60,.5));
-    border-color:#ffd76a;box-shadow:0 0 12px rgba(255,180,70,.7);animation:ridePulse 1.1s infinite}
-  #gsPill.hot{background:linear-gradient(90deg,rgba(90,210,130,.55),rgba(255,200,60,.5));
-    border-color:#c8ffd8;color:#fff}
-  @media (max-width:520px){#gsPill{padding:5px 6px;font-size:10px}}
-  /* Wボタン：相方コンビの クールダウン／ホールドを 円弧で表示 */
   .wbtn{position:relative;overflow:visible}
-  .wbtn .ring{position:absolute;inset:-8px;border-radius:50%;pointer-events:none;opacity:0;
-    transition:opacity .12s ease;
-    background:conic-gradient(from -90deg,#ffe14d 0deg,#ff9a3d var(--cg,0deg),rgba(255,255,255,.12) var(--cg,0deg) 360deg);
-    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
-    mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px))}
-  .wbtn.showRing .ring{opacity:1}
-  .wbtn.ringFull .ring{background:conic-gradient(from -90deg,#fff6a8 0deg,#ffd23a 360deg);
-    filter:drop-shadow(0 0 6px rgba(255,220,110,.95))}
-  .wbtn.gsReady{animation:gsReady .9s infinite}
-  @keyframes gsReady{0%,100%{box-shadow:0 0 16px rgba(255,140,40,.55),0 5px 14px rgba(0,0,0,.3)}
-    50%{box-shadow:0 0 30px 8px rgba(255,206,90,.95),0 5px 14px rgba(0,0,0,.3)}}
 </style>
 </head>
 <body>
@@ -495,7 +441,6 @@
       <div class="pill" id="batWrap">⚡<b id="bat">0</b></div>
       <div class="pill" id="powerPill" hidden>BIG</div>
       <div class="pill" id="ridePill" hidden>🏎️ RIDE</div>
-      <div class="pill" id="gsPill" hidden>⛽ 相方 OK</div>
       <div class="pill" id="comboPill"><span id="comboLbl">COMBO</span> <b id="combo">0</b><span id="comboMult" class="mult" hidden>×1.5</span><span id="feverTag" hidden>🔥FEVER <b id="feverT">8</b>s</span></div>
       <div class="pill" id="travPill" hidden>深度 <b id="travVal">0</b>m</div>
     </div>
@@ -510,16 +455,16 @@
 
   <div id="pad">
     <div class="side left">
-      <div class="dpad" id="dpad" role="group" aria-label="十字キー（左右で移動・上でジャンプ／上昇・下で潜水／下降、GSミアタは下でオーライ誘導＆窓拭き）">
+      <div class="dpad" id="dpad" role="group" aria-label="十字キー（左右で移動・上でジャンプ／上昇・下で潜水／下降）">
         <button id="bU" class="btn" aria-label="上（ジャンプ／浮上）">▲</button>
         <button id="bL" class="btn" aria-label="左（減速）">◀</button>
         <span class="dcore" aria-hidden="true"></span>
         <button id="bR" class="btn" aria-label="右（加速）">▶</button>
-        <button id="bD" class="btn" aria-label="下（潜水／下降、GSミアタはオーライ誘導＆窓拭き）">▼</button>
+        <button id="bD" class="btn" aria-label="下（潜水／下降）">▼</button>
       </div>
     </div>
     <div class="side right">
-      <button id="bW" class="btn wbtn" aria-label="Wスペシャル（相方コンビ必殺技・ホールドでも発動）">W<i id="bWRing" class="ring" aria-hidden="true"></i></button>
+      <button id="bW" class="btn wbtn" aria-label="Wスペシャル">W</button>
       <button id="bM" class="btn shot" aria-label="ミサイル／魚雷を発射（長押しでチャージ、離すと波動砲）">🚀<i id="bMRing" class="ring" aria-hidden="true"></i></button>
       <button id="bJ" class="btn jump" aria-label="ジャンプ／上昇">JUMP</button>
     </div>
@@ -536,26 +481,6 @@
     <div class="panel">
       <h1 id="ovTitle">おはたかダッシュ！</h1>
       <p class="sub" id="ovSub">〜 巨大化 ＆ タイムワープ・アクション 〜</p>
-      <div class="charSel" id="charSel" role="radiogroup" aria-label="主人公をえらぶ">
-        <div class="csTitle">主人公を えらぶ <span id="csCurrent"></span></div>
-        <div class="csRow">
-          <button class="csCard on" type="button" data-hero="default" role="radio" aria-checked="true" aria-label="ワッカーを選ぶ">
-            <span class="csThumb"><img src="../giant_char.png" alt="" draggable="false"></span>
-            <span class="csName">ワッカー</span>
-          </button>
-          <button class="csCard" type="button" data-hero="issei" role="radio" aria-checked="false" aria-label="イッセイ（GSミアタ）を選ぶ">
-            <span class="csThumb gs"><img src="gs_issei.png" alt="" draggable="false"></span>
-            <span class="csName">イッセイ</span>
-            <span class="csTag">GSミアタ</span>
-          </button>
-          <button class="csCard" type="button" data-hero="minnie" role="radio" aria-checked="false" aria-label="ミニー（GSミアタ）を選ぶ">
-            <span class="csThumb gs"><img src="gs_minnie.png" alt="" draggable="false"></span>
-            <span class="csName">ミニー</span>
-            <span class="csTag">GSミアタ</span>
-          </button>
-        </div>
-        <p class="csFoot">えらんだ主人公で 全8ステージを 走ります（タップで チェンジ）</p>
-      </div>
       <div class="rankBoard" id="rankBoard" aria-label="ハイスコアランキング">
         <div class="rbHead"><span class="rbTitle">🏆 HIGH SCORE RANKING<button id="rbReload" class="rbReload" type="button" aria-label="共有ランキングを読み直す" title="順位を読み直す">↻</button></span><span class="rbBest" id="rankBest">BEST —</span></div>
         <div class="rbNet loading" id="rankNet"><span class="rbNetDot" aria-hidden="true"></span><span id="rankNetTxt">🌐 共有ランキングを読み込み中…</span></div>
@@ -645,11 +570,6 @@
         <li><span class="k">DEPTH</span><span>ステージ6 地底潜航：段差を おりながら 浅層→結晶洞→マグマ層へ。落石・ドリルメカ・コウモリ・溶岩弾</span></li>
         <li><span class="k w">SHOT</span><span>🚀ミサイル／魚雷（水中は魚雷）：F・X（または Enter）で発射、短く押すと連射。水中・空中の敵を 1発で撃破（刺客・ウツボは2発）、中ボス・ボス・4人目の刺客にも ダメージ、敵の弾も 撃ち落とせる</span></li>
         <li><span class="k w">WAVE</span><span>🚀長押し＝波動砲チャージ！ 約0.9秒でMAX（ボタンの まわりが 光る）→ 離すと 極太ビームが 前方を 貫通。道中の敵・敵弾は まとめて消し飛ばし、中ボス・ボス・4人目の刺客に 大ダメージ（5〜6）。0.35秒以上で 小ビーム（2ダメージ）</span></li>
-        <li><span class="k w">GAS</span><span>イッセイ・ミニー（GSミアタ）を 選ぶと、🚀は ミサイル／波動砲ではなく <b>ガソリン噴射</b> に変化（短押しで 黄金〜虹色の 燃料ジェット・長押しで 超高圧ガソリンジェット）。威力・射程・連射は ワッカーの ミサイル／波動砲と 同じで、飛沫ぶん 当たりやすい</span></li>
-        <li><span class="k w">GS⛽</span><span><b>イッセイ・ミニー</b>で W：相方が カットイン＆並走して <b>「ハイオク満タン！」「In Japan we say...!」</b>。約5秒間 無敵＋超加速の ターボダッシュ（Wボタンの 円弧＝クールダウン、ホールドでも 発動。ゲージ満タンの巨大化・⚡タイムワープは これまでどおり タップで優先）</span></li>
-        <li><span class="k w">GS👋</span><span><b>イッセイ・ミニー</b>で 十字キーの ▼（↓/S）：スクイジー（窓拭き）＆誘導の弧で <b>「オーライ！オーライ！」「ピカピカ！」</b>。周囲の敵弾を 前方へ 跳ね返して 敵にダメージ、至近距離のザコ敵も ふき飛ばす（地上でも空中でもOK。水中では これまでどおり 潜水）</span></li>
-        <li><span class="k w">GS🏎️</span><span><b>RIDE に 乗っている間</b>に 🚀（または W）：<b>ハイオク満タンブースト</b>！ 黄金〜炎の ターボ噴射・超スピード・無敵体当たりで 敵を 弾き飛ばして ボーナス得点</span></li>
-        <li><span class="k w">GS🏪</span><span>道中の <b>「GS MIATAS SS」給油所</b>を 通過すると、給油ノズルと火花の演出で <b>ハート+1＋ハイオク満タン</b>（しばらく 速度＆攻撃力アップ）</span></li>
         <li><span class="k w">SWIM</span><span>ステージ7 深海：十字キーの▲（または JUMP・↑）で ぐんぐん浮上、▼（↓）で しっかり潜水。押さなければ ごくゆっくり沈む。アイテムは 泳ぐ高さ（中層〜水面寄り）に 配置</span></li>
         <li><span class="k w">FLY</span><span>ステージ8 天空：▲（または JUMP・↑）で 上昇、▼（↓）で 下降。アイテムは 中高度〜上空に 配置。加速ウインドリングを くぐると スピードアップ＆スコア</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
@@ -657,7 +577,7 @@
       </ul>
       <button id="btnStart" class="btnStart">スタート ▶</button>
       <button id="btnNextStage" class="btnStart dun" hidden>🕯️ ステージ2（地下ダンジョン）へ挑む</button>
-      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）<br>🔊 イッセイ・ミニーの 声が出ないとき は iPhoneの マナースイッチ（側面）を 解除して、Safariで 開くと 確実に 鳴る<br><span style="opacity:.72">音声 v5（2026-11-23）：ハイオク！マンタン！！＝明るく張りのある日本人男性の声／In Japan we say＝キラッと明るい女の子の声</span></p>
+      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）</p>
     </div>
   </div>
 </div>
@@ -712,25 +632,19 @@ function resize(){
   ctx.setTransform(DPR*S,0,0,DPR*S,0,0);
   ctx.imageSmoothingEnabled=true;
   if(LV.items.length){ for(const it of LV.items){ if(it.off!=null) it.y=groundY+floorOff(it.x)-it.off; } }
-  gsLayoutStations();
 }
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,120));
 
 /* ======================= assets ======================= */
-/* 主人公（プレイヤーキャラ）：タイトル画面で 3人から 選べる
-   default = ワッカー（バストアップ＋描画の脚）
-   issei / minnie = GSミアタの2人（全身立ち絵を そのまま描く） */
+/* 主人公（プレイヤーキャラ）：ワッカー（バストアップ＋描画の脚） */
 const HERO_DEFS={
-  default:{name:'ワッカー',src:'../giant_char.png',body:'bust'},
-  issei:{name:'イッセイ',src:'gs_issei.png',body:'full'},
-  minnie:{name:'ミニー',src:'gs_minnie.png',body:'full'}
+  default:{name:'ワッカー',src:'../giant_char.png',body:'bust'}
 };
 const HERO_IMGS={};
 for(const _hk in HERO_DEFS){
   const _im=new Image(); _im.decoding='async'; _im.src=HERO_DEFS[_hk].src; HERO_IMGS[_hk]=_im;
 }
-const HERO_STORE='momiji-dash.hero.v1';
 let heroKey='default';
 let imgRunner=HERO_IMGS.default;
 const imgDoc=new Image();    imgDoc.decoding='async';    imgDoc.src='../doc.png';
@@ -781,10 +695,6 @@ let spriteReady=false;
 const FULL_HERO_H=118;   /* 全身キャラの 足元からの高さ（バストアップの 84＋足の30＝114 に合わせる） */
 function heroBody(){return (HERO_DEFS[heroKey]||HERO_DEFS.default).body;}
 function isFullHero(){return heroBody()==='full';}
-/* GSミアタの2人（イッセイ／ミニー）は 🚀が ガソリン噴射になる */
-function isGasHero(){return heroKey==='issei'||heroKey==='minnie';}
-function shotName(){return isGasHero()?'ガソリン噴射':'ミサイル';}
-function waveName(){return isGasHero()?'超高圧ガソリンジェット':'波動砲';}
 function fullHeroW(){
   const im=imgRunner;
   const ar=(im&&im.naturalWidth&&im.naturalHeight)?im.naturalWidth/im.naturalHeight:0.55;
@@ -818,47 +728,6 @@ for(const _hk in HERO_IMGS){
   const _im=HERO_IMGS[_hk];
   _im.addEventListener('load',()=>{
     if(_im===imgRunner){assetsOK.runner=_im.naturalWidth>0;makeSprite();}
-    syncHeroCards();
-  });
-}
-/* 主人公の切りかえ（画像は すべて 先に読み込んでおく） */
-function syncHeroCards(){
-  const box=document.getElementById('charSel');
-  if(!box)return;
-  const cards=box.querySelectorAll('.csCard');
-  for(const c of cards){
-    const on=c.dataset.hero===heroKey;
-    c.classList.toggle('on',on);
-    c.setAttribute('aria-checked',on?'true':'false');
-  }
-  const cur=document.getElementById('csCurrent');
-  if(cur)cur.textContent='▸ '+(HERO_DEFS[heroKey]||HERO_DEFS.default).name;
-  const bm=document.getElementById('bM');
-  if(bm)bm.setAttribute('aria-label',isGasHero()
-    ?'ガソリン噴射（短押しで連射、長押しでチャージ、離すと超高圧ジェット）'
-    :'ミサイル／魚雷を発射（長押しでチャージ、離すと波動砲）');
-}
-function pickHero(key,save){
-  if(!HERO_DEFS[key])key='default';
-  heroKey=key;
-  imgRunner=HERO_IMGS[key];
-  assetsOK.runner=imgRunner.naturalWidth>0;
-  makeSprite();
-  syncHeroCards();
-  if(save!==false){try{localStorage.setItem(HERO_STORE,key);}catch(e){}}
-  return heroKey;
-}
-(function initHeroChoice(){
-  let v=null; try{v=localStorage.getItem(HERO_STORE);}catch(e){}
-  pickHero(HERO_DEFS[v]?v:'default',false);
-})();
-const charSelEl=document.getElementById('charSel');
-if(charSelEl){
-  charSelEl.addEventListener('click',e=>{
-    const card=e.target.closest('.csCard');
-    if(!card)return;
-    e.preventDefault();e.stopPropagation();
-    pickHero(card.dataset.hero);
   });
 }
 imgDoc.onload=()=>assetsOK.doc=imgDoc.naturalWidth>0;
@@ -891,12 +760,9 @@ const rr=(a,b)=>a+(b-a)*rnd();
 const MOMIJI=['#e8452c','#f2743a','#f2b02e','#c92f2a','#ff8a3d','#d9562b'];
 
 /* ======================= sound ======================= */
-/* 🔊 音量バランス（2026-11-23：GSミアタの 声が iPhoneでも はっきり 聞こえるように）
-   BGMは 基準を 少し下げ、声が 鳴っている間は さらに 22%まで 自動で 下げる（ダッキング） */
+/* 🔊 音量バランス */
 const MASTER_MIX=0.42;        /* 全体の マスター音量 */
-const BGM_MIX=0.72;           /* BGMバスの 基準音量（以前は 0.9） */
-const VOICE_DUCK=0.22;        /* 声の間の BGM（通常の 22%） */
-const VOICE_TAIL_MS=2000;     /* 声が 終わってから BGMが 戻るまでの 余韻（約2秒） */
+const BGM_MIX=0.72;           /* BGMバスの 基準音量 */
 const Sfx={
   ac:null,master:null,musBus:null,muted:false,nb:null,
   init(){
@@ -951,34 +817,6 @@ const Sfx={
     }catch(e){}
   },
   setMuted(m){this.muted=m;if(this.master)this.master.gain.value=m?0:MASTER_MIX;},
-  /* 🔊 声の 合図（トークボックス風の 短いファンファーレ）：
-     speechSynthesis が OS・アプリ内ブラウザの 仕様で 鳴らない環境でも 「喋った感」が 出るように、
-     発話の 頭で 短く 鳴らす（声が 通る環境では BGMダッキングと 合わせて 声を 前に 出す） */
-  voiceCue(kind){
-    if(!this.ac||this.muted)return;
-    try{
-      const t=this.t();
-      const en=kind==='en';
-      const notes=en?[783.99,987.77,1318.51]:[659.25,880.00,1174.66];
-      const step=0.072,dur=0.085;
-      notes.forEach((f,i)=>{
-        const when=t+i*step;
-        const o=this.ac.createOscillator(),bp=this.ac.createBiquadFilter(),g=this.ac.createGain();
-        o.type='sawtooth';
-        o.frequency.setValueAtTime(f*0.88,when);
-        o.frequency.exponentialRampToValueAtTime(f,when+step*0.55);
-        bp.type='bandpass';bp.Q.value=4.2;
-        bp.frequency.setValueAtTime(1350,when);
-        bp.frequency.exponentialRampToValueAtTime(2100,when+dur);
-        g.gain.setValueAtTime(0.0001,when);
-        g.gain.linearRampToValueAtTime(.16,when+.010);
-        g.gain.exponentialRampToValueAtTime(0.0001,when+dur);
-        o.connect(bp);bp.connect(g);g.connect(this.master);
-        o.start(when);o.stop(when+dur+.03);
-      });
-      this.noise(.05,.045,1400,1.1,0,3200);
-    }catch(e){}
-  },
   jump(n){this.tone(n>1?520:380,.14,'square',.14,n>1?900:720);this.noise(.07,.05,900,1,0,2200);},
   coin(){this.tone(1046,.06,'square',.10);this.tone(1568,.10,'square',.09,null,.055);},
   emblem(){[880,1174,1568,2093].forEach((f,i)=>this.tone(f,.10,'square',.09,null,i*.05));},
@@ -1048,52 +886,6 @@ const Sfx={
     }
   },
   boom(){this.noise(.22,.18,320,.8,0,900);this.tone(120,.16,'sawtooth',.10,58);},
-  /* --- GSミアタの2人：ガソリン噴射の SE --- */
-  gasSpray(){
-    this.noise(.17,.13,1600,1.0,2800,700);
-    this.tone(720,.13,'sawtooth',.07,300);
-    this.tone(180,.10,'square',.05,120,.02);
-  },
-  gasJet(small){
-    if(small){
-      this.noise(.30,.22,1400,1.0,3000,520);
-      this.tone(620,.26,'sawtooth',.11,160);
-      this.tone(150,.20,'square',.07,90,.02);
-    }else{
-      this.noise(.60,.32,1100,0.9,3600,260);
-      this.tone(140,.55,'sawtooth',.19,44);
-      this.tone(62,.60,'sine',.22,30,.02);
-      this.tone(1900,.22,'square',.09,300,.02);
-      this.noise(.50,.20,2600,1.1,.05,700);
-    }
-  },
-  /* --- GSミアタの 4大アクション用 --- */
-  gsCombo(){
-    /* 相方コンビ必殺技：クラクション→燃料が 満ちる上昇音→ターボ */
-    this.tone(392,.10,'square',.13);this.tone(523,.10,'square',.12,null,.09);
-    [523,659,784,1046,1318].forEach((f,i)=>this.tone(f,.11,'sawtooth',.10,null,.16+i*.055));
-    this.noise(.55,.14,1500,1.1,.12,5200);
-    this.tone(90,.5,'sine',.16,44,.3);
-  },
-  gsWipe(){
-    /* スクイジー＆誘導：シュッとした 布ずれ＋チーン */
-    this.noise(.22,.16,2600,1.5,0,900);
-    this.noise(.16,.10,1200,1.2,700,2600);
-    this.tone(1760,.22,'sine',.10,2350);
-    this.tone(2637,.16,'sine',.06,null,.06);
-  },
-  gsBoost(){
-    this.noise(.5,.20,700,1.0,0,4200);
-    this.tone(160,.44,'sawtooth',.16,760);
-    this.tone(70,.5,'sine',.14,150,.05);
-    [784,988,1174,1568].forEach((f,i)=>this.tone(f,.10,'square',.09,null,.12+i*.05));
-  },
-  gsFill(){
-    /* 給油：チン♪ と 燃料が入る コポコポ */
-    this.tone(1568,.10,'sine',.09);this.tone(2093,.16,'sine',.07,null,.07);
-    for(let i=0;i<4;i++)this.tone(300+i*70,.09,'sine',.07,420+i*60,.1+i*.09);
-    this.noise(.36,.09,900,1.2,.05,2200);
-  },
   bubble(){this.tone(520,.10,'sine',.09,1150);this.tone(900,.09,'sine',.05,null,.05);},
   wind(){this.noise(.34,.085,900,1.1,0,2700);},
   thunder(){this.noise(.5,.10,220,.8,0,120);this.tone(72,.42,'sawtooth',.075,40);},
@@ -1413,72 +1205,6 @@ function playRunStep(i,when){
   if(s===0||s===6||s===8||s===14)mkick(when);
   if(s===4||s===12)msnare(when);
   if(bar===3&&(s===13||s===15))mnoise(.10,.035,700,1.0,when);
-}
-/* ===== キャラ別の 走行BGM（GSミアタ） =====
-   イッセイ: JDMナイトの ユーロビート（154BPM・４つ打ち＋爆速シンセベース）
-   ミニー : 明るくキャッチーな ポップ（152BPM・弾むアルペジオと クラップ）
-   ワッカーは 従来の MRUN（148BPM）のまま、ボス曲・特殊ステージ曲（地下・水中・空など）も そのまま */
-const MRUN_ISSEI={
-  bpm:154,
-  roots:[45,41,43,40],
-  arp:[[69,72,76,79],[65,69,72,76],[67,71,74,79],[64,68,71,76]],
-  mel:[
-    [81,null,79,null,76,null,79,null,81,null,84,null,81,null,79,null],
-    [77,null,76,null,72,null,76,null,77,null,81,null,77,null,76,null],
-    [79,null,83,null,86,null,83,null,79,null,83,null,86,null,88,null],
-    [76,null,80,null,83,null,80,null,76,null,80,null,83,null,76,null]
-  ]
-};
-function playRunIsseiStep(i,when){
-  const bar=Math.floor(i/16)%4, s=i%16, root=MRUN_ISSEI.roots[bar];
-  /* ４つ打ちキック＋オフビートのハット（ユーロビートの 疾走感） */
-  if(s%4===0)mkick(when);
-  if(s%4===2)mnoise(.035,.014,9200,1.8,when);
-  if(s===4||s===12)msnare(when);
-  /* シンセベース：８分で オクターブ跳ね */
-  if(s%2===0){
-    const oct=(s%8===6)?12:0;
-    mnote(mtof(root-12+oct),.11,'sawtooth',.060,when);
-  }
-  /* ファンキーな スタブ */
-  if(s===0||s===3||s===6||s===10||s===13){
-    const ch=MRUN_ISSEI.arp[bar];
-    mnote(mtof(ch[0]),.10,'square',.024,when);
-    mnote(mtof(ch[2]),.10,'square',.019,when);
-  }
-  const mel=MRUN_ISSEI.mel[bar];
-  if(mel[s]!=null)mnote(mtof(mel[s]),.12,'sawtooth',.028,when);
-  if(bar===3&&(s===14||s===15))mnoise(.09,.030,1200,1.0,when);
-}
-const MRUN_MINNIE={
-  bpm:152,
-  roots:[48,43,45,41],
-  arp:[[72,76,79,84],[67,71,74,79],[69,72,76,81],[65,69,72,77]],
-  mel:[
-    [84,null,84,86,null,84,null,79,81,null,79,null,76,null,null,null],
-    [83,null,83,86,null,83,null,79,81,null,79,null,74,null,null,null],
-    [81,null,81,84,null,81,null,76,79,null,76,null,72,null,null,null],
-    [77,null,77,81,null,77,null,72,74,null,74,null,77,null,null,null]
-  ]
-};
-function playRunMinnieStep(i,when){
-  const bar=Math.floor(i/16)%4, s=i%16, root=MRUN_MINNIE.roots[bar];
-  if(s===0||s===8||s===10)mkick(when);
-  if(s===4||s===12)mnoise(.07,.048,2200,1.2,when);      /* クラップ */
-  if(s%4===2)mnoise(.03,.013,9500,1.6,when);
-  if(s%2===0){
-    const seq=MRUN_MINNIE.arp[bar];
-    mnote(mtof(seq[(s>>1)%4]),.10,'square',.026,when);
-  }
-  if(s%4===0)mnote(mtof(root-12),.16,'triangle',.048,when);
-  const mel=MRUN_MINNIE.mel[bar];
-  if(mel[s]!=null)mnote(mtof(mel[s]),.10,'triangle',.030,when);
-  if(bar===3&&s===15)mnote(mtof(84),.18,'triangle',.026,when);
-}
-/* 走行曲を キャラに合わせて 差し替える（特殊ステージの曲は そのまま） */
-function heroRunTrack(base){
-  if(base!=='run'||!isGasHero())return base;
-  return heroKey==='issei'?'run_issei':'run_minnie';
 }
 
 /* ボス戦BGM: 緊迫のマイナー・リフ */
@@ -1973,11 +1699,11 @@ function playSkyBossStep(i,when){
   if(s===15&&bar%2===1)mnoise(.3,.03,180,3,when);
   if(s%8===3)mnoise(.06,.014,4200,3,when);
 }
-const MUS_BPM={run:MRUN.bpm,run_issei:MRUN_ISSEI.bpm,run_minnie:MRUN_MINNIE.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
+const MUS_BPM={run:MRUN.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
   camp:MCAMP.bpm,camp_boss:MCAMPBOSS.bpm,yatai:MYATAI.bpm,yatai_boss:MYATAIBOSS.bpm,
   castle:MCASTLE.bpm,final_boss:MFINALBOSS.bpm,tl_boss:MTLB.bpm,
   depth:MDEPTH.bpm,depth_boss:MDBOSS2.bpm,aqua:MAQUA.bpm,aqua_boss:MABOSS2.bpm,sky:MSKY.bpm,sky_boss:MSBOSS2.bpm};
-const MUS_STEP={run:playRunStep,run_issei:playRunIsseiStep,run_minnie:playRunMinnieStep,
+const MUS_STEP={run:playRunStep,
   boss:playBossStep,dungeon:playDungeonStep,dungeon_boss:playDungeonBossStep,
   ending:playEndingStep,camp:playCampStep,camp_boss:playCampBossStep,yatai:playYataiStep,
   yatai_boss:playYataiBossStep,castle:playCastleStep,final_boss:playFinalBossStep,tl_boss:playTlbStep,
@@ -1991,14 +1717,12 @@ function musicUpdate(dt){
   const fighting=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='defeat'||BOSS.phase==='warning');
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight'||MID.phase==='defeat');
   if(st.mode==='ending')want='ending';
-  else if(st.mode==='run')want=(fighting||midFight)?(tlBoss?'tl_boss':d.bossTrack):heroRunTrack(d.runTrack);
+  else if(st.mode==='run')want=(fighting||midFight)?(tlBoss?'tl_boss':d.bossTrack):d.runTrack;
   if(want!==Mus.track){Mus.track=want;Mus.step=0;Mus.next=0;}
   if(!Sfx.ac)return;
   let duck=1;
   if(BOSS.phase==='defeat'||MID.phase==='defeat')duck=.16;
   else if(st.mode==='run'&&nearDocStage()<700)duck=.20;
-  /* 🔊 GSミアタの 声：話し始め〜終了後 約2秒まで BGMを 通常の 22%まで 下げる（声が かき消されない） */
-  if(voiceDucking())duck=Math.min(duck,VOICE_DUCK);
   /* 下げるのは 素早く、戻すのは ゆっくり（声の 余韻を 残す） */
   const k=duck<Mus.vol?Math.min(1,dt*16):Math.min(1,dt*2.0);
   Mus.vol=lerp(Mus.vol,duck,k);
@@ -2402,7 +2126,7 @@ let DOC_X=STAGE_DEFS[1].docs;
 let CP_X=STAGE_DEFS[1].cps;
 const LV={
   len:21000, goalX:20340,
-  obstacles:[], items:[], gaps:[], tunnels:[], docs:[], checkpoints:[], stations:[]
+  obstacles:[], items:[], gaps:[], tunnels:[], docs:[], checkpoints:[]
 };
 
 function applyStage(id){
@@ -2645,46 +2369,6 @@ function buildLevel(){
       if(it.x>rv.x0-40&&it.x<rv.x1+40&&(it.type==='star'||it.type==='power'||it.type==='capsule'||it.type==='battery'))LV.items.splice(i,1);
     }
   }
-  /* 🏪 GS MIATAS SS 給油所：各ステージの 道中 2箇所（谷・トンネル・ボス闘技場・中ボス／ライバルの 現場を よける）
-     乗り物カプセル（RIDE）の すぐ隣は さける。水上・空中ステージは 浮かぶ給油所として ベースを 上げる */
-  LV.stations.length=0;
-  {
-    const tmS=travelMode();
-    const baseOff=(tmS==='swim')?198:((tmS==='fly')?208:0);
-    const targets=[0.20,0.56];
-    const placedS=[];
-    const okStation=(x,clear)=>{
-      if(x<900)return false;
-      if(x>d.boss.trigger-1100)return false;
-      if(LV.gaps.some(g=>x>g.x0-280&&x<g.x1+280))return false;
-      if(LV.tunnels.some(t=>x>t.x0-280&&x<t.x1+280))return false;
-      if(LV.obstacles.some(o=>Math.abs(o.x-x)<clear))return false;
-      if(DOC_X.some(dd=>Math.abs(dd-x)<260))return false;
-      if(CP_X.some(c=>Math.abs(c-x)<200))return false;
-      if(d.mid&&x>d.mid.trigger-780&&x<d.mid.x1+680)return false;
-      if(rv&&x>rv.x0-280&&x<rv.x1+280)return false;
-      if(placedS.some(o=>Math.abs(o-x)<1300))return false;
-      if(ridePlaced.some(o=>Math.abs(o-x)<460))return false;
-      return true;
-    };
-    for(let si=0;si<targets.length;si++){
-      const target=d.len*targets[si];
-      let sx=null;
-      for(const clear of [300,220,150]){
-        for(let n=0;n<32&&sx==null;n++){
-          for(const cand of [target+n*140,target-n*140]){
-            if(okStation(cand,clear)){sx=cand;break;}
-          }
-        }
-        if(sx!=null)break;
-      }
-      if(sx==null)continue;
-      placedS.push(sx);
-      LV.stations.push({x:sx,off:baseOff,y:groundY+floorOff(sx)-baseOff,used:false,
-        t:rnd()*6.283,label:'GS MIATAS SS',sign:si===0?'ハイオク給油所':'ハイオク・セルフ'});
-    }
-  }
-  gsLayoutStations();
   // checkpoint torii-ish flags get drawn from LV.checkpoints
 }
 const groundYRef=404;   /* 参照Y（生成時のみ使用、描画はgroundY基準の相対で補正） */
@@ -2752,7 +2436,7 @@ const BADGES=[
   {id:'gold',  icon:'👑', name:'黄金コンプ', desc:'黄金のモミジ 3枚を そろえて クリア'},
   {id:'fever', icon:'🔥', name:'FEVER達成',  desc:'FEVER TIME に 突入する'},
   {id:'dodge', icon:'💨', name:'JUST回避',   desc:'JUST DODGE を 決める'},
-  {id:'wave',  icon:'🚀', name:'波動砲／ガソリンジェット', desc:'🚀を MAXまで チャージして 発射（イッセイ・ミニーは 超高圧ガソリンジェット）'},
+  {id:'wave',  icon:'🚀', name:'波動砲', desc:'🚀を MAXまで チャージして 発射'},
   {id:'combo', icon:'⛓', name:'50コンボ',   desc:'50コンボを つなげる'},
   {id:'all',   icon:'🏆', name:'全8面制覇',  desc:'8ステージ すべて クリア'}
 ];
@@ -3115,15 +2799,13 @@ function fireMissile(){
   MSL.cool=MSL.cd;MSL.count++;
   const tm=travelMode();
   const y=P.y-(tm==='run'?44:36);
-  const gas=isGasHero();
-  /* ガソリン噴射は 射程を 少し長く（life 2.1） */
-  MSL.list.push({x:P.x+30,y,vx:MSL.speed,vy:0,t:0,life:gas?2.1:1.9,under:(tm==='swim'),gas});
-  if(gas)Sfx.gasSpray(); else Sfx.missile();
+  MSL.list.push({x:P.x+30,y,vx:MSL.speed,vy:0,t:0,life:1.9,under:(tm==='swim')});
+  Sfx.missile();
   return true;
 }
-function missileBurst(x,y,r,big,gas){
+function missileBurst(x,y,r,big){
   const n=big?18:10;
-  const cols=gas?['#fff3a0','#ffd166','#ff9a3d','#9dffc4','#9edcff']:['#ffe45a','#ff8a3d','#fff','#9be6ff'];
+  const cols=['#ffe45a','#ff8a3d','#fff','#9be6ff'];
   for(let i=0;i<n;i++)spark(x+rr(-r,r),y+rr(-r,r),rr(2,5),cols[i%cols.length]);
   for(let i=0;i<(big?7:4);i++)puff(x+rr(-r,r),y+rr(-r,r),big?4.5:3);
   st.shake=Math.max(st.shake,big?.45:.2);
@@ -3136,10 +2818,10 @@ function missileVsShots(m){
     for(let i=g.length-1;i>=0;i--){
       const s=g[i];
       if(s.delay>0)continue;
-      const r=(s.r||14)+(m.gas?16:10);
+      const r=(s.r||14)+10;
       if(Math.abs(s.x-m.x)<r&&Math.abs(s.y-m.y)<r){
         g.splice(i,1);
-        missileBurst(s.x,s.y,10,false,m.gas);
+        missileBurst(s.x,s.y,10,false);
         addScore(30,s.x,s.y);MSL.hits++;
         return true;
       }
@@ -3150,14 +2832,13 @@ function missileVsShots(m){
 /* 障害物・敵キャラに 命中：1発で 撃破（刺客と ウツボは2発） */
 function missileHitObstacle(o,m){
   if(o.hp==null)o.hp=(o.type==='assassin')?2:(o.type==='eel'?2:1);
-  /* ⛽ ハイオク満タン中は 攻撃力UP（障害物・ザコは 2倍ダメージ） */
-  o.hp-=(GS.hiOct>0?2:1);MSL.hits++;
+  o.hp-=1;MSL.hits++;
   if(o.hp<=0){
-    missileBurst(m.x,m.y,16,true,m.gas);
+    missileBurst(m.x,m.y,16,true);
     MSL.killed++;
     smashObstacle(o);
   }else{
-    missileBurst(m.x,m.y,12,false,m.gas);
+    missileBurst(m.x,m.y,12,false);
     addScore(60,m.x,m.y);st.combo++;trackCombo();
   }
 }
@@ -3174,7 +2855,7 @@ function missileUpdate(dt){
         if(o.dead)continue;
         if(o.type==='windring'||o.type==='bubbleRing'||o.type==='stormcloud')continue;
         const ox=obX(o), ot=obTop(o);
-        const pad=m.gas?11:4;   /* ガソリン噴射は 飛沫ぶん 当たり判定を 少し広く */
+        const pad=4;   /* 当たり判定の 余裕 */
         if(m.x<ox-o.w/2-pad||m.x>ox+o.w/2+pad)continue;
         if(m.y<ot-pad||m.y>ot+o.h+pad)continue;
         missileHitObstacle(o,m);hit=true;break;
@@ -3183,23 +2864,23 @@ function missileUpdate(dt){
     if(!hit&&MID.active&&MID.phase==='fight'){
       const half=midHalfW(),top=MID.y-midDH()*0.9,bot=MID.y-6;
       if(m.x>MID.x-half&&m.x<MID.x+half&&m.y>top&&m.y<bot){
-        damageMid(GS.hiOct>0?2:1,'shot');MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
+        damageMid(1,'shot');MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
       }
     }
     if(!hit&&BOSS.active&&BOSS.phase==='fight'){
       const half=bossHalfW(),top=BOSS.y-bossHitTop(),bot=BOSS.y-6;
       if(m.x>BOSS.x-half&&m.x<BOSS.x+half&&m.y>top&&m.y<bot){
-        damageBoss(GS.hiOct>0?2:1,'shot');MSL.hits++;missileBurst(m.x,m.y,18,true);hit=true;
+        damageBoss(1,'shot');MSL.hits++;missileBurst(m.x,m.y,18,true);hit=true;
       }
     }
     if(!hit&&RIVAL.active&&RIVAL.phase==='fight'){
       const half=rivalHalfW(),top=rivalTop(),bot=groundY;
       if(m.x>RIVAL.x-half&&m.x<RIVAL.x+half&&m.y>top&&m.y<bot){
-        damageRival(GS.hiOct>0?2:1);MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
+        damageRival(1);MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
       }
     }
     if(hit||m.t>m.life||m.x-st.camX>VW+90||m.x<P.x-460){
-      if(!hit)missileBurst(m.x,m.y,7,false,m.gas);
+      if(!hit)missileBurst(m.x,m.y,7,false);
       MSL.list.splice(i,1);
     }
   }
@@ -3228,10 +2909,6 @@ function wcCancel(){
 }
 function shotPress(){
   if(st.mode!=='run')return;
-  /* GSミアタ：RIDE中は 🚀の タップで ハイオク満タンブースト（長押しチャージは これまでどおり） */
-  if(isGasHero()&&RIDE.active&&gsRideBoostReady()){
-    if(activateGsRideBoost('shot'))return;
-  }
   if(WC.charging)return;
   fireMissile();
   WC.charging=true;WC.t=0;WC.full=false;WC.partT=0;
@@ -3253,11 +2930,10 @@ function onWcFull(){
   WC.fulls++;
   Sfx.chargeMax();
   st.shake=Math.max(st.shake,.5);
-  const gas=isGasHero();
-  st.flash=Math.max(st.flash,.28);st.flashCol=gas?'255,228,150':'200,245,255';
-  st.pops.push({x:P.x,y:P.y-152,text:gas?'MAX！ ガソリン満タン':'MAX！ 波動砲 OK',t:0,life:1.1,col:'#fff3a0'});
-  msg(gas?'MAX！ 離すと 超高圧ジェット!!':'MAX！ 離すと 波動砲!!');
-  const cols=gas?['#ffd166','#9dffc4','#fff']:['#9be6ff','#fff3a0','#fff'];
+  st.flash=Math.max(st.flash,.28);st.flashCol='200,245,255';
+  st.pops.push({x:P.x,y:P.y-152,text:'MAX！ 波動砲 OK',t:0,life:1.1,col:'#fff3a0'});
+  msg('MAX！ 離すと 波動砲!!');
+  const cols=['#9be6ff','#fff3a0','#fff'];
   for(let i=0;i<26;i++)spark(P.x+rr(-70,70),P.y-rr(10,140),rr(2,5),cols[i%3]);
 }
 function fireWaveCannon(small){
@@ -3265,19 +2941,18 @@ function fireWaveCannon(small){
   const tm=travelMode();
   const y=P.y-(tm==='run'?52:36);
   const dmg=small?2:6;
-  const gas=isGasHero();
   WC.beams.push({x0:P.x+22,y,front:P.x+72,w:small?30:82,t:0,life:small?.42:.60,
-                 dmg,small,gas,hitB:false,hitM:false,hitR:false,kills:0});
+                 dmg,small,hitB:false,hitM:false,hitR:false,kills:0});
   WC.fired++;WC.shots++;WC.lastDmg=dmg;WC.maxDmg=Math.max(WC.maxDmg,dmg);
   if(!small)unlockBadge('wave');
   st.shake=Math.max(st.shake,small?.75:1.7);
   st.flash=Math.max(st.flash,small?.20:.42);
-  st.flashCol=gas?(small?'255,225,150':'255,240,190'):(small?'170,235,255':'255,252,235');
-  if(gas)Sfx.gasJet(small); else Sfx.waveCannon(small);
-  st.pops.push({x:P.x+150,y:y-72,text:gas?(small?'GAS SPRAY!':'GASOLINE JET!!'):(small?'BEAM!':'WAVE CANNON!!'),t:0,life:small?.9:1.3,
-                col:gas?'#ffe9a0':(small?'#bfefff':'#fff3a0')});
-  msg(gas?(small?'ガソリン噴射！':'超高圧ガソリンジェット 発射！！ フルパワー!!'):(small?'ビーム発射！':'波動砲 発射！！ MAX POWER!!'));
-  for(let i=0;i<(small?18:34);i++)spark(P.x+rr(20,74),y+rr(-14,14),rr(2,6),(gas?['#fff','#ffd166','#9dffc4']:['#fff','#9be6ff','#ffe45a'])[i%3]);
+  st.flashCol=small?'170,235,255':'255,252,235';
+  Sfx.waveCannon(small);
+  st.pops.push({x:P.x+150,y:y-72,text:small?'BEAM!':'WAVE CANNON!!',t:0,life:small?.9:1.3,
+                col:small?'#bfefff':'#fff3a0'});
+  msg(small?'ビーム発射！':'波動砲 発射！！ MAX POWER!!');
+  for(let i=0;i<(small?18:34);i++)spark(P.x+rr(20,74),y+rr(-14,14),rr(2,6),['#fff','#9be6ff','#ffe45a'][i%3]);
   return true;
 }
 /* 貫通判定：道中の敵・敵弾を まとめて 消し飛ばし、ボスには 大ダメージ */
@@ -3298,8 +2973,8 @@ function wcBeamHits(b){
       o.hp=0;
     }
     MSL.hits++;
-    if(o.hp<=0){MSL.killed++;b.kills++;missileBurst(ox,b.y,16,!b.small,b.gas);smashObstacle(o);}
-    else missileBurst(ox,b.y,12,false,b.gas);
+    if(o.hp<=0){MSL.killed++;b.kills++;missileBurst(ox,b.y,16,!b.small);smashObstacle(o);}
+    else missileBurst(ox,b.y,12,false);
   }
   /* 敵弾（刺客・中ボス・ボス）も まとめて 消す */
   for(const g of [FOE.shots,BOSS.shots,MID.shots]){
@@ -3308,7 +2983,7 @@ function wcBeamHits(b){
       if(s.delay>0)continue;
       if(s.x<b.x0||s.x>b.front)continue;
       if(Math.abs(s.y-b.y)>halfY+(s.r||14))continue;
-      g.splice(i,1);missileBurst(s.x,s.y,10,false,b.gas);addScore(30,s.x,s.y);MSL.hits++;
+      g.splice(i,1);missileBurst(s.x,s.y,10,false);addScore(30,s.x,s.y);MSL.hits++;
     }
   }
   /* 中ボス・ボス・ライバル：1本のビームで 1回 */
@@ -3343,7 +3018,7 @@ function wcUpdate(dt){
     if(WC.partT<=0){
       WC.partT=Math.max(.022,.058-r*.036);
       WC.parts.push({a:rr(0,6.283),r:rr(64,150),t:0,life:rr(.22,.42),sp:rr(1.6,3.4),
-                     col:isGasHero()?(Math.random()<.55?'#ffd166':'#9dffc4'):(Math.random()<.5?'#9be6ff':'#fff3a0')});
+                     col:(Math.random()<.5?'#9be6ff':'#fff3a0')});
     }
     for(let i=WC.parts.length-1;i>=0;i--){
       const p=WC.parts[i];p.t+=dt;p.r=Math.max(0,p.r-dt*(240+p.sp*160));
@@ -3395,11 +3070,7 @@ function doJump(){
 }
 function doDive(){
   if(st.mode!=='run')return;
-  if(travelMode()!=='swim'){
-    /* GSミアタ：▼は オーライ誘導＆窓拭き（地上でも空中でもOK） */
-    if(isGasHero())doGsWipe();
-    return;
-  }
+  if(travelMode()!=='swim')return;
   /* 潜水：押した瞬間に ぐっと もぐる（押し続けると さらに加速） */
   P.vy=Math.max(P.vy,150)+190;
   Sfx.dive();
@@ -3409,27 +3080,17 @@ function doDive(){
 }
 function pressW(){
   if(st.mode!=='run')return;
-  /* GSミアタ：RIDE中の W（タップ）は ハイオク満タンブースト */
-  if(isGasHero()&&RIDE.active&&gsRideBoostReady()){if(activateGsRideBoost('w'))return;}
-  /* 従来の 優先順位：巨大化（ゲージ満タン）→ タイムワープ（バッテリー）は そのまま */
+  /* 優先順位：巨大化（ゲージ満タン）→ タイムワープ（バッテリー） */
   if(st.gauge>=100){activateGiant();return;}
   if(st.bats>0){activateWarp();return;}
   if(st.giantT>0){msg('ゲージをためると さらにパワーアップ！');Sfx.deny();return;}
-  /* GSミアタ：どちらも無いときの W は 相方コンビ必殺技 */
-  if(isGasHero()){
-    if(GS.combo.cd>0){
-      msg('⛽ 相方コンビは クールダウン中（あと '+Math.ceil(GS.combo.cd)+'秒）');Sfx.deny();return;
-    }
-    if(activateGsCombo('tap'))return;
-  }
   msg('Wゲージか ⚡バッテリーをためよう！');Sfx.deny();
 }
-/* Wの 押し始め／離し（タップ＋ホールドの 両方を 扱う） */
+/* Wの 押し始め／離し */
 function wPressStart(){
-  GS.holdOn=true;GS.holdT=0;GS.holdFired=false;
   pressW();
 }
-function wPressEnd(){GS.holdOn=false;GS.holdT=0;GS.holdFired=false;}
+function wPressEnd(){}
 /* パワーアップ（1回目=BIG／2回目=MEGA）。Wゲージ満タン、またはパワーオーブで発動 */
 function grantPowerUp(src){
   const from=st.powerLv;
@@ -3490,8 +3151,6 @@ function bindHold(el,on,off){
     e.preventDefault();
     try{el.setPointerCapture&&el.setPointerCapture(e.pointerId);}catch(_){}
     el.classList.add('on');
-    /* 🔊 タップの ハンドラ内で 声の アンロック（resume）を 通してから アクションを 呼ぶ（iOS対策） */
-    try{voiceUnlock();}catch(_){}
     on();
   };
   const up=()=>{el.classList.remove('on'); if(off)off();};
@@ -3513,8 +3172,7 @@ function setHold(k,id,on){
 function clearHolds(){for(const k in holds){holds[k].clear();keys[k]=false;}}
 /* JUMP＝ジャンプ／泳ぎ蹴り／上昇。押し続けると 水中・空中で 浮上を助ける */
 bindHold(bJ,()=>{setHold('up','jump',true);doJump();},()=>setHold('up','jump',false));
-/* W＝スペシャル。タップは 従来どおり（巨大化／ワープ／GSの相方コンビ）、
-   ホールド（0.55秒）でも GSミアタは 相方コンビを 発動できる（gsUpdate で判定） */
+/* W＝スペシャル（巨大化／タイムワープ） */
 (function bindW(){
   const el=bW;
   if(!el)return;
@@ -3522,8 +3180,6 @@ bindHold(bJ,()=>{setHold('up','jump',true);doJump();},()=>setHold('up','jump',fa
     e.preventDefault();
     try{el.setPointerCapture&&el.setPointerCapture(e.pointerId);}catch(_){}
     el.classList.add('on');
-    /* 🔊 Wの タップでも 声の アンロックを 通す（相方コンビの 声を 同期で 鳴らすため） */
-    try{voiceUnlock();}catch(_){}
     wPressStart();
   };
   const up=()=>{el.classList.remove('on');wPressEnd();};
@@ -3587,8 +3243,6 @@ if(dpad){
   dpad.addEventListener('pointerdown',e=>{
     e.preventDefault();
     try{dpad.setPointerCapture(e.pointerId);}catch(_){}
-    /* 🔊 ▼の タップで オーライの 声を 同期で 鳴らせるように アンロック */
-    try{voiceUnlock();}catch(_){}
     dpadPtrs.set(e.pointerId,null);
     dpadMove(e.pointerId,e);
   },{passive:false});
@@ -3639,8 +3293,6 @@ function toggleMute(){
   muteBtn.textContent=Sfx.muted?'🔇':'🔊';
   muteBtn.setAttribute('aria-label',Sfx.muted?'サウンドをオン':'サウンドをオフ');
   muteBtn.style.opacity=Sfx.muted?.6:1;
-  /* ミュートしたら 声も すぐ 止める */
-  if(Sfx.muted)voiceCancel();
 }
 muteBtn.addEventListener('click',e=>{e.preventDefault();toggleMute();});
 
@@ -3659,8 +3311,6 @@ function showTitle(){
   ovHow.hidden=false;
   ovFine.hidden=false;
   if(stageSelEl)stageSelEl.hidden=false;
-  if(charSelEl)charSelEl.hidden=false;
-  syncHeroCards();
   if(btnNext)btnNext.hidden=true;
   btnStart.hidden=true;
   entryHide();closeEntryModal();renderRanking();
@@ -3680,7 +3330,6 @@ function showGoal(){
   ovHow.hidden=true;
   ovFine.hidden=true;
   if(stageSelEl)stageSelEl.hidden=true;
-  if(charSelEl)charSelEl.hidden=true;
   ovStats.hidden=false;
   ovStats.innerHTML=
     '<div><span>SCORE</span><b>'+st.score.toLocaleString('ja-JP')+'</b></div>'+
@@ -3717,7 +3366,6 @@ function showOver(){
   ovHow.hidden=true;
   ovFine.hidden=true;
   if(stageSelEl)stageSelEl.hidden=true;
-  if(charSelEl)charSelEl.hidden=true;
   if(btnNext)btnNext.hidden=true;
   ovStats.hidden=false;
   ovStats.innerHTML=
@@ -4016,9 +3664,6 @@ function startGame(stageId){
   entryHide();closeEntryModal();
   if(endEntry)endEntry.classList.remove('show');
   Sfx.init();
-  /* iOS Safari：STARTの タップで 声（speechSynthesis）を アンロック
-     毎回 アンロックし直す（resume＋極短無音発話）ので、前の プレイで 無音に なっても 復活する */
-  if(!Voice.unlocked||performance.now()-Voice.unlockT>1500){Voice.unlocked=false;voiceUnlock(true);}
   buildLevel(); relocateItems();
   st.mode='run'; st.t=0; st.runT=0; st.camX=-40; st.shake=0; st.flash=0;
   st.score=0; st.coins=0; st.hearts=4; st.gauge=0; st.bats=0;
@@ -4029,12 +3674,6 @@ function startGame(stageId){
   st.shieldT=0; st.boostT=0; st.shieldCount=0; st.boostCount=0;
   st.turboT=0; st.magT=0; st.parts=0; st.slipT=0;
   RIDE.active=false;RIDE.kind='';RIDE.t=0;RIDE.pT=0;RIDE.lostT=0;RIDE.popT=0;
-  GS.combo.t=0;GS.combo.cd=0;GS.combo.cutT=0;GS.combo.count=0;GS.combo.partner='';
-  GS.wipe.t=0;GS.wipe.cd=0;GS.wipe.count=0;GS.wipe.reflect=0;GS.wipe.smashed=0;
-  GS.ride.t=0;GS.ride.cd=0;GS.ride.count=0;GS.ride.hits=0;
-  GS.hiOct=0;GS.hiOctCount=0;GS.hiOctDmg=0;
-  GS.station.used=0;GS.station.last='';GS.station.flash=0;GS.station.fillT=0;
-  GS.holdOn=false;GS.holdT=0;GS.holdFired=false;
   st.msg=''; st.msgT=0; st.telop=''; st.telopSub=''; st.telopT=0; st.docNear=0;
   st.checkpoint=0; st.hits=0; st.stomps=0; st.kills=0; st.finishT=0;
   st.leaves.length=0;st.sparks.length=0;st.debris.length=0;st.puffs.length=0;st.pops.length=0;st.ghosts.length=0;st.rings.length=0;
@@ -4064,7 +3703,7 @@ function startGame(stageId){
   hideOverlay();
   updateHUD(true);
   const _sm=(STAGE.def&&STAGE.def.startMsg)||'スタート！';
-  msg(isGasHero()?_sm.replace('ミサイル','ガソリン噴射').replace('魚雷','ガソリン噴射'):_sm);
+  msg(_sm);
 }
 btnStart.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();startGame(STAGE.id);});
 if(btnNext)btnNext.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();
@@ -4348,7 +3987,7 @@ function damageBoss(n,how){
   if(bossBar){bossBar.classList.add('hit');setTimeout(()=>{if(bossBar)bossBar.classList.remove('hit');},180);}
   updateBossBar();
   bossRageCheck();
-  msg(how==='part'?(BOSS.def.short+'に 反撃パーツ直撃!! 大ダメージ！'):how==='wave'?((isGasHero()?'⛽超高圧ガソリンジェット':'⚡波動砲')+' 直撃！！ '+BOSS.def.short+'に 大ダメージ！'):how==='shot'?((isGasHero()?'⛽ガソリン噴射 直撃！ ':'🚀ミサイル直撃！ ')+BOSS.def.short+'にダメージ！'):(how==='stomp'?'踏みつけ！ '+BOSS.def.short+'にダメージ！':(how==='dark'?'ダークボールを はじき返した！':'体当たり！ ダメージ！')));
+  msg(how==='part'?(BOSS.def.short+'に 反撃パーツ直撃!! 大ダメージ！'):how==='wave'?('⚡波動砲 直撃！！ '+BOSS.def.short+'に 大ダメージ！'):how==='shot'?('🚀ミサイル直撃！ '+BOSS.def.short+'にダメージ！'):(how==='stomp'?'踏みつけ！ '+BOSS.def.short+'にダメージ！':(how==='dark'?'ダークボールを はじき返した！':'体当たり！ ダメージ！')));
   if(BOSS.hp<=0)defeatBoss();
 }
 function fireBolt(){
@@ -6105,7 +5744,6 @@ function update(dt){
   if(st.magT>0)st.magT-=dt;
   if(st.shieldT>0){st.shieldT-=dt;if(st.shieldT<=0)msg('🛡 シールドが きれた');}
   if(st.boostT>0)st.boostT-=dt;
-  gsUpdate(dt);
   musicUpdate(dt);
   helperUpdate(dt);
   foeUpdate(dt);
@@ -6173,8 +5811,6 @@ function update(dt){
   else if(st.turboT>0)target=Math.max(target,TURBO_SPEED);
   else if(st.slipT>0)target=Math.max(target,BASE+150);
   if(st.feverT>0)target=Math.max(target,FEVER_SPEED);
-  /* ⛽ GS MIATAS SS 給油所の ハイオク満タン：基準スピードが 上がる（攻撃力は ミサイル側で 反映） */
-  if(GS.hiOct>0&&st.warpT<=0)target=Math.max(target,HI_OCT_SPEED);
   /* RIDE（乗り物・動物）中は 高速移動。ワープ中は ワープ速度を 優先、ボス戦の 制限速度は 下の上書きで 優先される */
   if(RIDE.active&&st.warpT<=0)target=Math.min(target*RIDE_MUL,RIDE_MAX);
   const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='warning');
@@ -6241,14 +5877,7 @@ function update(dt){
     const hitY=P.y>top+3&&P.y-pxTall<top+o.h;
     if(!hitY)continue;
     if(G||Wp||Tb){
-      const gsRide=GS.ride.t>0&&RIDE.active&&isGasHero();
       smashObstacle(o);
-      if(gsRide){
-        GS.ride.hits++;
-        addScore(300,ox,top);
-        st.pops.push({x:ox,y:top-36,text:'ハイオク 体当たり！ +300',t:0,life:.95,col:'#ffe9a0',size:14});
-        ringFX(ox,top+o.h*0.4,10,90,.32,'255,200,110');
-      }
       continue;
     }
     const softSurface=!(o.type==='cone'||o.type==='spike'||o.type==='deer'||o.type==='wisp'||o.type==='lantern'||
@@ -6353,9 +5982,6 @@ function update(dt){
       }
     }
   }
-
-  /* --- 🏪 GS MIATAS SS 給油所（通過で ハート+1＆ハイオク満タン） --- */
-  gsStationCheck();
 
   /* --- doc bonus stages --- */
   for(const d of LV.docs){
@@ -6574,464 +6200,6 @@ function rideTrail(dt){
     RIDE.pT=.05;
     st.sparks.push({x:bx-8,y:by+rr(-22,14),vx:rr(-420,-220),vy:rr(-30,30),r:rr(1.2,2.6),life:rr(.15,.3),t:0,col:'#ffffff'});
     st.sparks.push({x:bx-30,y:by+rr(-30,20),vx:rr(-300,-160),vy:rr(-20,20),r:rr(1,2),life:rr(.12,.24),t:0,col:'#ffe9b0'});
-  }
-}
-
-/* ======================= GSミアタの ボイス（声真似・Web Speech API） =======================
-   「ハイオク満タン！」「In Japan we say...!」「オーライ！オーライ！」を speechSynthesis で 喋る。
-   イッセイ＝張りのある明るい男性風（pitch 1.10）／ミニー＝明るく高い声（pitch 1.50）
-   START・ボタンの タップで アンロック（iOS Safari 対策）、ミュート中は 喋らない、連続発話は 待って かぶらない */
-const VoiceDuck={until:0};
-/* 声が 鳴っている間（開始直前〜終了後 約2秒）は true ：BGMの ダッキングに 使う */
-function voiceDucking(){return VoiceDuck.until>performance.now();}
-function voiceDuckHold(ms){VoiceDuck.until=Math.max(VoiceDuck.until,performance.now()+Math.max(0,ms));}
-function voiceDuckClear(){VoiceDuck.until=0;}
-
-const Voice={
-  supported:(typeof window!=='undefined')&&('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window),
-  unlocked:false, said:0, lastText:'', lastAt:0, seqAt:0, unlockT:0,
-  timers:[], voices:[], last:null, lastVoiceName:'',
-  utts:[],                 /* 発話オブジェクトの 保持（GCで 無音になるのを 防ぐ） */
-  busyCancel:0, queueWait:0, cue:0, blocked:0
-};
-function voiceVoices(){
-  if(!Voice.supported)return Voice.voices;
-  try{
-    const v=window.speechSynthesis.getVoices()||[];
-    if(v.length)Voice.voices=v;
-  }catch(e){}
-  return Voice.voices;
-}
-/* 声の 役割（2026-11-23 v5）。日本語の音声で喋る（英語もカタカナ発音）。
-   gas  … 「ハイオク満タン！」= 日本人男性の声（Otoya・Hattori 等 ＋ pitch 1.15 で 明るく張りのある掛け声）
-   girl … 「In Japan we say...!」= 日本の若い女の子の声（Kyoko・O-Ren・Haruka 等 ＋ pitch 1.62）
-   ''   … その他の セリフ（ミニー=1.50／イッセイ=1.10 の キャラ声）
-   ※ iOSの 日本語男性音声（Otoya 等）は もともと低く、v4までの 0.90 は 暗く 重く 聞こえた。
-      v5では 全体の pitch を 上げて「暗くならない 明るさ」に そろえて いる */
-const VOICE_GAS_MAN=/otoya|hattori|takumi|keita|male|\bman\b|男性|男声/i;
-const VOICE_GIRL_JA=/kyoko|o-?ren|haruka|nanami|ayumi|sayaka|female|woman|女性|女声/i;
-const VOICE_GAS_PITCH=1.15, VOICE_GAS_RATE=1.34;    /* 日本人男性：低さを補う 明るく張りのある掛け声（速め） */
-const VOICE_GIRL_PITCH=1.62, VOICE_GIRL_RATE=1.32;  /* 若い女の子：上限寄りのキラッと明るい声・弾むように速め */
-const VOICE_OTHER_RATE=1.34;                        /* その他のセリフ（おーらい 等）も 明るく軽快に */
-const VOICE_HERO_PITCH={minnie:1.50,issei:1.10};    /* その他のセリフのキャラ別ベースピッチ（暗くならない明るさ） */
-function voiceHeroPitch(){return VOICE_HERO_PITCH[heroKey]!=null?VOICE_HERO_PITCH[heroKey]:1.0;}
-const VOICE_CUTE_EN_SAY='イン ジャパン、ウィー セイ！';
-const VOICE_CUTE_EN_RE=/In\s*Japan\s*we\s*say[^A-Za-z]*/i;
-function voiceRole(text){
-  const s=String(text==null?'':text);
-  if(VOICE_CUTE_EN_RE.test(s))return 'girl';
-  if(/ハイオク\s*満タン|満タン/.test(s))return 'gas';
-  return '';
-}
-/* 端末にある 日本語の声から 役割に合うものを 選ぶ。
-   見つからなければ null（＝端末の 既定の 日本語音声に pitch／rate で 色をつける） */
-function voicePick(role){
-  const list=voiceVoices();
-  if(!list.length)return null;
-  const c=list.filter(v=>/^ja/i.test(v.lang||''));
-  if(!c.length)return null;
-  if(role==='gas')return c.find(v=>VOICE_GAS_MAN.test(v.name||''))||null;
-  if(role==='girl')return c.find(v=>VOICE_GIRL_JA.test(v.name||''))||null;
-  if(heroKey==='minnie')return c.find(v=>VOICE_GIRL_JA.test(v.name||''))||c[0];
-  if(heroKey==='issei')return c.find(v=>VOICE_GAS_MAN.test(v.name||''))||c[0];
-  return c[0];
-}
-/* アンロック：iOS Safari / アプリ内ブラウザ では 「ユーザーの操作（タップ）」の中で
-   speechSynthesis.resume() ＋ 極短の無音発話を 通さないと、以後の speak() が 無音になる。
-   START・ステージ選択・ボタンの pointerdown から 必ず 呼ぶ */
-function voiceUnlock(force){
-  if(!Voice.supported)return false;
-  try{
-    const ss=window.speechSynthesis;
-    if(ss.paused)ss.resume();
-    voiceVoices();
-    if(!Voice.unlocked||force){
-      const u=new SpeechSynthesisUtterance('ん');
-      u.volume=0.01;u.lang='ja-JP';u.rate=1.1;u.pitch=1;
-      Voice.utts.push(u);
-      if(Voice.utts.length>8)Voice.utts.shift();
-      ss.speak(u);
-      try{ss.resume();}catch(e){}
-      Voice.unlocked=true;Voice.unlockT=performance.now();
-      /* 端末によっては resume() が 少し遅れて 効くので もう一度 かける */
-      Voice.timers.push(setTimeout(()=>{try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}},140));
-    }
-  }catch(e){}
-  return Voice.unlocked;
-}
-function voiceDropPending(){
-  for(const t of Voice.timers)clearTimeout(t);
-  Voice.timers.length=0;
-}
-function voiceCancel(){
-  voiceDropPending();
-  voiceDuckClear();
-  if(!Voice.supported)return;
-  try{window.speechSynthesis.cancel();}catch(e){}
-}
-function voiceForget(u){const i=Voice.utts.indexOf(u);if(i>=0)Voice.utts.splice(i,1);}
-/* 読み上げ用の カタカナ変換（画面表示は 漢字・英語のまま）。
-   漢字「満」は iOSの 日本語音声が 名前読みの「みつる」と 読むため、
-   「ハイオク満タン」→「ハイオク！マンタン！！」と カタカナの 弾む 掛け声で 渡す（v5）（最後の砦で 満→マン も 置換）。
-   画面の テロップ・メッセージ・ポップは これまでどおり 漢字表記。 */
-const VOICE_READ=[
-  [/ハイオク満タン、ブースト！/g,'ハイオク！マンタン！！ブースト！'],
-  [/ハイオク満タン！/g,'ハイオク！マンタン！！'],
-  [/ハイオク満タン/g,'ハイオク！マンタン！'],
-  [VOICE_CUTE_EN_RE,VOICE_CUTE_EN_SAY],    /* 「In Japan we say...!」= カタカナ英語で 喋る */
-  [/オーライ、オーライ！/g,'おーらい！おーらい！'],
-  [/オーライ！オーライ！/g,'おーらい！おーらい！'],
-  [/オーライ/g,'おーらい'],
-  [/ピカピカ！/g,'ぴかぴか！'],
-  [/ピカピカ/g,'ぴかぴか'],
-  [/満タン/g,'マンタン'],
-  [/給油/g,'きゅうゆ'],
-  [/無敵/g,'むてき'],
-  [/加速/g,'かそく'],
-  [/満/g,'マン']                             /* 保険：漢字「満」は speak() へ 渡さない */
-];
-function voiceRead(text){
-  let s=String(text==null?'':text);
-  for(const [re,to] of VOICE_READ)s=s.replace(re,to);
-  return s;
-}
-/* 1こと 声に 出す時間の 見積り（ミリ秒）。ダッキングを 声の長さに 合わせる */
-function voiceEstMs(text,en){
-  const n=(text||'').length;
-  return clamp((en?62:118)*n+420,650,3400);
-}
-/* 実際に speak() する（同期）。音量は 1.0 を 明示し、声の間は BGMを 下げる */
-function voiceSpeakNow(text,en){
-  if(!Voice.supported||!text||Sfx.muted)return false;
-  try{
-    const ss=window.speechSynthesis;
-    if(ss.paused)ss.resume();
-    const role=voiceRole(text);
-    const say=voiceRead(text);             /* ← 漢字・英語を カタカナ読みに 直してから 喋る（v3） */
-    const u=new SpeechSynthesisUtterance(say);
-    u.lang='ja-JP';                          /* 可愛い英語も 日本語音声で カタカナ発音 */
-    if(role==='gas'){                        /* ハイオク満タン！= 日本人男性 */
-      u.pitch=VOICE_GAS_PITCH;u.rate=VOICE_GAS_RATE;
-    }else if(role==='girl'){                 /* In Japan we say...! = 若い女の子 */
-      u.pitch=VOICE_GIRL_PITCH;u.rate=VOICE_GIRL_RATE;
-    }else{
-      u.pitch=voiceHeroPitch();u.rate=VOICE_OTHER_RATE;
-    }
-    u.volume=1.0;                            /* ← 最大音量を 明示（iOSの 既定音量対策） */
-    const v=voicePick(role);
-    if(v){u.voice=v;Voice.lastVoiceName=v.name||'';}else Voice.lastVoiceName='';
-    const latin=/^[\x20-\x7E]+$/.test(say);
-    const est=voiceEstMs(say,latin);
-    /* start で 伸ばし、end で 「終了後 約2秒」まで 保持する（onstart が 来ない端末対策で speak 時にも 押さえる） */
-    u.onstart=()=>{voiceDuckHold(est+VOICE_TAIL_MS);};
-    u.onend=()=>{voiceDuckHold(VOICE_TAIL_MS);voiceForget(u);};
-    u.onerror=()=>{voiceDuckHold(VOICE_TAIL_MS);voiceForget(u);Voice.blocked++;};
-    Voice.utts.push(u);
-    if(Voice.utts.length>8)Voice.utts.shift();
-    voiceDuckHold(est+VOICE_TAIL_MS);
-    Sfx.voiceCue(latin?'en':'ja');            /* トークボックス風の 合図音（声が 鳴らない端末でも 喋った感） */
-    Voice.cue++;
-    ss.speak(u);
-    Voice.said++;Voice.lastText=text;Voice.lastAt=performance.now();
-    Voice.last={text:say,display:text,role:role,lang:u.lang,pitch:u.pitch,rate:u.rate,volume:u.volume,voice:Voice.lastVoiceName,estMs:est};
-    return true;
-  }catch(e){return false;}
-}
-/* 1こと 喋る：
-   iOSで 「話している最中の cancel() → 直後の speak()」が 無音になるバグを 避けるため、
-   speaking || pending の ときだけ cancel() し、そのときは 40ms 待ってから speak()。
-   それ以外（通常）は そのまま 同期的に speak() する（タップの ハンドラ内でも そのまま 鳴る） */
-function voiceSayOne(text){
-  if(!Voice.supported||!text||Sfx.muted||!Voice.unlocked)return false;
-  const en=/^[\x20-\x7E]+$/.test(text);
-  let ss=null;
-  try{ss=window.speechSynthesis;}catch(e){}
-  const busy=!!(ss&&(ss.speaking||ss.pending));
-  if(busy){
-    Voice.busyCancel++;
-    try{ss.cancel();}catch(e){}
-    Voice.timers.push(setTimeout(()=>{if(!Sfx.muted)voiceSpeakNow(text,en);},40));
-    Voice.lastText=text;Voice.lastAt=performance.now();
-    return true;                             /* 40ms後に 鳴る約束 */
-  }
-  return voiceSpeakNow(text,en);
-}
-/* 待ってから 喋る（連続セリフの 2つ目以降：前の声を 切らずに 終わりを 待つ） */
-function voiceSpeakQueued(text,tries){
-  if(!Voice.supported||!text||Sfx.muted)return false;
-  const en=/^[\x20-\x7E]+$/.test(text);
-  let ss=null;
-  try{ss=window.speechSynthesis;}catch(e){}
-  if(ss&&(ss.speaking||ss.pending)){
-    if((tries|0)>=20){                       /* 1.6秒 待っても 終わらない → 入れ替える */
-      Voice.queueWait++;
-      try{ss.cancel();}catch(e){}
-      Voice.timers.push(setTimeout(()=>{if(!Sfx.muted)voiceSpeakNow(text,en);},40));
-      return true;
-    }
-    Voice.timers.push(setTimeout(()=>voiceSpeakQueued(text,(tries|0)+1),80));
-    return true;
-  }
-  return voiceSpeakNow(text,en);
-}
-/* 1こと（クールダウン 2.2秒で かぶりを 防ぐ） */
-function voiceSay(text){
-  if(!Voice.supported||Sfx.muted)return false;
-  if(!Voice.unlocked)voiceUnlock();
-  if(!Voice.unlocked)return false;
-  const now=performance.now();
-  if(now-Voice.seqAt<2200&&Voice.seqAt>0)return false;
-  Voice.seqAt=now;
-  voiceDropPending();
-  return voiceSayOne(text);
-}
-/* 連続セリフ（例：ハイオク満タン！ → In Japan we say...!）
-   1つ目は すぐ 喋り、続きは 前の声が 終わるのを 待ってから 喋る（かぶせて cancel しない） */
-function voiceSayLines(lines,gap){
-  if(!Voice.supported||Sfx.muted||!lines||!lines.length)return false;
-  if(!Voice.unlocked)voiceUnlock();
-  if(!Voice.unlocked)return false;
-  const now=performance.now();
-  if(now-Voice.seqAt<2600&&Voice.seqAt>0)return false;
-  Voice.seqAt=now;
-  voiceDropPending();
-  const g=gap==null?900:gap;
-  const ok=voiceSayOne(lines[0]);
-  for(let i=1;i<lines.length;i++){
-    const t=setTimeout(()=>{if(!Sfx.muted)voiceSpeakQueued(lines[i],0);},g*i);
-    Voice.timers.push(t);
-  }
-  return ok;
-}
-if(Voice.supported){
-  try{window.speechSynthesis.onvoiceschanged=()=>voiceVoices();}catch(e){}
-  /* 最初の タップ／キーで アンロック（以後も ボタンの pointerdown から 呼び直す） */
-  try{window.addEventListener('pointerdown',()=>voiceUnlock());
-      window.addEventListener('keydown',()=>voiceUnlock());}catch(e){}
-  /* アプリ切替・バックグラウンド復归で iOSは speechSynthesis が paused になる → 戻ったら resume */
-  try{
-    document.addEventListener('visibilitychange',()=>{
-      if(document.visibilityState==='visible'){try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}}
-    });
-    window.addEventListener('pageshow',()=>{try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();}catch(e){}});
-  }catch(e){}
-}
-
-/* ======================= GSミアタ 4大アクション（2026-11-23） =======================
-   ⛽1 相方コンビ必殺技（W）  : 相方が カットイン＆並走。「ハイオク満タン！」「In Japan we say...!」
-   👋2 オーライ誘導＆窓拭き（▼）: スクイジーの弧で、周囲の敵弾を 前方へ 跳ね返し ザコも ふき飛ばす
-   🏎️3 ハイオク満タンブースト : RIDE中に 🚀／W。黄金〜炎の 噴射・超スピード・無敵体当たり
-   🏪4 GS MIATAS SS 給油所 : 道中を 通過すると ハート+1 ＋ ハイオク満タン（速度＆攻撃力UP）
-   いずれも イッセイ・ミニー（isGasHero）専用。ワッカーの 操作と Wの優先順位は 変えない。 */
-const HI_OCT_DUR=9.0;          /* 給油所の ハイオク満タン パワーアップ（秒） */
-const HI_OCT_SPEED=BASE+96;    /* パワーアップ中の 基準スピード（守りながら 加速） */
-const GS={
-  /* 相方コンビ必殺技 */
-  combo:{t:0,cd:0,cutT:0,count:0,dur:5.0,cdMax:13.0,partner:'',verts:0},
-  /* オーライ誘導＆窓拭き */
-  wipe:{t:0,cd:0,count:0,cdMax:0.72,reflect:0,smashed:0},
-  /* RIDE ハイオク満タンブースト */
-  ride:{t:0,cd:0,count:0,cdMax:5.0,hits:0},
-  /* 給油所 */
-  hiOct:0,hiOctCount:0,hiOctDmg:0,
-  station:{used:0,last:'',flash:0,fillT:0},
-  /* Wの ホールド判定（タップの 従来動作は そのまま、押し続けても 相方コンビ） */
-  holdOn:false,holdT:0,holdFired:false
-};
-function gsPartnerKey(){return heroKey==='issei'?'minnie':(heroKey==='minnie'?'issei':'');}
-function gsPartnerName(){const d=HERO_DEFS[gsPartnerKey()];return d?d.name:'';}
-function gsPartnerImg(){return HERO_IMGS[gsPartnerKey()]||null;}
-function gsAtkUp(){return GS.hiOct>0;}
-
-/* ---------- ⛽ 1. 相方コンビ必殺技 ---------- */
-function gsComboReady(){return isGasHero()&&st.mode==='run'&&GS.combo.t<=0&&GS.combo.cd<=0;}
-function activateGsCombo(src){
-  if(!isGasHero()){msg('相方コンビは イッセイ・ミニーの 必殺技だ！');Sfx.deny();return false;}
-  if(st.mode!=='run')return false;
-  if(GS.combo.t>0)return false;
-  if(GS.combo.cd>0){
-    msg('⛽ 相方コンビは クールダウン中（あと '+Math.ceil(GS.combo.cd)+'秒）');
-    Sfx.deny();return false;
-  }
-  const cb=GS.combo;
-  cb.t=cb.dur;cb.cd=cb.cdMax;cb.count++;cb.cutT=1.7;cb.partner=gsPartnerKey();
-  /* 5秒間 無敵＋超加速：既存のターボ（無敵・障害物粉砕・敵弾消し・超スピード）を そのまま使う */
-  st.turboT=Math.max(st.turboT,cb.dur);
-  st.flash=Math.max(st.flash,.34);st.flashCol='255,214,120';
-  st.shake=Math.max(st.shake,.5);
-  Sfx.gsCombo();
-  /* 大きなカットインが セリフを見せるので、テロップや ポップは 重ねない（字幕は 画面下の メッセージだけ） */
-  for(let i=0;i<44;i++)spark(P.x+rr(-96,96),P.y-rr(0,160),rr(2,6),['#fff6c0','#ffd45e','#ff8a3d','#fff'][i%4]);
-  ringFX(P.x,P.y-40,18,180,.6,'255,214,120');
-  /* 声真似ボイス：「ハイオク満タン！」「In Japan we say...!」 */
-  voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);
-  msg('⛽ 相方コンビ必殺技！ 5秒 無敵＋超加速!!');
-  return true;
-}
-/* Wボタン／キーの ホールドでも 相方コンビを 発動できる（タップは 従来どおり 順位どおり） */
-function tryGsComboFromHold(){
-  if(!isGasHero()||st.mode!=='run')return false;
-  /* ワープ中だけは 遠慮する。巨大化中は OK（W長押しで 相方も 続いて 参戦） */
-  if(st.warpT>0)return false;
-  if(GS.combo.t>0||GS.combo.cd>0)return false;
-  return activateGsCombo('hold');
-}
-
-/* ---------- 👋 2. オーライ誘導＆窓拭き ---------- */
-function gsWipeReady(){return isGasHero()&&GS.wipe.cd<=0;}
-function doGsWipe(){
-  if(!isGasHero())return false;
-  if(st.mode!=='run')return false;
-  if(GS.wipe.cd>0)return false;
-  const wp=GS.wipe;
-  wp.cd=wp.cdMax;wp.t=0.55;wp.count++;
-  const tm=travelMode();
-  const cy=P.y-(tm==='run'?56:36);      /* スクイジーを ふるう高さ（地上＝胸元） */
-  /* 周囲の敵弾を 前方へ 跳ね返す（跳ね返した弾は プレイヤーの 弾として 敵を 撃つ） */
-  let n=0;
-  for(const g of [FOE.shots,BOSS.shots,MID.shots]){
-    for(let i=g.length-1;i>=0;i--){
-      const s=g[i];
-      if(s.delay>0)continue;
-      if(s.x<P.x-150||s.x>P.x+330)continue;
-      if(Math.abs(s.y-cy)>210)continue;
-      g.splice(i,1);
-      MSL.list.push({x:s.x,y:s.y,vx:1180,vy:clamp((cy-s.y)*0.25,-120,120),t:0,life:1.6,under:false,gas:true,reflect:true});
-      n++;
-      for(let k=0;k<6;k++)spark(s.x,s.y,rr(2,4),'#fff3c0');
-    }
-  }
-  wp.reflect+=n;
-  /* 至近距離の ザコ敵・障害物を ふき飛ばす */
-  let sm=0;
-  for(const o of LV.obstacles){
-    if(o.dead)continue;
-    if(o.type==='windring'||o.type==='bubbleRing'||o.type==='stormcloud')continue;
-    const ox=obX(o), top=obTop(o);
-    if(Math.abs(ox-P.x)>205)continue;
-    if(Math.abs((top+o.h*0.5)-cy)>190)continue;
-    smashObstacle(o);sm++;
-  }
-  wp.smashed+=sm;
-  Sfx.gsWipe();
-  st.shake=Math.max(st.shake,((n||sm)?0.32:0.16));
-  st.pops.push({x:P.x+96,y:P.y-150,text:'オーライ！オーライ！',t:0,life:1.15,col:'#fff3c0',size:17});
-  st.pops.push({x:P.x+130,y:P.y-120,text:'ピカピカ！',t:0,life:1.1,col:'#d8f4ff',size:14});
-  for(let i=0;i<22;i++)spark(P.x+rr(0,190),cy+rr(-70,70),rr(1.6,4),['#fff8cc','#bfe9ff','#ffd45e'][i%3]);
-  for(let i=0;i<6;i++)puff(P.x+rr(30,150),cy+rr(-40,40),rr(2.4,4.6));
-  ringFX(P.x+70,cy,14,120,.36,'255,240,180');
-  if(isGasHero())voiceSay('オーライ、オーライ！');
-  if(n>0)addScore(160*n,P.x+120,P.y-120);
-  if(sm>0)addScore(120*sm,P.x+150,P.y-96);
-  msg(n>0?('👋 オーライ！オーライ！ 敵弾を '+n+'発 跳ね返した！ ピカピカ！')
-        :(sm>0?('👋 オーライ！オーライ！ 近くの敵を ふき飛ばした！ ピカピカ！')
-        :('👋 オーライ！オーライ！ 誘導の弧で 前方を クリアに… ピカピカ！')));
-  return true;
-}
-
-/* ---------- 🏎️ 3. RIDE ハイオク満タンブースト ---------- */
-function gsRideBoostReady(){return isGasHero()&&RIDE.active&&GS.ride.t<=0&&GS.ride.cd<=0;}
-function activateGsRideBoost(src){
-  if(!isGasHero()||!RIDE.active||st.mode!=='run')return false;
-  if(GS.ride.t>0)return false;
-  if(GS.ride.cd>0){if(src==='w'){msg('🏎️ ハイオクブーストは クールダウン中（あと '+Math.ceil(GS.ride.cd)+'秒）');Sfx.deny();}return false;}
-  const rb=GS.ride;
-  rb.t=3.6;rb.cd=rb.cdMax;rb.count++;
-  st.turboT=Math.max(st.turboT,rb.t);        /* 超スピード＋無敵体当たり */
-  st.flash=Math.max(st.flash,.3);st.flashCol='255,196,90';
-  st.shake=Math.max(st.shake,.4);
-  Sfx.gsBoost();
-  st.telop='ハイオク満タン!!';st.telopSub='RIDE BOOST — 体当たりで 弾き飛ばせ！';st.telopT=2.0;
-  st.pops.push({x:P.x+120,y:P.y-150,text:'RIDE BOOST!',t:0,life:1.2,col:'#fff6cc',size:16});
-  for(let i=0;i<30;i++)spark(P.x+rr(-60,60),P.y-rr(0,110),rr(2,5),['#fff3b0','#ffd45e','#ff8a3d','#fff'][i%4]);
-  ringFX(P.x,P.y-24,16,150,.5,'255,200,110');
-  voiceSay('ハイオク満タン、ブースト！');
-  msg('🏎️⛽ ハイオク満タン ブースト!! 無敵体当たりで 敵を 弾き飛ばせ！');
-  return true;
-}
-
-/* ---------- 🏪 4. GS MIATAS SS 給油所 ---------- */
-function gsStationFill(s){
-  if(!s||s.used)return false;
-  s.used=true;GS.station.used++;GS.station.last=s.label||'GS MIATAS SS';
-  GS.station.at=s;
-  GS.station.flash=1;GS.station.fillT=1.1;
-  GS.hiOct=HI_OCT_DUR;GS.hiOctCount++;
-  const sx0=s.x, sy0=s.y;
-  if(st.hearts<st.maxHearts){
-    st.hearts++;
-    st.pops.push({x:P.x+96,y:P.y-196,text:'♥ +1',t:0,life:1.25,col:'#ffa8b6',size:18});
-  }else{
-    addScore(500,P.x,P.y-196);
-    st.pops.push({x:P.x+96,y:P.y-196,text:'♥ 満タン！ +500',t:0,life:1.3,col:'#ffc8d0',size:15});
-  }
-  addScore(400,P.x+86,P.y-238);
-  st.flash=Math.max(st.flash,.32);st.flashCol='255,220,140';
-  st.shake=Math.max(st.shake,.36);
-  Sfx.gsFill();
-  st.pops.push({x:P.x,y:P.y-262,text:'⛽ ハイオク満タン！',t:0,life:1.9,col:'#fff3c0',size:22});
-  st.pops.push({x:P.x,y:P.y-232,text:'速度＆攻撃力 UP（'+Math.round(HI_OCT_DUR)+'秒）',t:0,life:1.7,col:'#ffe1a8',size:13});
-  ringFX(P.x,P.y-30,16,160,.55,'255,210,110');
-  /* 給油ノズル＆火花：ノズル位置から 主人公へ 噴射 */
-  for(let i=0;i<26;i++){
-    const t=i/25;
-    spark(sx0-30+t*40,sy0-56+rr(-10,10),rr(1.6,4),['#fff8cc','#ffd166','#9dffc4','#ff8a3d'][i%4]);
-  }
-  for(let i=0;i<10;i++)puff(sx0-26+rr(-8,26),sy0-46+rr(-12,12),rr(2.6,5));
-  for(let i=0;i<14;i++)spark(P.x+rr(-40,40),P.y-rr(0,120),rr(2,5),['#fff3b0','#ffd45e','#fff'][i%3]);
-  msg('⛽ GS MIATAS SS で 給油！ ハート+1 ＋ ハイオク満タン（'+Math.round(HI_OCT_DUR)+'秒 速度＆攻撃力UP）');
-  voiceSay('ハイオク満タン！');
-  return true;
-}
-/* 給油所の 縦位置は 画面サイズ・地形に合わせて 置き直す */
-function gsLayoutStations(){
-  if(!LV.stations)return;
-  for(const s of LV.stations){
-    if(s.off==null)s.off=0;
-    s.y=groundY+floorOff(s.x)-s.off;
-  }
-}
-function gsStationCheck(){
-  if(st.mode!=='run')return;
-  for(const s of LV.stations){
-    if(s.used)continue;
-    if(Math.abs(P.x-s.x)>82)continue;
-    if(Math.abs((P.y-56)-(s.y-70))>210)continue;
-    gsStationFill(s);
-    break;
-  }
-}
-
-/* ---------- 毎フレームの タイマー ---------- */
-function gsUpdate(dt){
-  const cb=GS.combo;
-  if(cb.t>0)cb.t=Math.max(0,cb.t-dt);
-  if(cb.cutT>0)cb.cutT=Math.max(0,cb.cutT-dt);
-  if(cb.cd>0)cb.cd=Math.max(0,cb.cd-dt);
-  if(GS.wipe.cd>0)GS.wipe.cd=Math.max(0,GS.wipe.cd-dt);
-  if(GS.wipe.t>0)GS.wipe.t=Math.max(0,GS.wipe.t-dt);
-  if(GS.ride.t>0)GS.ride.t=Math.max(0,GS.ride.t-dt);
-  if(GS.ride.cd>0)GS.ride.cd=Math.max(0,GS.ride.cd-dt);
-  if(GS.station.flash>0)GS.station.flash=Math.max(0,GS.station.flash-dt*2.2);
-  if(GS.station.fillT>0)GS.station.fillT=Math.max(0,GS.station.fillT-dt);
-  if(GS.hiOct>0){
-    GS.hiOct=Math.max(0,GS.hiOct-dt);
-    if(GS.hiOct<=0)msg('ハイオク満タン パワーアップ 終了');
-  }
-  /* W ホールド（0.55秒 押し続け）でも 相方コンビを 発動 */
-  if(GS.holdOn&&!GS.holdFired&&GS.holdT<1.2){
-    GS.holdT+=dt;
-    if(GS.holdT>=0.55){GS.holdFired=true;tryGsComboFromHold();}
-  }
-  /* 相方の 並走：黄金の火花 */
-  if(cb.t>0&&isGasHero()&&st.mode==='run'&&Math.random()<dt*22){
-    st.sparks.push({x:P.x-58+rr(-16,6),y:P.y-rr(4,80),vx:rr(-160,-40),vy:rr(-50,10),r:rr(1.4,3.2),life:rr(.22,.5),t:0,
-      col:['#fff3b0','#ffd45e','#9dffc4'][(Math.random()*3)|0]});
-  }
-  /* RIDE ブーストの 炎 */
-  if(GS.ride.t>0&&RIDE.active&&Math.random()<dt*40){
-    st.sparks.push({x:P.x-40+rr(-16,6),y:P.y-rr(0,26),vx:rr(-380,-160),vy:rr(-60,30),r:rr(1.6,4),life:rr(.16,.34),t:0,
-      col:['#fff8cc','#ffd45e','#ff8a3d','#ff5a3d'][(Math.random()*4)|0]});
   }
 }
 
@@ -8262,7 +7430,6 @@ const elScore=document.getElementById('score'),elTime=document.getElementById('t
       elComboMult=document.getElementById('comboMult'),elFeverT=document.getElementById('feverT'),
       elPower=document.getElementById('powerPill'),
       elRide=document.getElementById('ridePill'),
-      elGs=document.getElementById('gsPill'),elWRing=document.getElementById('bWRing'),
       elFill=document.getElementById('gaugeFill'),elGaugeWrap=document.getElementById('gaugeWrap'),
       elProg=document.getElementById('progFill'),elW=bW;
 let hudAcc=0;
@@ -8304,31 +7471,6 @@ function updateHUD(force){
   const ready=st.gauge>=99.5||st.bats>0;
   if(elW){
     elW.classList.toggle('ready',ready&&st.mode==='run');
-    const gsShow=isGasHero()&&st.mode==='run';
-    elW.classList.toggle('gsReady',gsShow&&GS.combo.t<=0&&GS.combo.cd<=0);
-    elW.classList.toggle('showRing',gsShow);
-    if(gsShow){
-      const r=GS.combo.cd>0?1-GS.combo.cd/GS.combo.cdMax:(GS.holdOn&&!GS.holdFired?clamp(GS.holdT/0.55,0,1):1);
-      const deg=Math.round(clamp(r,0,1)*360);
-      if(elWRing)elWRing.style.setProperty('--cg',deg+'deg');
-      elW.classList.toggle('ringFull',GS.combo.t<=0&&GS.combo.cd<=0);
-    }else{
-      elW.classList.remove('ringFull');
-    }
-  }
-  if(elGs){
-    if(!isGasHero()){
-      elGs.hidden=true;
-    }else{
-      elGs.hidden=false;
-      elGs.classList.remove('ready','hot');
-      if(GS.combo.t>0){elGs.textContent='⛽ ハイオク無双 '+Math.ceil(GS.combo.t)+'s';elGs.classList.add('hot');}
-      else if(GS.ride.t>0&&RIDE.active){elGs.textContent='🏎️ ハイオク '+Math.ceil(GS.ride.t)+'s';elGs.classList.add('hot');}
-      else if(GS.hiOct>0){elGs.textContent='⛽ ハイオク '+Math.ceil(GS.hiOct)+'s';elGs.classList.add('hot');}
-      else if(RIDE.active){elGs.textContent='🏎️ 🚀で ブースト';elGs.classList.add('ready');}
-      else if(GS.combo.cd>0){elGs.textContent='⛽ 相方 '+Math.ceil(GS.combo.cd)+'s';}
-      else {elGs.textContent='⛽ 相方 OK';elGs.classList.add('ready');}
-    }
   }
   wcSyncButton();
   if(elPower){
@@ -12482,261 +11624,6 @@ function drawLeg(hx,ang,col){
   ctx.restore();
 }
 
-/* ======================= GSミアタ 4大アクションの描画 ======================= */
-/* ---------- 🏪 給油所 GS MIATAS SS ---------- */
-function drawStations(){
-  for(const s of LV.stations){
-    const x=s.x-st.camX;
-    if(x<-300||x>VW+300)continue;
-    drawGsStation(x,s);
-  }
-}
-function drawGsStation(x,s){
-  const base=s.y, used=!!s.used;
-  const pulse=0.5+0.5*Math.sin(st.t*3+s.t);
-  const live=GS.station.flash>0||GS.hiOct>0;
-  ctx.save();
-  ctx.globalAlpha=used?0.66:1;
-  /* 地面の影 */
-  ctx.fillStyle='rgba(0,0,0,.26)';
-  ctx.beginPath();ctx.ellipse(x,base+3,118,10,0,0,6.284);ctx.fill();
-  /* 前庭（アスファルト） */
-  const pg=ctx.createLinearGradient(0,base-12,0,base+6);
-  pg.addColorStop(0,'#4d4d58');pg.addColorStop(1,'#2b2b33');
-  ctx.fillStyle=pg;
-  ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(x-120,base-11,240,15,4);else ctx.rect(x-120,base-11,240,15);
-  ctx.fill();
-  ctx.fillStyle='rgba(255,214,90,.85)';
-  ctx.fillRect(x-98,base-6,48,3);ctx.fillRect(x+10,base-6,48,3);
-  /* にじむ光 */
-  const gl=ctx.createRadialGradient(x,base-70,10,x,base-70,152);
-  gl.addColorStop(0,'rgba(255,190,90,'+(used?0.10:0.20+pulse*0.12)+')');
-  gl.addColorStop(1,'rgba(255,150,60,0)');
-  ctx.fillStyle=gl;ctx.beginPath();ctx.arc(x,base-70,152,0,6.284);ctx.fill();
-  /* 柱と 屋根（赤・オレンジ・青の ストライプ） */
-  const roofY=base-118, roofH=20;
-  ctx.fillStyle='#c9d2de';
-  ctx.fillRect(x-104,roofY+roofH,8,base-roofY-roofH-8);
-  ctx.fillRect(x+96,roofY+roofH,8,base-roofY-roofH-8);
-  ctx.fillStyle='#e9eef5';ctx.fillRect(x-112,roofY,224,roofH);
-  ctx.fillStyle='#e23c2c';ctx.fillRect(x-112,roofY,224,5);
-  ctx.fillStyle='#ff9a2e';ctx.fillRect(x-112,roofY+5,224,5);
-  ctx.fillStyle='#2f6dd0';ctx.fillRect(x-112,roofY+10,224,5);
-  ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(x-112,roofY+16,224,2);
-  /* 屋根の下の 灯り */
-  for(let i=-2;i<=2;i++){
-    const lx=x+i*44;
-    const a=live?0.85:0.5+pulse*0.22;
-    const lg=ctx.createRadialGradient(lx,roofY+roofH+6,1,lx,roofY+roofH+6,26);
-    lg.addColorStop(0,'rgba(255,246,200,'+a+')');
-    lg.addColorStop(1,'rgba(255,220,140,0)');
-    ctx.fillStyle=lg;ctx.beginPath();ctx.arc(lx,roofY+roofH+6,26,0,6.284);ctx.fill();
-  }
-  /* 給油機（2台） */
-  for(const px of [x-54,x+4]){
-    ctx.fillStyle='#eef2f8';
-    ctx.beginPath();
-    if(ctx.roundRect)ctx.roundRect(px-15,base-60,30,52,4);else ctx.rect(px-15,base-60,30,52);
-    ctx.fill();
-    ctx.fillStyle='#e23c2c';ctx.fillRect(px-15,base-60,30,11);
-    ctx.fillStyle='#1f2a3a';ctx.fillRect(px-10,base-46,20,13);
-    ctx.fillStyle='#7be7a0';ctx.fillRect(px-8,base-43,16,2.5);ctx.fillRect(px-8,base-39,10,2.5);
-    ctx.strokeStyle='#2f6dd0';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(px+15,base-40);ctx.quadraticCurveTo(px+27,base-30,px+22,base-18);ctx.stroke();
-    ctx.fillStyle='#ff9a2e';ctx.fillRect(px+19,base-19,6,10);
-    if(GS.station.fillT>0&&GS.station.at===s){
-      const k=1-GS.station.fillT/1.1;
-      for(let i=0;i<6;i++){
-        const a=st.t*7+i*1.05;
-        ctx.fillStyle='rgba(255,240,170,'+(0.75*(1-k))+')';
-        ctx.beginPath();ctx.arc(px+22+Math.cos(a)*9,base-16+Math.sin(a)*9,2.6,0,6.284);ctx.fill();
-      }
-    }
-  }
-  /* 看板：GS MIATAS SS（実在ロゴは 使わない） */
-  const sy=roofY-36;
-  ctx.fillStyle='#c9d2de';ctx.fillRect(x-96,sy+28,7,roofY-sy-28);
-  ctx.fillStyle='#101828';
-  ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(x-114,sy-16,228,44,7);else ctx.rect(x-114,sy-16,228,44);
-  ctx.fill();
-  ctx.strokeStyle=used?'rgba(170,182,200,.7)':'rgba(255,215,106,'+(0.75+0.25*pulse)+')';
-  ctx.lineWidth=2.5;ctx.stroke();
-  ctx.fillStyle='#e23c2c';ctx.fillRect(x-110,sy-13,9,38);
-  ctx.fillStyle='#ff9a2e';ctx.fillRect(x-101,sy-13,5,38);
-  ctx.fillStyle='#2f6dd0';ctx.fillRect(x+100,sy-13,5,38);
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.font='900 17px system-ui,sans-serif';
-  ctx.fillStyle=used?'#b9c2d0':'#fff6d8';
-  ctx.fillText('GS MIATAS SS',x+2,sy-2);
-  ctx.font='800 10px system-ui,sans-serif';
-  ctx.fillStyle=used?'#8f98a6':'#ffd76a';
-  ctx.fillText(used?'満タン済み':(s.sign||'ハイオク給油所'),x+2,sy+14);
-  /* 未給油なら 上に ふわふわの ♥+1 と OPENランプ */
-  if(!used){
-    const bob=Math.sin(st.t*2.4+s.t)*4;
-    ctx.globalAlpha=1;
-    ctx.fillStyle='rgba(255,90,110,'+(0.55+0.35*Math.sin(st.t*5))+')';
-    ctx.beginPath();
-    ctx.arc(x+76,sy-38+bob,7,0,6.284);ctx.fill();
-    ctx.fillStyle='#fff';
-    ctx.font='900 9px system-ui,sans-serif';
-    ctx.fillText('+1',x+76,sy-38+bob);
-    ctx.fillStyle='rgba(255,120,90,.9)';
-    ctx.font='900 9px system-ui,sans-serif';
-    ctx.fillText('OPEN',x-70,sy-34+bob*0.5);
-  }
-  ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  ctx.restore();
-}
-
-/* ---------- ⛽ 相方の 並走 ---------- */
-function drawGsComboPartner(){
-  if(st.mode!=='run'||GS.combo.t<=0)return;
-  const img=HERO_IMGS[GS.combo.partner];
-  if(!img||!img.naturalWidth)return;
-  const ar=img.naturalWidth/img.naturalHeight;
-  const h=FULL_HERO_H*0.96, w=h*ar;
-  const run=Math.abs(P.speed)>60;
-  const bob=run?Math.abs(Math.sin(P.phase*1.2))*3.2:0;
-  const bx=P.x-58-st.camX, by=P.y-bob;
-  ctx.save();
-  /* 黄金の スピード線 */
-  ctx.strokeStyle='rgba(255,224,140,'+(0.32+0.2*Math.sin(st.t*14))+')';
-  ctx.lineWidth=2;
-  for(let i=0;i<3;i++){
-    const yy=by-26-i*28;
-    ctx.beginPath();ctx.moveTo(bx-w*0.5-46,yy);ctx.lineTo(bx-w*0.5-10,yy);ctx.stroke();
-  }
-  ctx.translate(bx,by);
-  ctx.rotate(-0.06);
-  ctx.shadowColor='rgba(255,200,90,.55)';ctx.shadowBlur=14;
-  ctx.drawImage(img,-w/2,-h,w,h);
-  ctx.restore();
-}
-
-/* ---------- 👋 スクイジー＆誘導の弧 ---------- */
-function drawGsWipeFX(){
-  const wp=GS.wipe;
-  if(wp.t<=0||st.mode!=='run')return;
-  const k=1-wp.t/0.55;
-  const cx=P.x-st.camX, cy=P.y-52;
-  ctx.save();
-  ctx.globalCompositeOperation='lighter';
-  for(let i=0;i<3;i++){
-    const r=56+k*190+i*16;
-    const a=(1-k)*(0.55-i*0.13);
-    ctx.strokeStyle='rgba(255,240,170,'+a+')';
-    ctx.lineWidth=7-i*1.7;
-    ctx.beginPath();ctx.arc(cx+18,cy,r,-1.0+k*0.5,1.0+k*0.5);ctx.stroke();
-  }
-  for(let i=0;i<11;i++){
-    const a2=-0.95+i*0.19;
-    const r2=64+k*170;
-    ctx.fillStyle='rgba(205,245,255,'+(0.55*(1-k))+')';
-    ctx.beginPath();ctx.arc(cx+18+Math.cos(a2)*r2,cy+Math.sin(a2)*r2*0.9,3.2*(1-k*0.5),0,6.284);ctx.fill();
-  }
-  ctx.restore();
-}
-
-/* ---------- 🏎️ RIDE ハイオク満タンの 噴射 ---------- */
-function drawGsRideJet(){
-  if(st.mode!=='run'||GS.ride.t<=0||!RIDE.active)return;
-  const cx=P.x-st.camX, cy=P.y-22;
-  ctx.save();
-  ctx.globalCompositeOperation='lighter';
-  const l=128+Math.sin(st.t*22)*24;
-  const g=ctx.createLinearGradient(cx-30-l,0,cx-4,0);
-  g.addColorStop(0,'rgba(255,70,25,0)');
-  g.addColorStop(.38,'rgba(255,140,35,.62)');
-  g.addColorStop(.82,'rgba(255,214,90,.9)');
-  g.addColorStop(1,'rgba(255,250,210,.98)');
-  ctx.fillStyle=g;
-  ctx.beginPath();
-  ctx.moveTo(cx-4,cy-19);
-  ctx.lineTo(cx-30-l,cy-4+Math.sin(st.t*18)*9);
-  ctx.lineTo(cx-4,cy+17);
-  ctx.closePath();ctx.fill();
-  const g2=ctx.createLinearGradient(cx-20-l*0.7,0,cx-2,0);
-  g2.addColorStop(0,'rgba(255,255,255,0)');
-  g2.addColorStop(1,'rgba(255,255,240,.95)');
-  ctx.fillStyle=g2;
-  ctx.beginPath();
-  ctx.moveTo(cx-2,cy-9);
-  ctx.lineTo(cx-20-l*0.7,cy+Math.sin(st.t*26)*5);
-  ctx.lineTo(cx-2,cy+9);
-  ctx.closePath();ctx.fill();
-  /* 炎の 粒 */
-  for(let i=0;i<4;i++){
-    const k=(st.t*2.4+i*0.27)%1;
-    ctx.fillStyle='rgba(255,'+Math.round(230-90*k)+','+Math.round(160-120*k)+','+(0.75*(1-k))+')';
-    ctx.beginPath();ctx.arc(cx-10-k*l*0.95,cy+(i%2?6:-5)+Math.sin(st.t*14+i)*3,6*(1-k*0.6),0,6.284);ctx.fill();
-  }
-  ctx.restore();
-}
-
-/* ---------- ⛽ 相方コンビの カットイン（画面座標） ---------- */
-function drawGsCutIn(){
-  const cb=GS.combo;
-  if(cb.cutT<=0)return;
-  const total=1.7,p=1-cb.cutT/total;
-  const inT=0.20,outT=0.66;
-  let k=1;
-  if(p<inT)k=clamp(p/inT,0,1);
-  else if(p>outT)k=clamp((1-p)/(1-outT),0,1);
-  if(k<=0)return;
-  const img=HERO_IMGS[cb.partner];
-  const w=Math.min(VW*0.92,540), h=Math.min(94,Math.max(76,VH*0.19));
-  const x0=(VW-w)/2, y0=VH*0.36-(1-k)*38;
-  ctx.save();
-  ctx.globalAlpha=k;
-  ctx.translate(x0,y0);
-  /* 斜めの 黒帯＋黄金のふち */
-  ctx.fillStyle='rgba(10,7,16,.94)';
-  ctx.beginPath();
-  ctx.moveTo(16,0);ctx.lineTo(w,0);ctx.lineTo(w-16,h);ctx.lineTo(0,h);
-  ctx.closePath();ctx.fill();
-  const bg=ctx.createLinearGradient(0,0,w,0);
-  bg.addColorStop(0,'rgba(255,180,60,.22)');
-  bg.addColorStop(.45,'rgba(255,200,80,.06)');
-  bg.addColorStop(1,'rgba(90,150,255,.16)');
-  ctx.fillStyle=bg;ctx.fill();
-  ctx.strokeStyle='rgba(255,206,90,.95)';ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle='rgba(226,60,44,.95)';
-  ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(26,0);ctx.lineTo(10,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
-  ctx.fillStyle='rgba(47,109,208,.95)';
-  ctx.beginPath();ctx.moveTo(w,h);ctx.lineTo(w-10,h);ctx.lineTo(w-26,0);ctx.lineTo(w-16,0);ctx.closePath();ctx.fill();
-  /* 相方の 顔の 窓（頭〜胸が 入るように 上の方を 切り取る） */
-  const bw=Math.min(78,h-14);
-  ctx.save();
-  ctx.beginPath();ctx.rect(22,7,bw,h-14);ctx.clip();
-  if(img&&img.naturalWidth){
-    const iw=img.naturalWidth, ih=img.naturalHeight;
-    const sh=ih*0.46, sw=iw;
-    const sc=Math.max(bw/sw,(h-14)/sh);
-    ctx.drawImage(img,22+bw/2-sw*sc/2,7+(h-14)/2-sh*sc/2,sw*sc,sh*sc);
-  }
-  ctx.restore();
-  ctx.strokeStyle='rgba(255,215,110,.8)';ctx.lineWidth=2;
-  ctx.strokeRect(22,7,bw,h-14);
-  /* テキスト */
-  const tx=22+bw+16;
-  ctx.textAlign='left';ctx.textBaseline='middle';
-  ctx.font='900 11px system-ui,sans-serif';
-  ctx.fillStyle='#ffd76a';
-  ctx.fillText('⛽ 相方コンビ必殺技 — '+gsPartnerName(),tx,h*0.24);
-  const fs=Math.round(clamp(w*0.052,17,24));
-  ctx.font='900 '+fs+'px system-ui,sans-serif';
-  ctx.fillStyle='#fff6d0';
-  ctx.fillText('ハイオク満タン！',tx,h*0.57);
-  ctx.font='900 '+Math.round(fs*0.58)+'px system-ui,sans-serif';
-  ctx.fillStyle='#ffe1a8';
-  ctx.fillText('In Japan we say...!',tx,h*0.84);
-  ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  ctx.restore();
-}
-
 /* ミサイル（空中・陸上）と 魚雷（水中）の描画 */
 function drawMissiles(){
   for(const m of MSL.list){
@@ -12744,70 +11631,6 @@ function drawMissiles(){
     if(x<-90||x>VW+90)continue;
     const fade=clamp((m.life-m.t)/0.22,0,1);
     ctx.save();ctx.globalAlpha=fade;
-    if(m.gas){
-      /* ガソリン噴射：ノズル（左・細い）から 先端（右・広い）へ 扇形に 広がる 黄金〜虹色の 燃料ジェット＋飛沫 */
-      const fl=1+Math.sin(st.t*46+m.t*14)*0.16;
-      /* 後方へ 引く 燃料ミスト */
-      for(let i=1;i<=9;i++){
-        const tx=x-14-i*9, ty=y+Math.sin(st.t*15+i*2.1)*(1.4+i*0.6);
-        ctx.fillStyle='rgba(255,'+(198-i*9)+','+(72+i*7)+','+(0.32*(1-i/10))+')';
-        ctx.beginPath();ctx.ellipse(tx,ty,4.6+i*1.0,2.8+i*0.55,0,0,6.284);ctx.fill();
-      }
-      ctx.translate(x,y);
-      const L1=-50, L2=22, sp=13*fl;
-      /* 1) 噴射コーン本体（黄金→白→虹色） */
-      const jg=ctx.createLinearGradient(L1,0,L2,0);
-      jg.addColorStop(0,'rgba(255,120,40,.30)');
-      jg.addColorStop(.22,'rgba(255,162,50,.62)');
-      jg.addColorStop(.52,'rgba(255,224,90,.92)');
-      jg.addColorStop(.78,'rgba(232,255,170,.90)');
-      jg.addColorStop(.93,'rgba(160,240,255,.85)');
-      jg.addColorStop(1,'rgba(150,205,255,.72)');
-      ctx.fillStyle=jg;
-      ctx.beginPath();
-      ctx.moveTo(L1,-1.8);
-      ctx.quadraticCurveTo(L1+18,-sp*0.45, L2,-sp);
-      ctx.quadraticCurveTo(L2+10,0, L2,sp);
-      ctx.quadraticCurveTo(L1+18,sp*0.45, L1,1.8);
-      ctx.quadraticCurveTo(L1-6,0, L1,-1.8);
-      ctx.closePath();ctx.fill();
-      /* 2) 芯の 白い ジェット */
-      const cg=ctx.createLinearGradient(L1+2,0,L2-2,0);
-      cg.addColorStop(0,'rgba(255,255,255,.15)');
-      cg.addColorStop(.5,'rgba(255,255,235,.95)');
-      cg.addColorStop(1,'rgba(255,250,195,.95)');
-      ctx.fillStyle=cg;
-      ctx.beginPath();
-      ctx.moveTo(L1+4,-1.4);
-      ctx.quadraticCurveTo((L1+L2)/2,-sp*0.40, L2-4,-sp*0.62);
-      ctx.quadraticCurveTo(L2+2,0, L2-4,sp*0.62);
-      ctx.quadraticCurveTo((L1+L2)/2,sp*0.40, L1+4,1.4);
-      ctx.closePath();ctx.fill();
-      /* 3) 虹色の 縁（屈折光） */
-      ctx.lineWidth=1.6;ctx.globalAlpha=fade*.75;
-      ctx.strokeStyle='rgba(170,255,190,.9)';
-      ctx.beginPath();ctx.moveTo(L1+8,-sp*0.24);ctx.quadraticCurveTo(L1+22,-sp*0.62, L2-2,-sp*0.92);ctx.stroke();
-      ctx.strokeStyle='rgba(150,220,255,.9)';
-      ctx.beginPath();ctx.moveTo(L1+8,sp*0.24);ctx.quadraticCurveTo(L1+22,sp*0.62, L2-2,sp*0.92);ctx.stroke();
-      ctx.globalAlpha=1;
-      /* 4) 飛沫（虹色の粒が 扇状に 飛び散る） */
-      const dc=['#ffd166','#ffb347','#a8ffcf','#9edcff','#fff6c0'];
-      for(let i=0;i<11;i++){
-        const a=st.t*6.5+i*0.72;
-        const spread=(i%2?1:-1)*(2.6+(i%5)*2.2);
-        const px=L2-6+Math.cos(a*1.5)*15, py=spread*fl+Math.sin(a)*4;
-        ctx.fillStyle=dc[i%dc.length];
-        ctx.beginPath();ctx.arc(px,py,1.7+(i%3)*0.7,0,6.284);ctx.fill();
-      }
-      /* 5) 先端の ノズル光 */
-      const hg=ctx.createRadialGradient(L2,0,1,L2,0,15*fl);
-      hg.addColorStop(0,'rgba(255,255,255,.95)');
-      hg.addColorStop(.38,'rgba(255,234,145,.72)');
-      hg.addColorStop(1,'rgba(255,170,60,0)');
-      ctx.fillStyle=hg;ctx.beginPath();ctx.arc(L2,0,15*fl,0,6.284);ctx.fill();
-      ctx.restore();
-      continue;
-    }
     if(m.under){
       /* 泡の trail */
       for(let i=1;i<=5;i++){
@@ -12850,68 +11673,6 @@ function drawMissiles(){
     ctx.restore();
   }
 }
-/* ガソリン噴射の ビーム（超高圧ジェット）：黄金→虹色の 帯＋波打つ飛沫 */
-function drawGasJetBeam(b){
-  const x0=b.x0-st.camX, x1=b.front-st.camX, y=b.y;
-  const fade=clamp((b.life-b.t)/.16,0,1), grow=clamp(b.t/.05,0,1);
-  const h=(b.small?10:24)*(.5+.5*grow), wide=Math.max(4,x1-x0), K=b.small?0.7:1;
-  ctx.save();ctx.globalAlpha=fade;ctx.lineCap='round';
-  /* 外側の アンバーの 炎（加算） */
-  ctx.globalCompositeOperation='lighter';
-  const g1=ctx.createLinearGradient(0,y-h*3,0,y+h*3);
-  g1.addColorStop(0,'rgba(255,140,40,0)');
-  g1.addColorStop(.36,'rgba(255,170,60,'+(0.13*K)+')');
-  g1.addColorStop(.5,'rgba(255,225,120,'+(0.21*K)+')');
-  g1.addColorStop(.64,'rgba(255,170,60,'+(0.13*K)+')');
-  g1.addColorStop(1,'rgba(255,140,40,0)');
-  ctx.fillStyle=g1;ctx.fillRect(x0,y-h*3,wide,h*6);
-  ctx.globalCompositeOperation='source-over';
-  /* 本体：黄金→白→虹色（緑・水色の照り） */
-  const g2=ctx.createLinearGradient(0,y-h*1.2,0,y+h*1.2);
-  g2.addColorStop(0,'rgba(255,150,40,'+(0.9*K)+')');
-  g2.addColorStop(.24,'rgba(255,206,70,'+(0.96*K)+')');
-  g2.addColorStop(.46,'rgba(255,252,220,1)');
-  g2.addColorStop(.54,'rgba(226,255,214,1)');
-  g2.addColorStop(.76,'rgba(155,236,255,'+(0.9*K)+')');
-  g2.addColorStop(1,'rgba(140,200,255,'+(0.75*K)+')');
-  ctx.fillStyle=g2;ctx.fillRect(x0,y-h*1.2,wide,h*2.4);
-  /* 乱流の 白い 筋 */
-  for(let k=0;k<10;k++){
-    const tt=((k/10)+st.t*1.6)%1, xx=x0+wide*tt;
-    const yy=y+Math.sin(tt*18+st.t*24+k)*h*.55;
-    ctx.fillStyle='rgba(255,255,255,'+(fade*(0.20+0.16*Math.sin(st.t*30+k)))+')';
-    ctx.beginPath();ctx.ellipse(xx,yy,h*.30,h*.15,0,0,6.284);ctx.fill();
-  }
-  /* 飛び散る ガソリン飛沫 */
-  for(let k=0;k<14;k++){
-    const tt=((k/14)+st.t*2.2)%1, xx=x0+wide*tt;
-    const yy=y+Math.sin(st.t*17+k*2.3)*h*1.55;
-    ctx.fillStyle='rgba(255,224,120,'+(fade*.7)+')';
-    ctx.beginPath();ctx.arc(xx,yy,2.2+1.6*Math.abs(Math.cos(k+st.t*9)),0,6.284);ctx.fill();
-  }
-  /* 先端の 閃光 */
-  const fl=h*3.0;
-  const fg=ctx.createRadialGradient(x1,y,1,x1,y,fl);
-  fg.addColorStop(0,'rgba(255,255,255,'+(0.95*K)+')');
-  fg.addColorStop(.25,'rgba(255,240,150,'+(0.8*K)+')');
-  fg.addColorStop(.55,'rgba(255,170,60,'+(0.4*K)+')');
-  fg.addColorStop(1,'rgba(255,120,30,0)');
-  ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x1,y,fl,0,6.284);ctx.fill();
-  /* 銃口（ノズル）の 光 */
-  const rg=ctx.createRadialGradient(x0,y,1,x0,y,h*2.2);
-  rg.addColorStop(0,'rgba(255,255,240,.9)');
-  rg.addColorStop(.4,'rgba(255,210,110,'+(0.5*K)+')');
-  rg.addColorStop(1,'rgba(255,150,40,0)');
-  ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x0,y,h*2.2,0,6.284);ctx.fill();
-  /* 衝撃波リング */
-  const al=clamp(1-b.t/b.life,0,1);
-  for(let k=0;k<2;k++){
-    const pr=b.t*900+k*60;
-    ctx.strokeStyle='rgba(255,236,170,'+(al*.5*K)+')';ctx.lineWidth=2.2;
-    ctx.beginPath();ctx.ellipse(x1-pr*.4,y,h*1.1+pr*.22,h*.62+pr*.16,0,0,6.284);ctx.stroke();
-  }
-  ctx.restore();
-}
 /* 波動砲：チャージの 光（粒子が集まる・エネルギー球）と 発射ビームの 描画 */
 function drawWaveCannonFX(){
   if(WC.charging){
@@ -12934,20 +11695,13 @@ function drawWaveCannonFX(){
     ctx.globalAlpha=1;
     const puls=WC.full?1+.10*Math.sin(st.t*26):1;
     const R=(8+46*r)*puls;
-    const gasC=isGasHero();
     const g=ctx.createRadialGradient(mx,my,1,mx,my,R);
     g.addColorStop(0,'rgba(255,255,255,.98)');
-    if(gasC){
-      g.addColorStop(.32,'rgba(255,236,150,.92)');
-      g.addColorStop(.66,'rgba(255,178,66,.45)');
-      g.addColorStop(1,'rgba(255,140,40,0)');
-    }else{
-      g.addColorStop(.32,'rgba(186,244,255,.92)');
-      g.addColorStop(.66,'rgba(96,196,255,.45)');
-      g.addColorStop(1,'rgba(70,150,255,0)');
-    }
+    g.addColorStop(.32,'rgba(186,244,255,.92)');
+    g.addColorStop(.66,'rgba(96,196,255,.45)');
+    g.addColorStop(1,'rgba(70,150,255,0)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(mx,my,R,0,6.284);ctx.fill();
-    ctx.strokeStyle=gasC?'rgba(255,238,175,'+(.28+.55*r)+')':'rgba(198,246,255,'+(.28+.55*r)+')';
+    ctx.strokeStyle='rgba(198,246,255,'+(.28+.55*r)+')';
     ctx.lineWidth=1.6+2.2*r;
     ctx.beginPath();ctx.ellipse(mx,my,R*1.22,R*1.02,0,0,6.284);ctx.stroke();
     if(WC.full){
@@ -12962,7 +11716,6 @@ function drawWaveCannonFX(){
   for(const b of WC.beams){
     const x0=b.x0-st.camX, x1=b.front-st.camX, y=b.y;
     if(x1<-60)continue;
-    if(b.gas){drawGasJetBeam(b);continue;}
     const fade=clamp((b.life-b.t)/.16,0,1);
     const grow=clamp(b.t/.05,0,1);
     const h=(b.small?9:22)*(.5+.5*grow);
@@ -14968,7 +13721,6 @@ function render(){
     drawTunnelDark(dark);
   }
 
-  drawStations();
   drawItems();
   drawObstacles();
   drawFoeShots();
@@ -14980,10 +13732,7 @@ function render(){
   drawHelper();
   drawSpeedFX();
   drawTravelGoal();
-  drawGsRideJet();
-  drawGsComboPartner();
   drawPlayer();
-  drawGsWipeFX();
   drawMissiles();
   drawWaveCannonFX();
   drawParticles();
@@ -15000,8 +13749,6 @@ function render(){
   ctx.restore();
   /* FEVER TIME の 画面演出は 揺れの外側で 描く（画面全体を 覆う） */
   drawFeverFX();
-  /* ⛽ 相方コンビの カットイン（画面座標） */
-  drawGsCutIn();
 }
 
 /* ======================= loop ======================= */
@@ -15170,82 +13917,14 @@ window.__dash={
   wcPress(){shotPress();return WC.charging;},
   wcRelease(){shotRelease();return {fired:WC.fired,lastDmg:WC.lastDmg};},
   wcFire(small){fireWaveCannon(!!small);return WC.beams.length;},
-  missiles(){return MSL.list.map(m=>({x:Math.round(m.x),y:Math.round(m.y),under:!!m.under,gas:!!m.gas}));},
+  missiles(){return MSL.list.map(m=>({x:Math.round(m.x),y:Math.round(m.y),under:!!m.under}));},
   mslInfo(){return {shots:MSL.count,hits:MSL.hits,killed:MSL.killed,cool:Math.round(MSL.cool*100)/100,live:MSL.list.length};},
   itemBands(){const m={};for(const it of LV.items){const off=Math.round(groundY-it.y);(m[it.type]=m[it.type]||[]).push(off);}const o={};for(const k in m)o[k]={n:m[k].length,min:Math.min(...m[k]),max:Math.max(...m[k])};return o;},
   pressW(){pressW();},
-  /* --- GSミアタ 4大アクションの 検証用 --- */
-  setHero(k){return pickHero(k,false);},
-  gsInfo(){
-    const s0=LV.stations||[];
-    return {hero:heroKey,gas:isGasHero(),partner:gsPartnerKey(),partnerName:gsPartnerName(),
-      combo:{t:Math.round(GS.combo.t*100)/100,cd:Math.round(GS.combo.cd*100)/100,cutT:Math.round(GS.combo.cutT*100)/100,
-        count:GS.combo.count,partner:GS.combo.partner,turbo:Math.max(0,Math.round(st.turboT*100)/100)},
-      wipe:{t:Math.round(GS.wipe.t*100)/100,cd:Math.round(GS.wipe.cd*100)/100,count:GS.wipe.count,
-        reflect:GS.wipe.reflect,smashed:GS.wipe.smashed,foeShots:FOE.shots.length},
-      ride:{t:Math.round(GS.ride.t*100)/100,cd:Math.round(GS.ride.cd*100)/100,count:GS.ride.count,
-        hits:GS.ride.hits,rideActive:RIDE.active,rideKind:RIDE.kind,speed:Math.round(P.speed)},
-      hiOct:Math.round(GS.hiOct*100)/100,hiOctCount:GS.hiOctCount,
-      station:{used:GS.station.used,last:GS.station.last,
-        list:s0.map(s=>({x:Math.round(s.x),y:Math.round(s.y),off:s.off,used:!!s.used,label:s.label}))},
-      pills:{gs:elGs?elGs.textContent:'',gsHidden:elGs?elGs.hidden:null,
-        wRing:elW?elW.className:'',ringDeg:elWRing?elWRing.style.getPropertyValue('--cg'):null},
-      pops:st.pops.map(p=>p.text),msg:st.msg,imgW:gsPartnerImg()?gsPartnerImg().naturalWidth:0};
-  },
-  gsCombo(){return activateGsCombo('debug');},
-  gsComboHold(){GS.holdT=0.6;GS.holdFired=false;return tryGsComboFromHold();},
-  gsWipe(){return doGsWipe();},
-  gsRideBoost(){return activateGsRideBoost('debug');},
-  gsStationTeleport(i){
-    const s=(LV.stations||[])[i||0];
-    if(!s)return null;
-    P.x=s.x-160;P.y=(travelMode()==='run')?floorY(P.x):(s.y-84);
-    P.vy=0;P.grounded=travelMode()==='run';st.camX=P.x-VW*0.31;
-    return {x:Math.round(s.x),y:Math.round(s.y)};
-  },
-  gsStationFillNow(i){
-    const s=(LV.stations||[])[i||0];
-    return s?gsStationFill(s):false;
-  },
-  gsSetHiOct(v){GS.hiOct=Math.max(0,v==null?HI_OCT_DUR:v);return GS.hiOct;},
-  gsResetCooldowns(){GS.combo.cd=0;GS.combo.t=0;GS.combo.cutT=0;GS.wipe.cd=0;GS.ride.cd=0;GS.ride.t=0;return true;},
-  gsShotNear(dx,dy){
-    FOE.shots.push({x:P.x+(dx==null?190:dx),y:P.y-56+(dy||0),vx:-140,vy:0,r:10,t:0,life:3.0,who:3,ph:0});
-    return FOE.shots.length;
-  },
-  gsClearShots(){FOE.shots.length=0;BOSS.shots.length=0;MID.shots.length=0;return true;},
-  gsClearStations(){for(const s of (LV.stations||[]))s.used=false;GS.station.used=0;GS.hiOct=0;return LV.stations.length;},
-  gsClearTurbo(){st.turboT=0;return 0;},
-  /* --- 音楽／ボイスの 検証用 --- */
+  /* --- 音楽の 検証用 --- */
   musicInfo(){return {track:Mus.track,bpm:MUS_BPM[Mus.track]||0,step:Mus.step,notes:Mus.notes,
     muted:Sfx.muted,vol:Math.round(Mus.vol*100)/100,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*100)/100:null,
     ctx:Sfx.ac?Sfx.ac.state:null,hero:heroKey};},
-  voiceInfo(){return {supported:Voice.supported,unlocked:Voice.unlocked,muted:Sfx.muted,said:Voice.said,
-    last:Voice.last,lastText:Voice.lastText,seqAt:Math.round(Voice.seqAt),
-    speaking:(Voice.supported?!!window.speechSynthesis.speaking:false),
-    pending:(Voice.supported?!!window.speechSynthesis.pending:false),
-    voices:(Voice.supported?(window.speechSynthesis.getVoices()||[]).map(v=>v.name+'/'+v.lang).slice(0,8):[]),
-    hero:heroKey,pitch:voiceHeroPitch(),heroPitch:VOICE_HERO_PITCH,
-    gasPitch:VOICE_GAS_PITCH,gasRate:VOICE_GAS_RATE,
-    otherRate:VOICE_OTHER_RATE,
-    gasVoice:(function(){const v=voicePick('gas');return v?(v.name+'/'+v.lang):null;})(),
-    girlPitch:VOICE_GIRL_PITCH,girlRate:VOICE_GIRL_RATE,
-    girlVoice:(function(){const v=voicePick('girl');return v?(v.name+'/'+v.lang):null;})(),
-    readJa:voiceRead('ハイオク満タン！'),
-    readBoost:voiceRead('ハイオク満タン、ブースト！'),
-    readEn:voiceRead('In Japan we say...!'),
-    ducking:voiceDucking(),duckMsLeft:Math.max(0,Math.round(VoiceDuck.until-performance.now())),
-    duckFactor:VOICE_DUCK,cue:Voice.cue,busyCancel:Voice.busyCancel,queueWait:Voice.queueWait,blocked:Voice.blocked};},
-  voiceDuckNow(ms){voiceDuckHold(ms==null?2000:ms);return voiceDucking();},
-  voiceDuckInfo(){return {ducking:voiceDucking(),left:Math.max(0,Math.round(VoiceDuck.until-performance.now())),vol:Math.round(Mus.vol*1000)/1000,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*1000)/1000:null,bgmMix:BGM_MIX,duckFactor:VOICE_DUCK};},
-  voiceUnlock(){return voiceUnlock();},
-  voiceTest(t){return voiceSay(t||'ハイオク満タン！');},
-  voiceReading(t){return voiceRead(t==null?'ハイオク満タン！':t);},
-  voiceRolePick(role){const v=voicePick(role);return v?{name:v.name,lang:v.lang}:null;},
-  voiceRoleOf(t){return voiceRole(t);},
-  voiceLines(){return voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);},
-  voiceCancel(){voiceCancel();return true;},
-  voiceResetCooldown(){Voice.seqAt=0;return true;},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
   assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4,party4helmet:imgParty4H,kart:imgKart,ironchef:imgIronChef,finalegod:imgFinaleGod,eunos:imgEunos};

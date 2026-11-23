@@ -657,7 +657,7 @@
       </ul>
       <button id="btnStart" class="btnStart">スタート ▶</button>
       <button id="btnNextStage" class="btnStart dun" hidden>🕯️ ステージ2（地下ダンジョン）へ挑む</button>
-      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）<br>🔊 イッセイ・ミニーの 声が出ないとき は iPhoneの マナースイッチ（側面）を 解除して、Safariで 開くと 確実に 鳴る</p>
+      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）<br>🔊 イッセイ・ミニーの 声が出ないとき は iPhoneの マナースイッチ（側面）を 解除して、Safariで 開くと 確実に 鳴る<br><span style="opacity:.72">音声 v3（2026-11-23）：ハイオク マンタン＝日本人男性の声／In Japan we say＝カタカナ英語の女の子の声</span></p>
     </div>
   </div>
 </div>
@@ -6602,29 +6602,33 @@ function voiceVoices(){
   }catch(e){}
   return Voice.voices;
 }
-/* 「In Japan we say...!」の 英語は、イッセイ操作時も ミニー操作時も 女の子の声に 固定する。
-   端末に よく入っている 女性名の声を 優先し、男性名の声（Daniel・Alex 等）は 避ける。 */
-const VOICE_EN_GIRL=/samantha|karen|victoria|allison|ava|tessa|nicky|moira|fiona|kate|serena|martha|susan|zira|hazel|catherine|amy|emma|joanna|salli|kimberly|ivy|kendra|aria|jenny|michelle|sonia|libby|natasha|female|woman|google us english/i;
-const VOICE_EN_BOY=/daniel|alex|fred|aaron|arthur|oliver|gordon|rishi|david|mark\b|james\b|guy\b|george|graham|diego|jorge|juan|carlos|luca|matteo|male|\bman\b/i;
-const VOICE_EN_PITCH=1.30;   /* 女の子らしい 高さ（1.28〜1.35の 範囲） */
-function voicePickEnGirl(list){
-  const c=(list||voiceVoices()).filter(v=>/^en/i.test(v.lang||''));
-  if(!c.length)return null;
-  const girl=c.find(v=>VOICE_EN_GIRL.test(v.name||''));
-  if(girl)return girl;
-  const notBoy=c.find(v=>!VOICE_EN_BOY.test(v.name||''));
-  return notBoy||c[0];
+/* 声の 役割（2026-11-23 v3）。日本語の 音声で 喋る（英語も カタカナ発音）。
+   gas  … 「ハイオク満タン！」= 日本人男性の 声（Otoya・Hattori 等 → 無ければ pitch 0.82 の 低め）
+   girl … 「In Japan we say...!」= 日本の 若い女の子の 声（Kyoko・O-Ren・Haruka 等 ＋ pitch 1.38）
+   ''   … その他の セリフ（ミニー=高め／イッセイ=低め の キャラ声） */
+const VOICE_GAS_MAN=/otoya|hattori|takumi|keita|male|\bman\b|男性|男声/i;
+const VOICE_GIRL_JA=/kyoko|o-?ren|haruka|nanami|ayumi|sayaka|female|woman|女性|女声/i;
+const VOICE_GAS_PITCH=0.82, VOICE_GAS_RATE=1.05;    /* 日本人男性：低め・落ち着いた速さ */
+const VOICE_GIRL_PITCH=1.38, VOICE_GIRL_RATE=1.08;  /* 若い女の子：明るく高め・少し速め */
+const VOICE_CUTE_EN_SAY='イン ジャパン、ウィー セイ！';
+const VOICE_CUTE_EN_RE=/In\s*Japan\s*we\s*say[^A-Za-z]*/i;
+function voiceRole(text){
+  const s=String(text==null?'':text);
+  if(VOICE_CUTE_EN_RE.test(s))return 'girl';
+  if(/ハイオク\s*満タン|満タン/.test(s))return 'gas';
+  return '';
 }
-/* 端末にある声から キャラに合うものを 選ぶ（なければ 既定の声＋pitchで 色をつける） */
-function voicePick(en){
+/* 端末にある 日本語の声から 役割に合うものを 選ぶ。
+   見つからなければ null（＝端末の 既定の 日本語音声に pitch／rate で 色をつける） */
+function voicePick(role){
   const list=voiceVoices();
   if(!list.length)return null;
-  const re=en?/^en/i:/^ja/i;
-  const c=list.filter(v=>re.test(v.lang||''));
+  const c=list.filter(v=>/^ja/i.test(v.lang||''));
   if(!c.length)return null;
-  if(en)return voicePickEnGirl(c);        /* 英語のセリフは いつも 女の子の声 */
-  if(heroKey==='minnie')return c.find(v=>/kyoko|o-?ren|nanami|female|woman|女性|google 日本語/i.test(v.name||''))||c[0];
-  if(heroKey==='issei')return c.find(v=>/otoya|hattori|takumi|male|man|男性|google 日本語/i.test(v.name||''))||c[0];
+  if(role==='gas')return c.find(v=>VOICE_GAS_MAN.test(v.name||''))||null;
+  if(role==='girl')return c.find(v=>VOICE_GIRL_JA.test(v.name||''))||null;
+  if(heroKey==='minnie')return c.find(v=>VOICE_GIRL_JA.test(v.name||''))||c[0];
+  if(heroKey==='issei')return c.find(v=>VOICE_GAS_MAN.test(v.name||''))||c[0];
   return c[0];
 }
 /* アンロック：iOS Safari / アプリ内ブラウザ では 「ユーザーの操作（タップ）」の中で
@@ -6661,23 +6665,25 @@ function voiceCancel(){
   try{window.speechSynthesis.cancel();}catch(e){}
 }
 function voiceForget(u){const i=Voice.utts.indexOf(u);if(i>=0)Voice.utts.splice(i,1);}
-/* 読み上げ用の かな変換（画面表示は 漢字のまま）。
-   speechSynthesis は 「ハイオク満タン」を 「はいおく みつるたん」等と 誤読するため、
-   speak() へ 渡す文だけ 平仮名・カタカナの 読みに 置き換える。
+/* 読み上げ用の カタカナ変換（画面表示は 漢字・英語のまま）。
+   漢字「満」は iOSの 日本語音声が 名前読みの「みつる」と 読むため、
+   「ハイオク満タン」→「ハイオク マンタン」と カタカナで 渡す（最後の砦で 満→マン も 置換）。
    画面の テロップ・メッセージ・ポップは これまでどおり 漢字表記。 */
 const VOICE_READ=[
-  [/ハイオク満タン、ブースト！/g,'はいおく、まんたん、ぶーすと！'],
-  [/ハイオク満タン！/g,'はいおく まんたん！'],
-  [/ハイオク満タン/g,'はいおく まんたん'],
+  [/ハイオク満タン、ブースト！/g,'ハイオク、マンタン、ブースト！'],
+  [/ハイオク満タン！/g,'ハイオク マンタン！'],
+  [/ハイオク満タン/g,'ハイオク マンタン'],
+  [VOICE_CUTE_EN_RE,VOICE_CUTE_EN_SAY],    /* 「In Japan we say...!」= カタカナ英語で 喋る */
   [/オーライ、オーライ！/g,'おーらい！おーらい！'],
   [/オーライ！オーライ！/g,'おーらい！おーらい！'],
   [/オーライ/g,'おーらい'],
   [/ピカピカ！/g,'ぴかぴか！'],
   [/ピカピカ/g,'ぴかぴか'],
-  [/満タン/g,'まんたん'],
+  [/満タン/g,'マンタン'],
   [/給油/g,'きゅうゆ'],
   [/無敵/g,'むてき'],
-  [/加速/g,'かそく']
+  [/加速/g,'かそく'],
+  [/満/g,'マン']                             /* 保険：漢字「満」は speak() へ 渡さない */
 ];
 function voiceRead(text){
   let s=String(text==null?'':text);
@@ -6695,20 +6701,22 @@ function voiceSpeakNow(text,en){
   try{
     const ss=window.speechSynthesis;
     if(ss.paused)ss.resume();
-    const say=en?text:voiceRead(text);      /* ← 日本語は かな読みに 直してから 喋る */
+    const role=voiceRole(text);
+    const say=voiceRead(text);             /* ← 漢字・英語を カタカナ読みに 直してから 喋る（v3） */
     const u=new SpeechSynthesisUtterance(say);
-    if(en){
-      u.lang='en-US';
-      u.pitch=VOICE_EN_PITCH;              /* 英語のセリフは ヒーローに関係なく 女の子の声 */
+    u.lang='ja-JP';                          /* 可愛い英語も 日本語音声で カタカナ発音 */
+    if(role==='gas'){                        /* ハイオク満タン！= 日本人男性 */
+      u.pitch=VOICE_GAS_PITCH;u.rate=VOICE_GAS_RATE;
+    }else if(role==='girl'){                 /* In Japan we say...! = 若い女の子 */
+      u.pitch=VOICE_GIRL_PITCH;u.rate=VOICE_GIRL_RATE;
     }else{
-      u.lang='ja-JP';
-      u.pitch=heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0);
+      u.pitch=heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0);u.rate=1.12;
     }
-    u.rate=1.12;
     u.volume=1.0;                            /* ← 最大音量を 明示（iOSの 既定音量対策） */
-    const v=voicePick(en);
+    const v=voicePick(role);
     if(v){u.voice=v;Voice.lastVoiceName=v.name||'';}else Voice.lastVoiceName='';
-    const est=voiceEstMs(say,en);
+    const latin=/^[\x20-\x7E]+$/.test(say);
+    const est=voiceEstMs(say,latin);
     /* start で 伸ばし、end で 「終了後 約2秒」まで 保持する（onstart が 来ない端末対策で speak 時にも 押さえる） */
     u.onstart=()=>{voiceDuckHold(est+VOICE_TAIL_MS);};
     u.onend=()=>{voiceDuckHold(VOICE_TAIL_MS);voiceForget(u);};
@@ -6716,11 +6724,11 @@ function voiceSpeakNow(text,en){
     Voice.utts.push(u);
     if(Voice.utts.length>8)Voice.utts.shift();
     voiceDuckHold(est+VOICE_TAIL_MS);
-    Sfx.voiceCue(en?'en':'ja');               /* トークボックス風の 合図音（声が 鳴らない端末でも 喋った感） */
+    Sfx.voiceCue(latin?'en':'ja');            /* トークボックス風の 合図音（声が 鳴らない端末でも 喋った感） */
     Voice.cue++;
     ss.speak(u);
     Voice.said++;Voice.lastText=text;Voice.lastAt=performance.now();
-    Voice.last={text:say,display:text,lang:u.lang,pitch:u.pitch,rate:u.rate,volume:u.volume,voice:Voice.lastVoiceName,estMs:est};
+    Voice.last={text:say,display:text,role:role,lang:u.lang,pitch:u.pitch,rate:u.rate,volume:u.volume,voice:Voice.lastVoiceName,estMs:est};
     return true;
   }catch(e){return false;}
 }
@@ -15213,8 +15221,13 @@ window.__dash={
     pending:(Voice.supported?!!window.speechSynthesis.pending:false),
     voices:(Voice.supported?(window.speechSynthesis.getVoices()||[]).map(v=>v.name+'/'+v.lang).slice(0,8):[]),
     hero:heroKey,pitch:heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0),
-    enPitch:VOICE_EN_PITCH,enVoice:(function(){const v=voicePickEnGirl();return v?(v.name+'/'+v.lang):null;})(),
+    gasPitch:VOICE_GAS_PITCH,gasRate:VOICE_GAS_RATE,
+    gasVoice:(function(){const v=voicePick('gas');return v?(v.name+'/'+v.lang):null;})(),
+    girlPitch:VOICE_GIRL_PITCH,girlRate:VOICE_GIRL_RATE,
+    girlVoice:(function(){const v=voicePick('girl');return v?(v.name+'/'+v.lang):null;})(),
     readJa:voiceRead('ハイオク満タン！'),
+    readBoost:voiceRead('ハイオク満タン、ブースト！'),
+    readEn:voiceRead('In Japan we say...!'),
     ducking:voiceDucking(),duckMsLeft:Math.max(0,Math.round(VoiceDuck.until-performance.now())),
     duckFactor:VOICE_DUCK,cue:Voice.cue,busyCancel:Voice.busyCancel,queueWait:Voice.queueWait,blocked:Voice.blocked};},
   voiceDuckNow(ms){voiceDuckHold(ms==null?2000:ms);return voiceDucking();},
@@ -15222,7 +15235,8 @@ window.__dash={
   voiceUnlock(){return voiceUnlock();},
   voiceTest(t){return voiceSay(t||'ハイオク満タン！');},
   voiceReading(t){return voiceRead(t==null?'ハイオク満タン！':t);},
-  voiceEnPick(){const v=voicePickEnGirl();return v?{name:v.name,lang:v.lang}:null;},
+  voiceRolePick(role){const v=voicePick(role);return v?{name:v.name,lang:v.lang}:null;},
+  voiceRoleOf(t){return voiceRole(t);},
   voiceLines(){return voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);},
   voiceCancel(){voiceCancel();return true;},
   voiceResetCooldown(){Voice.seqAt=0;return true;},

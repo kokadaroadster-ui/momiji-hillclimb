@@ -239,10 +239,11 @@ GSミアタの2人が 主役のときだけ 使える 4つのアクション。�
 **GSミアタの ボイス（声真似・Web Speech API）**
 
 - `window.speechSynthesis` で 「**ハイオク満タン！**」「**In Japan we say...!**」「**オーライ、オーライ！**」「**ハイオク満タン、ブースト！**」を 喋る
-- 声色は キャラで 分ける: **イッセイ＝pitch 0.90**（低めで 張りのある男性風）／**ミニー＝pitch 1.30**（明るく 高い声）／ワッカー（給油所だけ）＝1.00。`rate` は 1.12。日本語は `ja-JP`、「In Japan we say...!」は `en-US`。端末に Kyoko／Otoya などの 声があれば それも 選ぶ
+- 発話文（音声 v3・2026-11-23）: 画面表示は 漢字・英語のまま、`speak()` へは カタカナ読みを 渡す。漢字「満」は iOSの 日本語音声が 名前読みの「みつる」と 読むため、**「ハイオク マンタン！」**（ブーストは「ハイオク、マンタン、ブースト！」）／**「In Japan we say...!」→「イン ジャパン、ウィー セイ！」**。最後の砦として `満→マン` も 置換し、漢字が 残らない
+- 声色: **「ハイオク満タン！」＝日本人男性**（`ja-JP`・Otoya／Hattori 等を 優先、pitch **0.82**、rate 1.05。男性名の声が 無ければ 端末既定の日本語音声＋pitch 0.82 の 低め）／**「In Japan we say...!」＝日本の 若い女の子**（`ja-JP`・Kyoko／O-Ren／Haruka 等を 優先、pitch **1.38**、rate **1.08**。英語ネイティブの `en-US` は 使わない）／その他（オーライ・給油所の ワッカー等）＝キャラ声（イッセイ 0.90／ミニー 1.30、rate 1.12）
 - 鳴る場所: **Wの 相方コンビ必殺技**（2こと連続）／**給油所の 通過**／**RIDE ハイオクブースト**／**▼の オーライ誘導**
 - ミュート中は 喋らず、ミュートした瞬間に 発話も 止める。連続発話は 2.2秒（セリフ連続は 2.6秒）の クールダウンと `cancel()` で かぶらない。iOS Safari 対策として START・最初のタップ／キー入力で アンロック
-- 検証フック: `__dash.voiceInfo()` / `voiceTest(text)` / `voiceLines()` / `voiceUnlock()` / `voiceCancel()` / `voiceResetCooldown()`
+- 検証フック: `__dash.voiceInfo()`（`readJa` / `readBoost` / `readEn` / `gasVoice` / `girlVoice` / `gasPitch` / `girlPitch`）/ `voiceTest(text)` / `voiceLines()` / `voiceReading(text)` / `voiceRoleOf(text)` / `voiceUnlock()` / `voiceCancel()` / `voiceResetCooldown()`
 
 ### 🚀攻撃の違い：ワッカー＝ミサイル／波動砲、イッセイ・ミニー＝ガソリン噴射（2026-11-23）
 

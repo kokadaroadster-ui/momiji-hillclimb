@@ -160,6 +160,41 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 3px 10px rgba(255,90,30,.45))}
   .panel .sub{margin:6px 0 14px;font-size:clamp(11px,2.6vmin,13px);color:#ffcaa0;letter-spacing:.06em}
+  /* ---------- 主人公セレクト（3択） ---------- */
+  .charSel{margin:0 0 12px;padding:8px 8px 7px;border-radius:14px;
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
+    border:1px solid rgba(255,180,130,.30)}
+  .charSel[hidden]{display:none}
+  .csTitle{margin:0 0 6px;font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#ffd0a8}
+  .csRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .csCard{position:relative;cursor:pointer;min-width:0;padding:3px 4px 4px;border-radius:11px;
+    border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#f3e7e0;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;
+    font-family:inherit;transition:border-color .12s,background .12s,transform .12s;
+    -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  .csCard:active{transform:scale(.97)}
+  .csThumb{display:flex;align-items:flex-end;justify-content:center;width:100%;
+    height:clamp(42px,11.4vmin,54px);pointer-events:none;overflow:hidden}
+  .csThumb img{max-height:100%;max-width:100%;object-fit:contain;
+    filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))}
+  /* GSの2人は 全身絵なので、サムネイルでは 顔〜胸までを 大きく見せる */
+  .csThumb.gs img{transform:scale(2.6);transform-origin:50% 8%}
+  .csName{font-size:clamp(9.5px,2.3vmin,11px);font-weight:800;line-height:1.15;white-space:nowrap;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+  .csTag{font-size:8.5px;font-weight:800;letter-spacing:.06em;color:#9fd8ff;opacity:.9;line-height:1;pointer-events:none}
+  .csCard.on{border-color:#ffb066;
+    background:linear-gradient(180deg,rgba(255,170,80,.32),rgba(255,110,40,.12));
+    box-shadow:0 0 0 2px rgba(255,140,60,.35),0 4px 14px rgba(255,120,40,.28)}
+  .csCard.on .csName{color:#fff6e8}
+  .csCard.on::after{content:'✓';position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+    background:linear-gradient(180deg,#ffe08a,#ff9f2e);color:#4a1404;font-size:11px;font-weight:900;
+    line-height:18px;text-align:center;box-shadow:0 2px 7px rgba(0,0,0,.5)}
+  .charSel .csFoot{margin:5px 0 0;font-size:9.5px;color:#ffcaa0;opacity:.85;line-height:1.3}
+  @media (max-height:430px){
+    .charSel{margin-bottom:8px;padding:6px 6px 5px}
+    .csThumb{height:34px}
+    .charSel .csFoot{display:none}
+  }
   .how{list-style:none;margin:0 0 16px;padding:0;text-align:left;display:grid;gap:7px}
   .how li{display:flex;gap:9px;align-items:flex-start;font-size:clamp(11.5px,2.7vmin,13.5px);line-height:1.5;color:#f2e7e2}
   .how .k{flex:0 0 auto;min-width:52px;text-align:center;padding:2px 7px;border-radius:8px;
@@ -479,6 +514,26 @@
     <div class="panel">
       <h1 id="ovTitle">紅葉ダッシュ！</h1>
       <p class="sub" id="ovSub">〜 巨大化 ＆ タイムワープ・アクション 〜</p>
+      <div class="charSel" id="charSel" role="radiogroup" aria-label="主人公をえらぶ">
+        <div class="csTitle">主人公を えらぶ <span id="csCurrent"></span></div>
+        <div class="csRow">
+          <button class="csCard on" type="button" data-hero="default" role="radio" aria-checked="true" aria-label="いつもの主人公を選ぶ">
+            <span class="csThumb"><img src="../giant_char.png" alt="" draggable="false"></span>
+            <span class="csName">いつもの主人公</span>
+          </button>
+          <button class="csCard" type="button" data-hero="issei" role="radio" aria-checked="false" aria-label="イッセイ（GSミアタ）を選ぶ">
+            <span class="csThumb gs"><img src="gs_issei.png" alt="" draggable="false"></span>
+            <span class="csName">イッセイ</span>
+            <span class="csTag">GSミアタ</span>
+          </button>
+          <button class="csCard" type="button" data-hero="minnie" role="radio" aria-checked="false" aria-label="ミニー（GSミアタ）を選ぶ">
+            <span class="csThumb gs"><img src="gs_minnie.png" alt="" draggable="false"></span>
+            <span class="csName">ミニー</span>
+            <span class="csTag">GSミアタ</span>
+          </button>
+        </div>
+        <p class="csFoot">えらんだ主人公で 全8ステージを 走ります（タップで チェンジ）</p>
+      </div>
       <div class="rankBoard" id="rankBoard" aria-label="ハイスコアランキング">
         <div class="rbHead"><span class="rbTitle">🏆 HIGH SCORE RANKING<button id="rbReload" class="rbReload" type="button" aria-label="共有ランキングを読み直す" title="順位を読み直す">↻</button></span><span class="rbBest" id="rankBest">BEST —</span></div>
         <div class="rbNet loading" id="rankNet"><span class="rbNetDot" aria-hidden="true"></span><span id="rankNetTxt">🌐 共有ランキングを読み込み中…</span></div>
@@ -635,7 +690,21 @@ window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,120));
 
 /* ======================= assets ======================= */
-const imgRunner=new Image(); imgRunner.decoding='async'; imgRunner.src='../giant_char.png';
+/* 主人公（プレイヤーキャラ）：タイトル画面で 3人から 選べる
+   default = いつもの主人公（バストアップ＋描画の脚）
+   issei / minnie = GSミアタの2人（全身立ち絵を そのまま描く） */
+const HERO_DEFS={
+  default:{name:'いつもの主人公',src:'../giant_char.png',body:'bust'},
+  issei:{name:'イッセイ',src:'gs_issei.png',body:'full'},
+  minnie:{name:'ミニー',src:'gs_minnie.png',body:'full'}
+};
+const HERO_IMGS={};
+for(const _hk in HERO_DEFS){
+  const _im=new Image(); _im.decoding='async'; _im.src=HERO_DEFS[_hk].src; HERO_IMGS[_hk]=_im;
+}
+const HERO_STORE='momiji-dash.hero.v1';
+let heroKey='default';
+let imgRunner=HERO_IMGS.default;
 const imgDoc=new Image();    imgDoc.decoding='async';    imgDoc.src='../doc.png';
 const imgBoss=new Image();   imgBoss.decoding='async';   imgBoss.src='dungeon_boss.png';
 /* ステージ3〜5のボス（写真の人物をアニメ化したスプライト） */
@@ -681,9 +750,25 @@ const PARADE_IMG={helper:imgHelper,helper2:imgHelper2,party1:imgParty1,party2:im
 /* バストアップ画像の下端をふわっと溶かして、脚と自然につなぐ */
 const sprite=document.createElement('canvas');
 let spriteReady=false;
+const FULL_HERO_H=118;   /* 全身キャラの 足元からの高さ（バストアップの 84＋足の30＝114 に合わせる） */
+function heroBody(){return (HERO_DEFS[heroKey]||HERO_DEFS.default).body;}
+function isFullHero(){return heroBody()==='full';}
+function fullHeroW(){
+  const im=imgRunner;
+  const ar=(im&&im.naturalWidth&&im.naturalHeight)?im.naturalWidth/im.naturalHeight:0.55;
+  return FULL_HERO_H*ar;
+}
+/* 原点＝足元。全身キャラを そのまま描く */
+function drawHeroFull(lift,scale){
+  const s=scale||1, w=fullHeroW()*s, h=FULL_HERO_H*s;
+  ctx.drawImage(imgRunner,-w/2,-h-(lift||0),w,h);
+}
 function makeSprite(){
   const w=imgRunner.naturalWidth,h=imgRunner.naturalHeight;
+  spriteReady=false;
   if(!w||!h)return;
+  /* 全身キャラは 下端フェードを使わず そのまま描く */
+  if(heroBody()==='full')return;
   sprite.width=w;sprite.height=h;
   const c=sprite.getContext('2d');
   c.clearRect(0,0,w,h);
@@ -697,7 +782,49 @@ function makeSprite(){
   c.globalCompositeOperation='source-over';
   spriteReady=true;
 }
-imgRunner.onload=()=>{assetsOK.runner=imgRunner.naturalWidth>0;makeSprite();};
+for(const _hk in HERO_IMGS){
+  const _im=HERO_IMGS[_hk];
+  _im.addEventListener('load',()=>{
+    if(_im===imgRunner){assetsOK.runner=_im.naturalWidth>0;makeSprite();}
+    syncHeroCards();
+  });
+}
+/* 主人公の切りかえ（画像は すべて 先に読み込んでおく） */
+function syncHeroCards(){
+  const box=document.getElementById('charSel');
+  if(!box)return;
+  const cards=box.querySelectorAll('.csCard');
+  for(const c of cards){
+    const on=c.dataset.hero===heroKey;
+    c.classList.toggle('on',on);
+    c.setAttribute('aria-checked',on?'true':'false');
+  }
+  const cur=document.getElementById('csCurrent');
+  if(cur)cur.textContent='▸ '+(HERO_DEFS[heroKey]||HERO_DEFS.default).name;
+}
+function pickHero(key,save){
+  if(!HERO_DEFS[key])key='default';
+  heroKey=key;
+  imgRunner=HERO_IMGS[key];
+  assetsOK.runner=imgRunner.naturalWidth>0;
+  makeSprite();
+  syncHeroCards();
+  if(save!==false){try{localStorage.setItem(HERO_STORE,key);}catch(e){}}
+  return heroKey;
+}
+(function initHeroChoice(){
+  let v=null; try{v=localStorage.getItem(HERO_STORE);}catch(e){}
+  pickHero(HERO_DEFS[v]?v:'default',false);
+})();
+const charSelEl=document.getElementById('charSel');
+if(charSelEl){
+  charSelEl.addEventListener('click',e=>{
+    const card=e.target.closest('.csCard');
+    if(!card)return;
+    e.preventDefault();e.stopPropagation();
+    pickHero(card.dataset.hero);
+  });
+}
 imgDoc.onload=()=>assetsOK.doc=imgDoc.naturalWidth>0;
 imgBoss.onload=()=>assetsOK.boss=imgBoss.naturalWidth>0;
 imgChick.onload=()=>assetsOK.chick=imgChick.naturalWidth>0;
@@ -3244,6 +3371,8 @@ function showTitle(){
   ovHow.hidden=false;
   ovFine.hidden=false;
   if(stageSelEl)stageSelEl.hidden=false;
+  if(charSelEl)charSelEl.hidden=false;
+  syncHeroCards();
   if(btnNext)btnNext.hidden=true;
   btnStart.hidden=true;
   entryHide();closeEntryModal();renderRanking();
@@ -3263,6 +3392,7 @@ function showGoal(){
   ovHow.hidden=true;
   ovFine.hidden=true;
   if(stageSelEl)stageSelEl.hidden=true;
+  if(charSelEl)charSelEl.hidden=true;
   ovStats.hidden=false;
   ovStats.innerHTML=
     '<div><span>SCORE</span><b>'+st.score.toLocaleString('ja-JP')+'</b></div>'+
@@ -3299,6 +3429,7 @@ function showOver(){
   ovHow.hidden=true;
   ovFine.hidden=true;
   if(stageSelEl)stageSelEl.hidden=true;
+  if(charSelEl)charSelEl.hidden=true;
   if(btnNext)btnNext.hidden=true;
   ovStats.hidden=false;
   ovStats.innerHTML=
@@ -6874,14 +7005,18 @@ function drawRewardScene(){
   ctx.save();
   ctx.translate(hx,feet-bob);
   ctx.scale(k,k);
-  drawLeg(-5,Math.sin(lph)*0.5,'#2f3a63');
-  drawLeg(5,Math.sin(lph+Math.PI)*0.5,'#3a4776');
-  if(spriteReady||imgRunner.naturalWidth>0){
-    ctx.drawImage(spriteReady?sprite:imgRunner,-heroW/2/k,-30-84,heroW/k,84);
+  if(isFullHero()&&imgRunner.naturalWidth>0){
+    drawHeroFull(0,1);
   }else{
-    const bw2=84*540/806;
-    ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw2/2,-114,bw2,84);
-    ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-114+bw2*0.52,bw2*0.42,0,6.284);ctx.fill();
+    drawLeg(-5,Math.sin(lph)*0.5,'#2f3a63');
+    drawLeg(5,Math.sin(lph+Math.PI)*0.5,'#3a4776');
+    if(spriteReady||imgRunner.naturalWidth>0){
+      ctx.drawImage(spriteReady?sprite:imgRunner,-heroW/2/k,-30-84,heroW/k,84);
+    }else{
+      const bw2=84*540/806;
+      ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw2/2,-114,bw2,84);
+      ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-114+bw2*0.52,bw2*0.42,0,6.284);ctx.fill();
+    }
   }
   ctx.restore();
 
@@ -7028,15 +7163,20 @@ function drawEndingMarch(withWindow){
   ctx.save();
   ctx.translate(hx,feet-bob);
   ctx.scale(k,k);
-  drawLeg(-5,Math.sin(lph)*0.62,'#2f3a63');
-  drawLeg(5,Math.sin(lph+Math.PI)*0.62,'#3a4776');
-  ctx.rotate(Math.sin(END.t*4.6)*0.02);
-  if(spriteReady||imgRunner.naturalWidth>0){
-    ctx.drawImage(spriteReady?sprite:imgRunner,-heroW/2/k,-30-84,heroW/k,84);
+  if(isFullHero()&&imgRunner.naturalWidth>0){
+    ctx.rotate(Math.sin(END.t*4.6)*0.02);
+    drawHeroFull(0,1);
   }else{
-    const bw2=84*540/806;
-    ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw2/2,-114,bw2,84);
-    ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-114+bw2*0.52,bw2*0.42,0,6.284);ctx.fill();
+    drawLeg(-5,Math.sin(lph)*0.62,'#2f3a63');
+    drawLeg(5,Math.sin(lph+Math.PI)*0.62,'#3a4776');
+    ctx.rotate(Math.sin(END.t*4.6)*0.02);
+    if(spriteReady||imgRunner.naturalWidth>0){
+      ctx.drawImage(spriteReady?sprite:imgRunner,-heroW/2/k,-30-84,heroW/k,84);
+    }else{
+      const bw2=84*540/806;
+      ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw2/2,-114,bw2,84);
+      ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-114+bw2*0.52,bw2*0.42,0,6.284);ctx.fill();
+    }
   }
   ctx.restore();
 
@@ -11456,22 +11596,28 @@ function drawPlayer(){
   const swing2=paddling?Math.sin(st.t*9+Math.PI)*0.5:(running?Math.sin(ph+Math.PI)*0.72:(P.vy<0?0.35:-0.12));
   /* RIDE：乗り物・動物を 足元に 描き、主人公が その上に またがる */
   if(RIDE.active)drawMount(RIDE.kind);
-  if(RIDE.active){
-    const tuck=RIDE.kind==='car';
-    drawRideLeg(-6,0.9,'#2f3a63',tuck);
-    drawRideLeg(6,0.45,'#3a4776',tuck);
+  const fullHero=isFullHero()&&imgRunner.naturalWidth>0;
+  if(fullHero){
+    /* 全身キャラ：脚は 絵に含まれているので そのまま描く。RIDE では 乗り物の 上に またがらせる */
+    if(RIDE.active)drawHeroFull(24,0.84); else drawHeroFull(0,1);
   }else{
-    drawLeg(-5,swing,'#2f3a63');
-    drawLeg(5,swing2,'#3a4776');
-  }
-  // body / head image
-  const bh=84, bw=bh*540/806;
-  const bodyImg=spriteReady?sprite:imgRunner;
-  if(bodyImg.naturalWidth>0||spriteReady){
-    ctx.drawImage(bodyImg,-bw/2,-30-bh,bw,bh);
-  }else{
-    ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw/2,-30-bh,bw,bh);
-    ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-30-bh+bw*0.52,bw*0.42,0,6.284);ctx.fill();
+    if(RIDE.active){
+      const tuck=RIDE.kind==='car';
+      drawRideLeg(-6,0.9,'#2f3a63',tuck);
+      drawRideLeg(6,0.45,'#3a4776',tuck);
+    }else{
+      drawLeg(-5,swing,'#2f3a63');
+      drawLeg(5,swing2,'#3a4776');
+    }
+    // body / head image
+    const bh=84, bw=bh*540/806;
+    const bodyImg=spriteReady?sprite:imgRunner;
+    if(bodyImg.naturalWidth>0||spriteReady){
+      ctx.drawImage(bodyImg,-bw/2,-30-bh,bw,bh);
+    }else{
+      ctx.fillStyle='#2b6fd0';ctx.fillRect(-bw/2,-30-bh,bw,bh);
+      ctx.fillStyle='#f0c9a0';ctx.beginPath();ctx.arc(0,-30-bh+bw*0.52,bw*0.42,0,6.284);ctx.fill();
+    }
   }
   ctx.restore();
 
@@ -11496,9 +11642,13 @@ function drawPlayer(){
       ctx.translate(gh.x-st.camX,gh.y);
       ctx.scale(gh.sc,gh.sc);
       if(imgRunner.naturalWidth>0){
-        const bh2=84,bw2=bh2*540/806;
         ctx.filter=gh.dodge?'saturate(1.9) brightness(1.55) hue-rotate(150deg)':'saturate(0.3) brightness(1.4)';
-        ctx.drawImage(imgRunner,-bw2/2,-30-bh2,bw2,bh2);
+        if(isFullHero()){
+          drawHeroFull(0,1);
+        }else{
+          const bh2=84,bw2=bh2*540/806;
+          ctx.drawImage(imgRunner,-bw2/2,-30-bh2,bw2,bh2);
+        }
         ctx.filter='none';
       }
       ctx.restore();

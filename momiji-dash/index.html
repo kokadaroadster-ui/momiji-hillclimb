@@ -657,7 +657,7 @@
       </ul>
       <button id="btnStart" class="btnStart">スタート ▶</button>
       <button id="btnNextStage" class="btnStart dun" hidden>🕯️ ステージ2（地下ダンジョン）へ挑む</button>
-      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）<br>🔊 イッセイ・ミニーの 声が出ないとき は iPhoneの マナースイッチ（側面）を 解除して、Safariで 開くと 確実に 鳴る<br><span style="opacity:.72">音声 v4（2026-11-23）：ハイオク！マンタン！＝元気な日本人男性の声／In Japan we say＝明るく弾む女の子の声</span></p>
+      <p class="fine" id="ovFine">PC：←→ / A・D 移動　Space / ↑ ジャンプ　W スペシャル　M 消音　🚀は F・X・Enter（長押しで波動砲）<br>スマホ：左下の十字キー（▲▼◀▶）と 右下のボタン（JUMP・🚀・W）で操作。両手で同時に押せる（縦持ち・横持ちどちらもOK）<br>🔊 イッセイ・ミニーの 声が出ないとき は iPhoneの マナースイッチ（側面）を 解除して、Safariで 開くと 確実に 鳴る<br><span style="opacity:.72">音声 v5（2026-11-23）：ハイオク！マンタン！！＝明るく張りのある日本人男性の声／In Japan we say＝キラッと明るい女の子の声</span></p>
     </div>
   </div>
 </div>
@@ -6579,7 +6579,7 @@ function rideTrail(dt){
 
 /* ======================= GSミアタの ボイス（声真似・Web Speech API） =======================
    「ハイオク満タン！」「In Japan we say...!」「オーライ！オーライ！」を speechSynthesis で 喋る。
-   イッセイ＝低めで 張りのある男性風（pitch 0.90）／ミニー＝明るく高い声（pitch 1.30）
+   イッセイ＝張りのある明るい男性風（pitch 1.10）／ミニー＝明るく高い声（pitch 1.50）
    START・ボタンの タップで アンロック（iOS Safari 対策）、ミュート中は 喋らない、連続発話は 待って かぶらない */
 const VoiceDuck={until:0};
 /* 声が 鳴っている間（開始直前〜終了後 約2秒）は true ：BGMの ダッキングに 使う */
@@ -6602,15 +6602,19 @@ function voiceVoices(){
   }catch(e){}
   return Voice.voices;
 }
-/* 声の 役割（2026-11-23 v4）。日本語の 音声で 喋る（英語も カタカナ発音）。
-   gas  … 「ハイオク満タン！」= 日本人男性の 声（Otoya・Hattori 等 → 無ければ pitch 0.90 の 低め）
-   girl … 「In Japan we say...!」= 日本の 若い女の子の 声（Kyoko・O-Ren・Haruka 等 ＋ pitch 1.48）
-   ''   … その他の セリフ（ミニー=高め／イッセイ=低め の キャラ声） */
+/* 声の 役割（2026-11-23 v5）。日本語の音声で喋る（英語もカタカナ発音）。
+   gas  … 「ハイオク満タン！」= 日本人男性の声（Otoya・Hattori 等 ＋ pitch 1.15 で 明るく張りのある掛け声）
+   girl … 「In Japan we say...!」= 日本の若い女の子の声（Kyoko・O-Ren・Haruka 等 ＋ pitch 1.62）
+   ''   … その他の セリフ（ミニー=1.50／イッセイ=1.10 の キャラ声）
+   ※ iOSの 日本語男性音声（Otoya 等）は もともと低く、v4までの 0.90 は 暗く 重く 聞こえた。
+      v5では 全体の pitch を 上げて「暗くならない 明るさ」に そろえて いる */
 const VOICE_GAS_MAN=/otoya|hattori|takumi|keita|male|\bman\b|男性|男声/i;
 const VOICE_GIRL_JA=/kyoko|o-?ren|haruka|nanami|ayumi|sayaka|female|woman|女性|女声/i;
-const VOICE_GAS_PITCH=0.90, VOICE_GAS_RATE=1.24;    /* 日本人男性：低めのまま 元気に ハキハキ（速め） */
-const VOICE_GIRL_PITCH=1.48, VOICE_GIRL_RATE=1.25;  /* 若い女の子：明るく高め・弾むように 速め */
-const VOICE_OTHER_RATE=1.26;                        /* その他の セリフ（おーらい 等）も 元気に */
+const VOICE_GAS_PITCH=1.15, VOICE_GAS_RATE=1.34;    /* 日本人男性：低さを補う 明るく張りのある掛け声（速め） */
+const VOICE_GIRL_PITCH=1.62, VOICE_GIRL_RATE=1.32;  /* 若い女の子：上限寄りのキラッと明るい声・弾むように速め */
+const VOICE_OTHER_RATE=1.34;                        /* その他のセリフ（おーらい 等）も 明るく軽快に */
+const VOICE_HERO_PITCH={minnie:1.50,issei:1.10};    /* その他のセリフのキャラ別ベースピッチ（暗くならない明るさ） */
+function voiceHeroPitch(){return VOICE_HERO_PITCH[heroKey]!=null?VOICE_HERO_PITCH[heroKey]:1.0;}
 const VOICE_CUTE_EN_SAY='イン ジャパン、ウィー セイ！';
 const VOICE_CUTE_EN_RE=/In\s*Japan\s*we\s*say[^A-Za-z]*/i;
 function voiceRole(text){
@@ -6668,11 +6672,11 @@ function voiceCancel(){
 function voiceForget(u){const i=Voice.utts.indexOf(u);if(i>=0)Voice.utts.splice(i,1);}
 /* 読み上げ用の カタカナ変換（画面表示は 漢字・英語のまま）。
    漢字「満」は iOSの 日本語音声が 名前読みの「みつる」と 読むため、
-   「ハイオク満タン」→「ハイオク！マンタン！」と カタカナの 歯切れよい 掛け声で 渡す（最後の砦で 満→マン も 置換）。
+   「ハイオク満タン」→「ハイオク！マンタン！！」と カタカナの 弾む 掛け声で 渡す（v5）（最後の砦で 満→マン も 置換）。
    画面の テロップ・メッセージ・ポップは これまでどおり 漢字表記。 */
 const VOICE_READ=[
-  [/ハイオク満タン、ブースト！/g,'ハイオク！マンタン！ブースト！'],
-  [/ハイオク満タン！/g,'ハイオク！マンタン！'],
+  [/ハイオク満タン、ブースト！/g,'ハイオク！マンタン！！ブースト！'],
+  [/ハイオク満タン！/g,'ハイオク！マンタン！！'],
   [/ハイオク満タン/g,'ハイオク！マンタン！'],
   [VOICE_CUTE_EN_RE,VOICE_CUTE_EN_SAY],    /* 「In Japan we say...!」= カタカナ英語で 喋る */
   [/オーライ、オーライ！/g,'おーらい！おーらい！'],
@@ -6711,7 +6715,7 @@ function voiceSpeakNow(text,en){
     }else if(role==='girl'){                 /* In Japan we say...! = 若い女の子 */
       u.pitch=VOICE_GIRL_PITCH;u.rate=VOICE_GIRL_RATE;
     }else{
-      u.pitch=heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0);u.rate=VOICE_OTHER_RATE;
+      u.pitch=voiceHeroPitch();u.rate=VOICE_OTHER_RATE;
     }
     u.volume=1.0;                            /* ← 最大音量を 明示（iOSの 既定音量対策） */
     const v=voicePick(role);
@@ -15221,7 +15225,7 @@ window.__dash={
     speaking:(Voice.supported?!!window.speechSynthesis.speaking:false),
     pending:(Voice.supported?!!window.speechSynthesis.pending:false),
     voices:(Voice.supported?(window.speechSynthesis.getVoices()||[]).map(v=>v.name+'/'+v.lang).slice(0,8):[]),
-    hero:heroKey,pitch:heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0),
+    hero:heroKey,pitch:voiceHeroPitch(),heroPitch:VOICE_HERO_PITCH,
     gasPitch:VOICE_GAS_PITCH,gasRate:VOICE_GAS_RATE,
     otherRate:VOICE_OTHER_RATE,
     gasVoice:(function(){const v=voicePick('gas');return v?(v.name+'/'+v.lang):null;})(),

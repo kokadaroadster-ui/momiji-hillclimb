@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1b1226">
-<title>紅葉ダッシュ！〜巨大化＆タイムワープ・アクション〜</title>
+<title>おはたかダッシュ！〜巨大化＆タイムワープ・アクション〜</title>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;
@@ -454,11 +454,32 @@
     .badgeGrid{gap:4px}.badge span{font-size:8px}.trophyBox{margin-bottom:9px}
     .gchip{font-size:9px;padding:2px 4px}
   }
+
+  /* ---------- GSミアタ（イッセイ・ミニー）の 4大アクション ---------- */
+  #gsPill{color:#ffe9b0;font-weight:900;letter-spacing:.04em}
+  #gsPill.ready{background:linear-gradient(90deg,rgba(255,150,40,.5),rgba(255,70,60,.5));
+    border-color:#ffd76a;box-shadow:0 0 12px rgba(255,180,70,.7);animation:ridePulse 1.1s infinite}
+  #gsPill.hot{background:linear-gradient(90deg,rgba(90,210,130,.55),rgba(255,200,60,.5));
+    border-color:#c8ffd8;color:#fff}
+  @media (max-width:520px){#gsPill{padding:5px 6px;font-size:10px}}
+  /* Wボタン：相方コンビの クールダウン／ホールドを 円弧で表示 */
+  .wbtn{position:relative;overflow:visible}
+  .wbtn .ring{position:absolute;inset:-8px;border-radius:50%;pointer-events:none;opacity:0;
+    transition:opacity .12s ease;
+    background:conic-gradient(from -90deg,#ffe14d 0deg,#ff9a3d var(--cg,0deg),rgba(255,255,255,.12) var(--cg,0deg) 360deg);
+    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
+    mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px))}
+  .wbtn.showRing .ring{opacity:1}
+  .wbtn.ringFull .ring{background:conic-gradient(from -90deg,#fff6a8 0deg,#ffd23a 360deg);
+    filter:drop-shadow(0 0 6px rgba(255,220,110,.95))}
+  .wbtn.gsReady{animation:gsReady .9s infinite}
+  @keyframes gsReady{0%,100%{box-shadow:0 0 16px rgba(255,140,40,.55),0 5px 14px rgba(0,0,0,.3)}
+    50%{box-shadow:0 0 30px 8px rgba(255,206,90,.95),0 5px 14px rgba(0,0,0,.3)}}
 </style>
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" aria-label="紅葉ダッシュ ゲーム画面"></canvas>
+  <canvas id="game" aria-label="おはたかダッシュ ゲーム画面"></canvas>
 
   <div id="hud">
     <div class="hudTop">
@@ -474,6 +495,7 @@
       <div class="pill" id="batWrap">⚡<b id="bat">0</b></div>
       <div class="pill" id="powerPill" hidden>BIG</div>
       <div class="pill" id="ridePill" hidden>🏎️ RIDE</div>
+      <div class="pill" id="gsPill" hidden>⛽ 相方 OK</div>
       <div class="pill" id="comboPill"><span id="comboLbl">COMBO</span> <b id="combo">0</b><span id="comboMult" class="mult" hidden>×1.5</span><span id="feverTag" hidden>🔥FEVER <b id="feverT">8</b>s</span></div>
       <div class="pill" id="travPill" hidden>深度 <b id="travVal">0</b>m</div>
     </div>
@@ -488,16 +510,16 @@
 
   <div id="pad">
     <div class="side left">
-      <div class="dpad" id="dpad" role="group" aria-label="十字キー（左右で移動・上でジャンプ／上昇・下で潜水／下降）">
+      <div class="dpad" id="dpad" role="group" aria-label="十字キー（左右で移動・上でジャンプ／上昇・下で潜水／下降、GSミアタは下でオーライ誘導＆窓拭き）">
         <button id="bU" class="btn" aria-label="上（ジャンプ／浮上）">▲</button>
         <button id="bL" class="btn" aria-label="左（減速）">◀</button>
         <span class="dcore" aria-hidden="true"></span>
         <button id="bR" class="btn" aria-label="右（加速）">▶</button>
-        <button id="bD" class="btn" aria-label="下（潜水／下降）">▼</button>
+        <button id="bD" class="btn" aria-label="下（潜水／下降、GSミアタはオーライ誘導＆窓拭き）">▼</button>
       </div>
     </div>
     <div class="side right">
-      <button id="bW" class="btn wbtn" aria-label="Wスペシャル">W</button>
+      <button id="bW" class="btn wbtn" aria-label="Wスペシャル（相方コンビ必殺技・ホールドでも発動）">W<i id="bWRing" class="ring" aria-hidden="true"></i></button>
       <button id="bM" class="btn shot" aria-label="ミサイル／魚雷を発射（長押しでチャージ、離すと波動砲）">🚀<i id="bMRing" class="ring" aria-hidden="true"></i></button>
       <button id="bJ" class="btn jump" aria-label="ジャンプ／上昇">JUMP</button>
     </div>
@@ -512,7 +534,7 @@
 
   <div id="overlay">
     <div class="panel">
-      <h1 id="ovTitle">紅葉ダッシュ！</h1>
+      <h1 id="ovTitle">おはたかダッシュ！</h1>
       <p class="sub" id="ovSub">〜 巨大化 ＆ タイムワープ・アクション 〜</p>
       <div class="charSel" id="charSel" role="radiogroup" aria-label="主人公をえらぶ">
         <div class="csTitle">主人公を えらぶ <span id="csCurrent"></span></div>
@@ -624,6 +646,10 @@
         <li><span class="k w">SHOT</span><span>🚀ミサイル／魚雷（水中は魚雷）：F・X（または Enter）で発射、短く押すと連射。水中・空中の敵を 1発で撃破（刺客・ウツボは2発）、中ボス・ボス・4人目の刺客にも ダメージ、敵の弾も 撃ち落とせる</span></li>
         <li><span class="k w">WAVE</span><span>🚀長押し＝波動砲チャージ！ 約0.9秒でMAX（ボタンの まわりが 光る）→ 離すと 極太ビームが 前方を 貫通。道中の敵・敵弾は まとめて消し飛ばし、中ボス・ボス・4人目の刺客に 大ダメージ（5〜6）。0.35秒以上で 小ビーム（2ダメージ）</span></li>
         <li><span class="k w">GAS</span><span>イッセイ・ミニー（GSミアタ）を 選ぶと、🚀は ミサイル／波動砲ではなく <b>ガソリン噴射</b> に変化（短押しで 黄金〜虹色の 燃料ジェット・長押しで 超高圧ガソリンジェット）。威力・射程・連射は ワッカーの ミサイル／波動砲と 同じで、飛沫ぶん 当たりやすい</span></li>
+        <li><span class="k w">GS⛽</span><span><b>イッセイ・ミニー</b>で W：相方が カットイン＆並走して <b>「ハイオク満タン！」「In Japan we say...!」</b>。約5秒間 無敵＋超加速の ターボダッシュ（Wボタンの 円弧＝クールダウン、ホールドでも 発動。ゲージ満タンの巨大化・⚡タイムワープは これまでどおり タップで優先）</span></li>
+        <li><span class="k w">GS👋</span><span><b>イッセイ・ミニー</b>で 十字キーの ▼（↓/S）：スクイジー（窓拭き）＆誘導の弧で <b>「オーライ！オーライ！」「ピカピカ！」</b>。周囲の敵弾を 前方へ 跳ね返して 敵にダメージ、至近距離のザコ敵も ふき飛ばす（地上でも空中でもOK。水中では これまでどおり 潜水）</span></li>
+        <li><span class="k w">GS🏎️</span><span><b>RIDE に 乗っている間</b>に 🚀（または W）：<b>ハイオク満タンブースト</b>！ 黄金〜炎の ターボ噴射・超スピード・無敵体当たりで 敵を 弾き飛ばして ボーナス得点</span></li>
+        <li><span class="k w">GS🏪</span><span>道中の <b>「GS MIATAS SS」給油所</b>を 通過すると、給油ノズルと火花の演出で <b>ハート+1＋ハイオク満タン</b>（しばらく 速度＆攻撃力アップ）</span></li>
         <li><span class="k w">SWIM</span><span>ステージ7 深海：十字キーの▲（または JUMP・↑）で ぐんぐん浮上、▼（↓）で しっかり潜水。押さなければ ごくゆっくり沈む。アイテムは 泳ぐ高さ（中層〜水面寄り）に 配置</span></li>
         <li><span class="k w">FLY</span><span>ステージ8 天空：▲（または JUMP・↑）で 上昇、▼（↓）で 下降。アイテムは 中高度〜上空に 配置。加速ウインドリングを くぐると スピードアップ＆スコア</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
@@ -686,6 +712,7 @@ function resize(){
   ctx.setTransform(DPR*S,0,0,DPR*S,0,0);
   ctx.imageSmoothingEnabled=true;
   if(LV.items.length){ for(const it of LV.items){ if(it.off!=null) it.y=groundY+floorOff(it.x)-it.off; } }
+  gsLayoutStations();
 }
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,120));
@@ -1005,6 +1032,33 @@ const Sfx={
       this.tone(1900,.22,'square',.09,300,.02);
       this.noise(.50,.20,2600,1.1,.05,700);
     }
+  },
+  /* --- GSミアタの 4大アクション用 --- */
+  gsCombo(){
+    /* 相方コンビ必殺技：クラクション→燃料が 満ちる上昇音→ターボ */
+    this.tone(392,.10,'square',.13);this.tone(523,.10,'square',.12,null,.09);
+    [523,659,784,1046,1318].forEach((f,i)=>this.tone(f,.11,'sawtooth',.10,null,.16+i*.055));
+    this.noise(.55,.14,1500,1.1,.12,5200);
+    this.tone(90,.5,'sine',.16,44,.3);
+  },
+  gsWipe(){
+    /* スクイジー＆誘導：シュッとした 布ずれ＋チーン */
+    this.noise(.22,.16,2600,1.5,0,900);
+    this.noise(.16,.10,1200,1.2,700,2600);
+    this.tone(1760,.22,'sine',.10,2350);
+    this.tone(2637,.16,'sine',.06,null,.06);
+  },
+  gsBoost(){
+    this.noise(.5,.20,700,1.0,0,4200);
+    this.tone(160,.44,'sawtooth',.16,760);
+    this.tone(70,.5,'sine',.14,150,.05);
+    [784,988,1174,1568].forEach((f,i)=>this.tone(f,.10,'square',.09,null,.12+i*.05));
+  },
+  gsFill(){
+    /* 給油：チン♪ と 燃料が入る コポコポ */
+    this.tone(1568,.10,'sine',.09);this.tone(2093,.16,'sine',.07,null,.07);
+    for(let i=0;i<4;i++)this.tone(300+i*70,.09,'sine',.07,420+i*60,.1+i*.09);
+    this.noise(.36,.09,900,1.2,.05,2200);
   },
   bubble(){this.tone(520,.10,'sine',.09,1150);this.tone(900,.09,'sine',.05,null,.05);},
   wind(){this.noise(.34,.085,900,1.1,0,2700);},
@@ -2242,7 +2296,7 @@ let DOC_X=STAGE_DEFS[1].docs;
 let CP_X=STAGE_DEFS[1].cps;
 const LV={
   len:21000, goalX:20340,
-  obstacles:[], items:[], gaps:[], tunnels:[], docs:[], checkpoints:[]
+  obstacles:[], items:[], gaps:[], tunnels:[], docs:[], checkpoints:[], stations:[]
 };
 
 function applyStage(id){
@@ -2485,6 +2539,46 @@ function buildLevel(){
       if(it.x>rv.x0-40&&it.x<rv.x1+40&&(it.type==='star'||it.type==='power'||it.type==='capsule'||it.type==='battery'))LV.items.splice(i,1);
     }
   }
+  /* 🏪 GS MIATAS SS 給油所：各ステージの 道中 2箇所（谷・トンネル・ボス闘技場・中ボス／ライバルの 現場を よける）
+     乗り物カプセル（RIDE）の すぐ隣は さける。水上・空中ステージは 浮かぶ給油所として ベースを 上げる */
+  LV.stations.length=0;
+  {
+    const tmS=travelMode();
+    const baseOff=(tmS==='swim')?198:((tmS==='fly')?208:0);
+    const targets=[0.20,0.56];
+    const placedS=[];
+    const okStation=(x,clear)=>{
+      if(x<900)return false;
+      if(x>d.boss.trigger-1100)return false;
+      if(LV.gaps.some(g=>x>g.x0-280&&x<g.x1+280))return false;
+      if(LV.tunnels.some(t=>x>t.x0-280&&x<t.x1+280))return false;
+      if(LV.obstacles.some(o=>Math.abs(o.x-x)<clear))return false;
+      if(DOC_X.some(dd=>Math.abs(dd-x)<260))return false;
+      if(CP_X.some(c=>Math.abs(c-x)<200))return false;
+      if(d.mid&&x>d.mid.trigger-780&&x<d.mid.x1+680)return false;
+      if(rv&&x>rv.x0-280&&x<rv.x1+280)return false;
+      if(placedS.some(o=>Math.abs(o-x)<1300))return false;
+      if(ridePlaced.some(o=>Math.abs(o-x)<460))return false;
+      return true;
+    };
+    for(let si=0;si<targets.length;si++){
+      const target=d.len*targets[si];
+      let sx=null;
+      for(const clear of [300,220,150]){
+        for(let n=0;n<32&&sx==null;n++){
+          for(const cand of [target+n*140,target-n*140]){
+            if(okStation(cand,clear)){sx=cand;break;}
+          }
+        }
+        if(sx!=null)break;
+      }
+      if(sx==null)continue;
+      placedS.push(sx);
+      LV.stations.push({x:sx,off:baseOff,y:groundY+floorOff(sx)-baseOff,used:false,
+        t:rnd()*6.283,label:'GS MIATAS SS',sign:si===0?'ハイオク給油所':'ハイオク・セルフ'});
+    }
+  }
+  gsLayoutStations();
   // checkpoint torii-ish flags get drawn from LV.checkpoints
 }
 const groundYRef=404;   /* 参照Y（生成時のみ使用、描画はgroundY基準の相対で補正） */
@@ -2950,7 +3044,8 @@ function missileVsShots(m){
 /* 障害物・敵キャラに 命中：1発で 撃破（刺客と ウツボは2発） */
 function missileHitObstacle(o,m){
   if(o.hp==null)o.hp=(o.type==='assassin')?2:(o.type==='eel'?2:1);
-  o.hp-=1;MSL.hits++;
+  /* ⛽ ハイオク満タン中は 攻撃力UP（障害物・ザコは 2倍ダメージ） */
+  o.hp-=(GS.hiOct>0?2:1);MSL.hits++;
   if(o.hp<=0){
     missileBurst(m.x,m.y,16,true,m.gas);
     MSL.killed++;
@@ -2982,19 +3077,19 @@ function missileUpdate(dt){
     if(!hit&&MID.active&&MID.phase==='fight'){
       const half=midHalfW(),top=MID.y-midDH()*0.9,bot=MID.y-6;
       if(m.x>MID.x-half&&m.x<MID.x+half&&m.y>top&&m.y<bot){
-        damageMid(1,'shot');MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
+        damageMid(GS.hiOct>0?2:1,'shot');MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
       }
     }
     if(!hit&&BOSS.active&&BOSS.phase==='fight'){
       const half=bossHalfW(),top=BOSS.y-bossHitTop(),bot=BOSS.y-6;
       if(m.x>BOSS.x-half&&m.x<BOSS.x+half&&m.y>top&&m.y<bot){
-        damageBoss(1,'shot');MSL.hits++;missileBurst(m.x,m.y,18,true);hit=true;
+        damageBoss(GS.hiOct>0?2:1,'shot');MSL.hits++;missileBurst(m.x,m.y,18,true);hit=true;
       }
     }
     if(!hit&&RIVAL.active&&RIVAL.phase==='fight'){
       const half=rivalHalfW(),top=rivalTop(),bot=groundY;
       if(m.x>RIVAL.x-half&&m.x<RIVAL.x+half&&m.y>top&&m.y<bot){
-        damageRival(1);MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
+        damageRival(GS.hiOct>0?2:1);MSL.hits++;missileBurst(m.x,m.y,16,true);hit=true;
       }
     }
     if(hit||m.t>m.life||m.x-st.camX>VW+90||m.x<P.x-460){
@@ -3027,6 +3122,10 @@ function wcCancel(){
 }
 function shotPress(){
   if(st.mode!=='run')return;
+  /* GSミアタ：RIDE中は 🚀の タップで ハイオク満タンブースト（長押しチャージは これまでどおり） */
+  if(isGasHero()&&RIDE.active&&gsRideBoostReady()){
+    if(activateGsRideBoost('shot'))return;
+  }
   if(WC.charging)return;
   fireMissile();
   WC.charging=true;WC.t=0;WC.full=false;WC.partT=0;
@@ -3190,7 +3289,11 @@ function doJump(){
 }
 function doDive(){
   if(st.mode!=='run')return;
-  if(travelMode()!=='swim')return;
+  if(travelMode()!=='swim'){
+    /* GSミアタ：▼は オーライ誘導＆窓拭き（地上でも空中でもOK） */
+    if(isGasHero())doGsWipe();
+    return;
+  }
   /* 潜水：押した瞬間に ぐっと もぐる（押し続けると さらに加速） */
   P.vy=Math.max(P.vy,150)+190;
   Sfx.dive();
@@ -3200,11 +3303,27 @@ function doDive(){
 }
 function pressW(){
   if(st.mode!=='run')return;
+  /* GSミアタ：RIDE中の W（タップ）は ハイオク満タンブースト */
+  if(isGasHero()&&RIDE.active&&gsRideBoostReady()){if(activateGsRideBoost('w'))return;}
+  /* 従来の 優先順位：巨大化（ゲージ満タン）→ タイムワープ（バッテリー）は そのまま */
   if(st.gauge>=100){activateGiant();return;}
   if(st.bats>0){activateWarp();return;}
   if(st.giantT>0){msg('ゲージをためると さらにパワーアップ！');Sfx.deny();return;}
+  /* GSミアタ：どちらも無いときの W は 相方コンビ必殺技 */
+  if(isGasHero()){
+    if(GS.combo.cd>0){
+      msg('⛽ 相方コンビは クールダウン中（あと '+Math.ceil(GS.combo.cd)+'秒）');Sfx.deny();return;
+    }
+    if(activateGsCombo('tap'))return;
+  }
   msg('Wゲージか ⚡バッテリーをためよう！');Sfx.deny();
 }
+/* Wの 押し始め／離し（タップ＋ホールドの 両方を 扱う） */
+function wPressStart(){
+  GS.holdOn=true;GS.holdT=0;GS.holdFired=false;
+  pressW();
+}
+function wPressEnd(){GS.holdOn=false;GS.holdT=0;GS.holdFired=false;}
 /* パワーアップ（1回目=BIG／2回目=MEGA）。Wゲージ満タン、またはパワーオーブで発動 */
 function grantPowerUp(src){
   const from=st.powerLv;
@@ -3285,7 +3404,24 @@ function setHold(k,id,on){
 function clearHolds(){for(const k in holds){holds[k].clear();keys[k]=false;}}
 /* JUMP＝ジャンプ／泳ぎ蹴り／上昇。押し続けると 水中・空中で 浮上を助ける */
 bindHold(bJ,()=>{setHold('up','jump',true);doJump();},()=>setHold('up','jump',false));
-bindHold(bW,()=>pressW());
+/* W＝スペシャル。タップは 従来どおり（巨大化／ワープ／GSの相方コンビ）、
+   ホールド（0.55秒）でも GSミアタは 相方コンビを 発動できる（gsUpdate で判定） */
+(function bindW(){
+  const el=bW;
+  if(!el)return;
+  const down=e=>{
+    e.preventDefault();
+    try{el.setPointerCapture&&el.setPointerCapture(e.pointerId);}catch(_){}
+    el.classList.add('on');
+    wPressStart();
+  };
+  const up=()=>{el.classList.remove('on');wPressEnd();};
+  el.addEventListener('pointerdown',down,{passive:false});
+  el.addEventListener('pointerup',up);
+  el.addEventListener('pointercancel',up);
+  el.addEventListener('lostpointercapture',up);
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+})();
 /* SHOT：ミサイル／魚雷。短押し＝連射、長押し＝波動砲チャージ */
 const bM=document.getElementById('bM');
 bindHold(bM,()=>{setHold('shot','shot',true);shotPress();},()=>{setHold('shot','shot',false);shotRelease();});
@@ -3362,7 +3498,7 @@ window.addEventListener('keydown',e=>{
   if(k==='ArrowUp'||k===' '||k==='z'||k==='Z'){setHold('up','kb',true);if(!e.repeat)doJump();}
   if(k==='ArrowDown'||k==='s'||k==='S'){setHold('down','kb',true);if(!e.repeat)doDive();}
   if(k==='f'||k==='F'||k==='x'||k==='X'){const id=(k==='f'||k==='F')?'kf':'kx';const was=keys.shot;setHold('shot',id,true);if(!was&&!e.repeat)shotPress();}
-  if((k==='w'||k==='W')&&!e.repeat)pressW();
+  if((k==='w'||k==='W')&&!e.repeat)wPressStart();
 },{passive:false});
 window.addEventListener('keyup',e=>{
   const k=e.key;
@@ -3373,12 +3509,14 @@ window.addEventListener('keyup',e=>{
   if(k==='f'||k==='F'){setHold('shot','kf',false);if(!keys.shot)shotRelease();}
   if(k==='x'||k==='X'){setHold('shot','kx',false);if(!keys.shot)shotRelease();}
   if(k==='Enter'){setHold('shot','kEnter',false);if(!keys.shot)shotRelease();}
+  if(k==='w'||k==='W')wPressEnd();
 });
 
 /* ウィンドウが フォーカスを 失ったら（アプリ切替など）押しっぱなしを 解除し、チャージは キャンセル */
 window.addEventListener('blur',()=>{
   if(WC.charging)wcCancel();
   clearHolds();
+  wPressEnd();
 });
 
 /* mute */
@@ -3400,7 +3538,7 @@ const ovTitle=document.getElementById('ovTitle'),ovSub=document.getElementById('
       btnStart=document.getElementById('btnStart');
 
 function showTitle(){
-  ovTitle.textContent='紅葉ダッシュ！';
+  ovTitle.textContent='おはたかダッシュ！';
   ovSub.textContent='〜 巨大化 ＆ タイムワープ・アクション 〜';
   ovStats.hidden=true;
   ovHow.hidden=false;
@@ -3773,6 +3911,12 @@ function startGame(stageId){
   st.shieldT=0; st.boostT=0; st.shieldCount=0; st.boostCount=0;
   st.turboT=0; st.magT=0; st.parts=0; st.slipT=0;
   RIDE.active=false;RIDE.kind='';RIDE.t=0;RIDE.pT=0;RIDE.lostT=0;RIDE.popT=0;
+  GS.combo.t=0;GS.combo.cd=0;GS.combo.cutT=0;GS.combo.count=0;GS.combo.partner='';
+  GS.wipe.t=0;GS.wipe.cd=0;GS.wipe.count=0;GS.wipe.reflect=0;GS.wipe.smashed=0;
+  GS.ride.t=0;GS.ride.cd=0;GS.ride.count=0;GS.ride.hits=0;
+  GS.hiOct=0;GS.hiOctCount=0;GS.hiOctDmg=0;
+  GS.station.used=0;GS.station.last='';GS.station.flash=0;GS.station.fillT=0;
+  GS.holdOn=false;GS.holdT=0;GS.holdFired=false;
   st.msg=''; st.msgT=0; st.telop=''; st.telopSub=''; st.telopT=0; st.docNear=0;
   st.checkpoint=0; st.hits=0; st.stomps=0; st.kills=0; st.finishT=0;
   st.leaves.length=0;st.sparks.length=0;st.debris.length=0;st.puffs.length=0;st.pops.length=0;st.ghosts.length=0;st.rings.length=0;
@@ -5843,6 +5987,7 @@ function update(dt){
   if(st.magT>0)st.magT-=dt;
   if(st.shieldT>0){st.shieldT-=dt;if(st.shieldT<=0)msg('🛡 シールドが きれた');}
   if(st.boostT>0)st.boostT-=dt;
+  gsUpdate(dt);
   musicUpdate(dt);
   helperUpdate(dt);
   foeUpdate(dt);
@@ -5910,6 +6055,8 @@ function update(dt){
   else if(st.turboT>0)target=Math.max(target,TURBO_SPEED);
   else if(st.slipT>0)target=Math.max(target,BASE+150);
   if(st.feverT>0)target=Math.max(target,FEVER_SPEED);
+  /* ⛽ GS MIATAS SS 給油所の ハイオク満タン：基準スピードが 上がる（攻撃力は ミサイル側で 反映） */
+  if(GS.hiOct>0&&st.warpT<=0)target=Math.max(target,HI_OCT_SPEED);
   /* RIDE（乗り物・動物）中は 高速移動。ワープ中は ワープ速度を 優先、ボス戦の 制限速度は 下の上書きで 優先される */
   if(RIDE.active&&st.warpT<=0)target=Math.min(target*RIDE_MUL,RIDE_MAX);
   const bossFight=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='warning');
@@ -5975,7 +6122,17 @@ function update(dt){
     if(!hitX)continue;
     const hitY=P.y>top+3&&P.y-pxTall<top+o.h;
     if(!hitY)continue;
-    if(G||Wp||Tb){ smashObstacle(o); continue; }
+    if(G||Wp||Tb){
+      const gsRide=GS.ride.t>0&&RIDE.active&&isGasHero();
+      smashObstacle(o);
+      if(gsRide){
+        GS.ride.hits++;
+        addScore(300,ox,top);
+        st.pops.push({x:ox,y:top-36,text:'ハイオク 体当たり！ +300',t:0,life:.95,col:'#ffe9a0',size:14});
+        ringFX(ox,top+o.h*0.4,10,90,.32,'255,200,110');
+      }
+      continue;
+    }
     const softSurface=!(o.type==='cone'||o.type==='spike'||o.type==='deer'||o.type==='wisp'||o.type==='lantern'||
       o.type==='campfire'||o.type==='grill'||o.type==='crystal');
     if(P.vy>0&&prevY<=top+14&&softSurface){
@@ -6078,6 +6235,9 @@ function update(dt){
       }
     }
   }
+
+  /* --- 🏪 GS MIATAS SS 給油所（通過で ハート+1＆ハイオク満タン） --- */
+  gsStationCheck();
 
   /* --- doc bonus stages --- */
   for(const d of LV.docs){
@@ -6296,6 +6456,219 @@ function rideTrail(dt){
     RIDE.pT=.05;
     st.sparks.push({x:bx-8,y:by+rr(-22,14),vx:rr(-420,-220),vy:rr(-30,30),r:rr(1.2,2.6),life:rr(.15,.3),t:0,col:'#ffffff'});
     st.sparks.push({x:bx-30,y:by+rr(-30,20),vx:rr(-300,-160),vy:rr(-20,20),r:rr(1,2),life:rr(.12,.24),t:0,col:'#ffe9b0'});
+  }
+}
+
+/* ======================= GSミアタ 4大アクション（2026-11-23） =======================
+   ⛽1 相方コンビ必殺技（W）  : 相方が カットイン＆並走。「ハイオク満タン！」「In Japan we say...!」
+   👋2 オーライ誘導＆窓拭き（▼）: スクイジーの弧で、周囲の敵弾を 前方へ 跳ね返し ザコも ふき飛ばす
+   🏎️3 ハイオク満タンブースト : RIDE中に 🚀／W。黄金〜炎の 噴射・超スピード・無敵体当たり
+   🏪4 GS MIATAS SS 給油所 : 道中を 通過すると ハート+1 ＋ ハイオク満タン（速度＆攻撃力UP）
+   いずれも イッセイ・ミニー（isGasHero）専用。ワッカーの 操作と Wの優先順位は 変えない。 */
+const HI_OCT_DUR=9.0;          /* 給油所の ハイオク満タン パワーアップ（秒） */
+const HI_OCT_SPEED=BASE+96;    /* パワーアップ中の 基準スピード（守りながら 加速） */
+const GS={
+  /* 相方コンビ必殺技 */
+  combo:{t:0,cd:0,cutT:0,count:0,dur:5.0,cdMax:13.0,partner:'',verts:0},
+  /* オーライ誘導＆窓拭き */
+  wipe:{t:0,cd:0,count:0,cdMax:0.72,reflect:0,smashed:0},
+  /* RIDE ハイオク満タンブースト */
+  ride:{t:0,cd:0,count:0,cdMax:5.0,hits:0},
+  /* 給油所 */
+  hiOct:0,hiOctCount:0,hiOctDmg:0,
+  station:{used:0,last:'',flash:0,fillT:0},
+  /* Wの ホールド判定（タップの 従来動作は そのまま、押し続けても 相方コンビ） */
+  holdOn:false,holdT:0,holdFired:false
+};
+function gsPartnerKey(){return heroKey==='issei'?'minnie':(heroKey==='minnie'?'issei':'');}
+function gsPartnerName(){const d=HERO_DEFS[gsPartnerKey()];return d?d.name:'';}
+function gsPartnerImg(){return HERO_IMGS[gsPartnerKey()]||null;}
+function gsAtkUp(){return GS.hiOct>0;}
+
+/* ---------- ⛽ 1. 相方コンビ必殺技 ---------- */
+function gsComboReady(){return isGasHero()&&st.mode==='run'&&GS.combo.t<=0&&GS.combo.cd<=0;}
+function activateGsCombo(src){
+  if(!isGasHero()){msg('相方コンビは イッセイ・ミニーの 必殺技だ！');Sfx.deny();return false;}
+  if(st.mode!=='run')return false;
+  if(GS.combo.t>0)return false;
+  if(GS.combo.cd>0){
+    msg('⛽ 相方コンビは クールダウン中（あと '+Math.ceil(GS.combo.cd)+'秒）');
+    Sfx.deny();return false;
+  }
+  const cb=GS.combo;
+  cb.t=cb.dur;cb.cd=cb.cdMax;cb.count++;cb.cutT=1.7;cb.partner=gsPartnerKey();
+  /* 5秒間 無敵＋超加速：既存のターボ（無敵・障害物粉砕・敵弾消し・超スピード）を そのまま使う */
+  st.turboT=Math.max(st.turboT,cb.dur);
+  st.flash=Math.max(st.flash,.34);st.flashCol='255,214,120';
+  st.shake=Math.max(st.shake,.5);
+  Sfx.gsCombo();
+  /* 大きなカットインが セリフを見せるので、テロップや ポップは 重ねない（字幕は 画面下の メッセージだけ） */
+  for(let i=0;i<44;i++)spark(P.x+rr(-96,96),P.y-rr(0,160),rr(2,6),['#fff6c0','#ffd45e','#ff8a3d','#fff'][i%4]);
+  ringFX(P.x,P.y-40,18,180,.6,'255,214,120');
+  msg('⛽ 相方コンビ必殺技！ 5秒 無敵＋超加速!!');
+  return true;
+}
+/* Wボタン／キーの ホールドでも 相方コンビを 発動できる（タップは 従来どおり 順位どおり） */
+function tryGsComboFromHold(){
+  if(!isGasHero()||st.mode!=='run')return false;
+  /* ワープ中だけは 遠慮する。巨大化中は OK（W長押しで 相方も 続いて 参戦） */
+  if(st.warpT>0)return false;
+  if(GS.combo.t>0||GS.combo.cd>0)return false;
+  return activateGsCombo('hold');
+}
+
+/* ---------- 👋 2. オーライ誘導＆窓拭き ---------- */
+function gsWipeReady(){return isGasHero()&&GS.wipe.cd<=0;}
+function doGsWipe(){
+  if(!isGasHero())return false;
+  if(st.mode!=='run')return false;
+  if(GS.wipe.cd>0)return false;
+  const wp=GS.wipe;
+  wp.cd=wp.cdMax;wp.t=0.55;wp.count++;
+  const tm=travelMode();
+  const cy=P.y-(tm==='run'?56:36);      /* スクイジーを ふるう高さ（地上＝胸元） */
+  /* 周囲の敵弾を 前方へ 跳ね返す（跳ね返した弾は プレイヤーの 弾として 敵を 撃つ） */
+  let n=0;
+  for(const g of [FOE.shots,BOSS.shots,MID.shots]){
+    for(let i=g.length-1;i>=0;i--){
+      const s=g[i];
+      if(s.delay>0)continue;
+      if(s.x<P.x-150||s.x>P.x+330)continue;
+      if(Math.abs(s.y-cy)>210)continue;
+      g.splice(i,1);
+      MSL.list.push({x:s.x,y:s.y,vx:1180,vy:clamp((cy-s.y)*0.25,-120,120),t:0,life:1.6,under:false,gas:true,reflect:true});
+      n++;
+      for(let k=0;k<6;k++)spark(s.x,s.y,rr(2,4),'#fff3c0');
+    }
+  }
+  wp.reflect+=n;
+  /* 至近距離の ザコ敵・障害物を ふき飛ばす */
+  let sm=0;
+  for(const o of LV.obstacles){
+    if(o.dead)continue;
+    if(o.type==='windring'||o.type==='bubbleRing'||o.type==='stormcloud')continue;
+    const ox=obX(o), top=obTop(o);
+    if(Math.abs(ox-P.x)>205)continue;
+    if(Math.abs((top+o.h*0.5)-cy)>190)continue;
+    smashObstacle(o);sm++;
+  }
+  wp.smashed+=sm;
+  Sfx.gsWipe();
+  st.shake=Math.max(st.shake,((n||sm)?0.32:0.16));
+  st.pops.push({x:P.x+96,y:P.y-150,text:'オーライ！オーライ！',t:0,life:1.15,col:'#fff3c0',size:17});
+  st.pops.push({x:P.x+130,y:P.y-120,text:'ピカピカ！',t:0,life:1.1,col:'#d8f4ff',size:14});
+  for(let i=0;i<22;i++)spark(P.x+rr(0,190),cy+rr(-70,70),rr(1.6,4),['#fff8cc','#bfe9ff','#ffd45e'][i%3]);
+  for(let i=0;i<6;i++)puff(P.x+rr(30,150),cy+rr(-40,40),rr(2.4,4.6));
+  ringFX(P.x+70,cy,14,120,.36,'255,240,180');
+  if(n>0)addScore(160*n,P.x+120,P.y-120);
+  if(sm>0)addScore(120*sm,P.x+150,P.y-96);
+  msg(n>0?('👋 オーライ！オーライ！ 敵弾を '+n+'発 跳ね返した！ ピカピカ！')
+        :(sm>0?('👋 オーライ！オーライ！ 近くの敵を ふき飛ばした！ ピカピカ！')
+        :('👋 オーライ！オーライ！ 誘導の弧で 前方を クリアに… ピカピカ！')));
+  return true;
+}
+
+/* ---------- 🏎️ 3. RIDE ハイオク満タンブースト ---------- */
+function gsRideBoostReady(){return isGasHero()&&RIDE.active&&GS.ride.t<=0&&GS.ride.cd<=0;}
+function activateGsRideBoost(src){
+  if(!isGasHero()||!RIDE.active||st.mode!=='run')return false;
+  if(GS.ride.t>0)return false;
+  if(GS.ride.cd>0){if(src==='w'){msg('🏎️ ハイオクブーストは クールダウン中（あと '+Math.ceil(GS.ride.cd)+'秒）');Sfx.deny();}return false;}
+  const rb=GS.ride;
+  rb.t=3.6;rb.cd=rb.cdMax;rb.count++;
+  st.turboT=Math.max(st.turboT,rb.t);        /* 超スピード＋無敵体当たり */
+  st.flash=Math.max(st.flash,.3);st.flashCol='255,196,90';
+  st.shake=Math.max(st.shake,.4);
+  Sfx.gsBoost();
+  st.telop='ハイオク満タン!!';st.telopSub='RIDE BOOST — 体当たりで 弾き飛ばせ！';st.telopT=2.0;
+  st.pops.push({x:P.x+120,y:P.y-150,text:'RIDE BOOST!',t:0,life:1.2,col:'#fff6cc',size:16});
+  for(let i=0;i<30;i++)spark(P.x+rr(-60,60),P.y-rr(0,110),rr(2,5),['#fff3b0','#ffd45e','#ff8a3d','#fff'][i%4]);
+  ringFX(P.x,P.y-24,16,150,.5,'255,200,110');
+  msg('🏎️⛽ ハイオク満タン ブースト!! 無敵体当たりで 敵を 弾き飛ばせ！');
+  return true;
+}
+
+/* ---------- 🏪 4. GS MIATAS SS 給油所 ---------- */
+function gsStationFill(s){
+  if(!s||s.used)return false;
+  s.used=true;GS.station.used++;GS.station.last=s.label||'GS MIATAS SS';
+  GS.station.at=s;
+  GS.station.flash=1;GS.station.fillT=1.1;
+  GS.hiOct=HI_OCT_DUR;GS.hiOctCount++;
+  const sx0=s.x, sy0=s.y;
+  if(st.hearts<st.maxHearts){
+    st.hearts++;
+    st.pops.push({x:P.x+96,y:P.y-196,text:'♥ +1',t:0,life:1.25,col:'#ffa8b6',size:18});
+  }else{
+    addScore(500,P.x,P.y-196);
+    st.pops.push({x:P.x+96,y:P.y-196,text:'♥ 満タン！ +500',t:0,life:1.3,col:'#ffc8d0',size:15});
+  }
+  addScore(400,P.x+86,P.y-238);
+  st.flash=Math.max(st.flash,.32);st.flashCol='255,220,140';
+  st.shake=Math.max(st.shake,.36);
+  Sfx.gsFill();
+  st.pops.push({x:P.x,y:P.y-262,text:'⛽ ハイオク満タン！',t:0,life:1.9,col:'#fff3c0',size:22});
+  st.pops.push({x:P.x,y:P.y-232,text:'速度＆攻撃力 UP（'+Math.round(HI_OCT_DUR)+'秒）',t:0,life:1.7,col:'#ffe1a8',size:13});
+  ringFX(P.x,P.y-30,16,160,.55,'255,210,110');
+  /* 給油ノズル＆火花：ノズル位置から 主人公へ 噴射 */
+  for(let i=0;i<26;i++){
+    const t=i/25;
+    spark(sx0-30+t*40,sy0-56+rr(-10,10),rr(1.6,4),['#fff8cc','#ffd166','#9dffc4','#ff8a3d'][i%4]);
+  }
+  for(let i=0;i<10;i++)puff(sx0-26+rr(-8,26),sy0-46+rr(-12,12),rr(2.6,5));
+  for(let i=0;i<14;i++)spark(P.x+rr(-40,40),P.y-rr(0,120),rr(2,5),['#fff3b0','#ffd45e','#fff'][i%3]);
+  msg('⛽ GS MIATAS SS で 給油！ ハート+1 ＋ ハイオク満タン（'+Math.round(HI_OCT_DUR)+'秒 速度＆攻撃力UP）');
+  return true;
+}
+/* 給油所の 縦位置は 画面サイズ・地形に合わせて 置き直す */
+function gsLayoutStations(){
+  if(!LV.stations)return;
+  for(const s of LV.stations){
+    if(s.off==null)s.off=0;
+    s.y=groundY+floorOff(s.x)-s.off;
+  }
+}
+function gsStationCheck(){
+  if(st.mode!=='run')return;
+  for(const s of LV.stations){
+    if(s.used)continue;
+    if(Math.abs(P.x-s.x)>82)continue;
+    if(Math.abs((P.y-56)-(s.y-70))>210)continue;
+    gsStationFill(s);
+    break;
+  }
+}
+
+/* ---------- 毎フレームの タイマー ---------- */
+function gsUpdate(dt){
+  const cb=GS.combo;
+  if(cb.t>0)cb.t=Math.max(0,cb.t-dt);
+  if(cb.cutT>0)cb.cutT=Math.max(0,cb.cutT-dt);
+  if(cb.cd>0)cb.cd=Math.max(0,cb.cd-dt);
+  if(GS.wipe.cd>0)GS.wipe.cd=Math.max(0,GS.wipe.cd-dt);
+  if(GS.wipe.t>0)GS.wipe.t=Math.max(0,GS.wipe.t-dt);
+  if(GS.ride.t>0)GS.ride.t=Math.max(0,GS.ride.t-dt);
+  if(GS.ride.cd>0)GS.ride.cd=Math.max(0,GS.ride.cd-dt);
+  if(GS.station.flash>0)GS.station.flash=Math.max(0,GS.station.flash-dt*2.2);
+  if(GS.station.fillT>0)GS.station.fillT=Math.max(0,GS.station.fillT-dt);
+  if(GS.hiOct>0){
+    GS.hiOct=Math.max(0,GS.hiOct-dt);
+    if(GS.hiOct<=0)msg('ハイオク満タン パワーアップ 終了');
+  }
+  /* W ホールド（0.55秒 押し続け）でも 相方コンビを 発動 */
+  if(GS.holdOn&&!GS.holdFired&&GS.holdT<1.2){
+    GS.holdT+=dt;
+    if(GS.holdT>=0.55){GS.holdFired=true;tryGsComboFromHold();}
+  }
+  /* 相方の 並走：黄金の火花 */
+  if(cb.t>0&&isGasHero()&&st.mode==='run'&&Math.random()<dt*22){
+    st.sparks.push({x:P.x-58+rr(-16,6),y:P.y-rr(4,80),vx:rr(-160,-40),vy:rr(-50,10),r:rr(1.4,3.2),life:rr(.22,.5),t:0,
+      col:['#fff3b0','#ffd45e','#9dffc4'][(Math.random()*3)|0]});
+  }
+  /* RIDE ブーストの 炎 */
+  if(GS.ride.t>0&&RIDE.active&&Math.random()<dt*40){
+    st.sparks.push({x:P.x-40+rr(-16,6),y:P.y-rr(0,26),vx:rr(-380,-160),vy:rr(-60,30),r:rr(1.6,4),life:rr(.16,.34),t:0,
+      col:['#fff8cc','#ffd45e','#ff8a3d','#ff5a3d'][(Math.random()*4)|0]});
   }
 }
 
@@ -6554,7 +6927,7 @@ function creditEntries(){
     {t:'row',  r:'高雄大駐車場', n:'おはよう高雄 MEETING 会場'}
   ]);
   return [
-    {t:'logo', s:'紅葉ダッシュ！'},
+    {t:'logo', s:'おはたかダッシュ！'},
     {t:'sub',  s:'〜 巨大化 ＆ タイムワープ・アクション 〜'},
     {gap:1.4},
     {t:'head', s:'CAST'},
@@ -6574,7 +6947,7 @@ function creditEntries(){
     {t:'big',  s:'ロードスター乗りの あなた'},
     {t:'sub',  s:'そして あそんでくれた すべての ひとへ'},
     {gap:1.5},
-    {t:'sub',  s:'Presented by 紅葉ダッシュ！'}
+    {t:'sub',  s:'Presented by おはたかダッシュ！'}
   ].concat(fin?[{gap:1.1},{t:'sub',  s:'ロードスターと ともに、 紅葉の みちへ  🚗'},{t:'sub',  s:'GET! NA ROADSTER  ✨'}]:[]));
 }
 function creditLayout(){
@@ -7526,6 +7899,7 @@ const elScore=document.getElementById('score'),elTime=document.getElementById('t
       elComboMult=document.getElementById('comboMult'),elFeverT=document.getElementById('feverT'),
       elPower=document.getElementById('powerPill'),
       elRide=document.getElementById('ridePill'),
+      elGs=document.getElementById('gsPill'),elWRing=document.getElementById('bWRing'),
       elFill=document.getElementById('gaugeFill'),elGaugeWrap=document.getElementById('gaugeWrap'),
       elProg=document.getElementById('progFill'),elW=bW;
 let hudAcc=0;
@@ -7565,7 +7939,34 @@ function updateHUD(force){
     }
   }
   const ready=st.gauge>=99.5||st.bats>0;
-  if(elW)elW.classList.toggle('ready',ready&&st.mode==='run');
+  if(elW){
+    elW.classList.toggle('ready',ready&&st.mode==='run');
+    const gsShow=isGasHero()&&st.mode==='run';
+    elW.classList.toggle('gsReady',gsShow&&GS.combo.t<=0&&GS.combo.cd<=0);
+    elW.classList.toggle('showRing',gsShow);
+    if(gsShow){
+      const r=GS.combo.cd>0?1-GS.combo.cd/GS.combo.cdMax:(GS.holdOn&&!GS.holdFired?clamp(GS.holdT/0.55,0,1):1);
+      const deg=Math.round(clamp(r,0,1)*360);
+      if(elWRing)elWRing.style.setProperty('--cg',deg+'deg');
+      elW.classList.toggle('ringFull',GS.combo.t<=0&&GS.combo.cd<=0);
+    }else{
+      elW.classList.remove('ringFull');
+    }
+  }
+  if(elGs){
+    if(!isGasHero()){
+      elGs.hidden=true;
+    }else{
+      elGs.hidden=false;
+      elGs.classList.remove('ready','hot');
+      if(GS.combo.t>0){elGs.textContent='⛽ ハイオク無双 '+Math.ceil(GS.combo.t)+'s';elGs.classList.add('hot');}
+      else if(GS.ride.t>0&&RIDE.active){elGs.textContent='🏎️ ハイオク '+Math.ceil(GS.ride.t)+'s';elGs.classList.add('hot');}
+      else if(GS.hiOct>0){elGs.textContent='⛽ ハイオク '+Math.ceil(GS.hiOct)+'s';elGs.classList.add('hot');}
+      else if(RIDE.active){elGs.textContent='🏎️ 🚀で ブースト';elGs.classList.add('ready');}
+      else if(GS.combo.cd>0){elGs.textContent='⛽ 相方 '+Math.ceil(GS.combo.cd)+'s';}
+      else {elGs.textContent='⛽ 相方 OK';elGs.classList.add('ready');}
+    }
+  }
   wcSyncButton();
   if(elPower){
     const lv=st.powerLv;
@@ -11718,6 +12119,261 @@ function drawLeg(hx,ang,col){
   ctx.restore();
 }
 
+/* ======================= GSミアタ 4大アクションの描画 ======================= */
+/* ---------- 🏪 給油所 GS MIATAS SS ---------- */
+function drawStations(){
+  for(const s of LV.stations){
+    const x=s.x-st.camX;
+    if(x<-300||x>VW+300)continue;
+    drawGsStation(x,s);
+  }
+}
+function drawGsStation(x,s){
+  const base=s.y, used=!!s.used;
+  const pulse=0.5+0.5*Math.sin(st.t*3+s.t);
+  const live=GS.station.flash>0||GS.hiOct>0;
+  ctx.save();
+  ctx.globalAlpha=used?0.66:1;
+  /* 地面の影 */
+  ctx.fillStyle='rgba(0,0,0,.26)';
+  ctx.beginPath();ctx.ellipse(x,base+3,118,10,0,0,6.284);ctx.fill();
+  /* 前庭（アスファルト） */
+  const pg=ctx.createLinearGradient(0,base-12,0,base+6);
+  pg.addColorStop(0,'#4d4d58');pg.addColorStop(1,'#2b2b33');
+  ctx.fillStyle=pg;
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(x-120,base-11,240,15,4);else ctx.rect(x-120,base-11,240,15);
+  ctx.fill();
+  ctx.fillStyle='rgba(255,214,90,.85)';
+  ctx.fillRect(x-98,base-6,48,3);ctx.fillRect(x+10,base-6,48,3);
+  /* にじむ光 */
+  const gl=ctx.createRadialGradient(x,base-70,10,x,base-70,152);
+  gl.addColorStop(0,'rgba(255,190,90,'+(used?0.10:0.20+pulse*0.12)+')');
+  gl.addColorStop(1,'rgba(255,150,60,0)');
+  ctx.fillStyle=gl;ctx.beginPath();ctx.arc(x,base-70,152,0,6.284);ctx.fill();
+  /* 柱と 屋根（赤・オレンジ・青の ストライプ） */
+  const roofY=base-118, roofH=20;
+  ctx.fillStyle='#c9d2de';
+  ctx.fillRect(x-104,roofY+roofH,8,base-roofY-roofH-8);
+  ctx.fillRect(x+96,roofY+roofH,8,base-roofY-roofH-8);
+  ctx.fillStyle='#e9eef5';ctx.fillRect(x-112,roofY,224,roofH);
+  ctx.fillStyle='#e23c2c';ctx.fillRect(x-112,roofY,224,5);
+  ctx.fillStyle='#ff9a2e';ctx.fillRect(x-112,roofY+5,224,5);
+  ctx.fillStyle='#2f6dd0';ctx.fillRect(x-112,roofY+10,224,5);
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(x-112,roofY+16,224,2);
+  /* 屋根の下の 灯り */
+  for(let i=-2;i<=2;i++){
+    const lx=x+i*44;
+    const a=live?0.85:0.5+pulse*0.22;
+    const lg=ctx.createRadialGradient(lx,roofY+roofH+6,1,lx,roofY+roofH+6,26);
+    lg.addColorStop(0,'rgba(255,246,200,'+a+')');
+    lg.addColorStop(1,'rgba(255,220,140,0)');
+    ctx.fillStyle=lg;ctx.beginPath();ctx.arc(lx,roofY+roofH+6,26,0,6.284);ctx.fill();
+  }
+  /* 給油機（2台） */
+  for(const px of [x-54,x+4]){
+    ctx.fillStyle='#eef2f8';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(px-15,base-60,30,52,4);else ctx.rect(px-15,base-60,30,52);
+    ctx.fill();
+    ctx.fillStyle='#e23c2c';ctx.fillRect(px-15,base-60,30,11);
+    ctx.fillStyle='#1f2a3a';ctx.fillRect(px-10,base-46,20,13);
+    ctx.fillStyle='#7be7a0';ctx.fillRect(px-8,base-43,16,2.5);ctx.fillRect(px-8,base-39,10,2.5);
+    ctx.strokeStyle='#2f6dd0';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(px+15,base-40);ctx.quadraticCurveTo(px+27,base-30,px+22,base-18);ctx.stroke();
+    ctx.fillStyle='#ff9a2e';ctx.fillRect(px+19,base-19,6,10);
+    if(GS.station.fillT>0&&GS.station.at===s){
+      const k=1-GS.station.fillT/1.1;
+      for(let i=0;i<6;i++){
+        const a=st.t*7+i*1.05;
+        ctx.fillStyle='rgba(255,240,170,'+(0.75*(1-k))+')';
+        ctx.beginPath();ctx.arc(px+22+Math.cos(a)*9,base-16+Math.sin(a)*9,2.6,0,6.284);ctx.fill();
+      }
+    }
+  }
+  /* 看板：GS MIATAS SS（実在ロゴは 使わない） */
+  const sy=roofY-36;
+  ctx.fillStyle='#c9d2de';ctx.fillRect(x-96,sy+28,7,roofY-sy-28);
+  ctx.fillStyle='#101828';
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(x-114,sy-16,228,44,7);else ctx.rect(x-114,sy-16,228,44);
+  ctx.fill();
+  ctx.strokeStyle=used?'rgba(170,182,200,.7)':'rgba(255,215,106,'+(0.75+0.25*pulse)+')';
+  ctx.lineWidth=2.5;ctx.stroke();
+  ctx.fillStyle='#e23c2c';ctx.fillRect(x-110,sy-13,9,38);
+  ctx.fillStyle='#ff9a2e';ctx.fillRect(x-101,sy-13,5,38);
+  ctx.fillStyle='#2f6dd0';ctx.fillRect(x+100,sy-13,5,38);
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='900 17px system-ui,sans-serif';
+  ctx.fillStyle=used?'#b9c2d0':'#fff6d8';
+  ctx.fillText('GS MIATAS SS',x+2,sy-2);
+  ctx.font='800 10px system-ui,sans-serif';
+  ctx.fillStyle=used?'#8f98a6':'#ffd76a';
+  ctx.fillText(used?'満タン済み':(s.sign||'ハイオク給油所'),x+2,sy+14);
+  /* 未給油なら 上に ふわふわの ♥+1 と OPENランプ */
+  if(!used){
+    const bob=Math.sin(st.t*2.4+s.t)*4;
+    ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(255,90,110,'+(0.55+0.35*Math.sin(st.t*5))+')';
+    ctx.beginPath();
+    ctx.arc(x+76,sy-38+bob,7,0,6.284);ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font='900 9px system-ui,sans-serif';
+    ctx.fillText('+1',x+76,sy-38+bob);
+    ctx.fillStyle='rgba(255,120,90,.9)';
+    ctx.font='900 9px system-ui,sans-serif';
+    ctx.fillText('OPEN',x-70,sy-34+bob*0.5);
+  }
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.restore();
+}
+
+/* ---------- ⛽ 相方の 並走 ---------- */
+function drawGsComboPartner(){
+  if(st.mode!=='run'||GS.combo.t<=0)return;
+  const img=HERO_IMGS[GS.combo.partner];
+  if(!img||!img.naturalWidth)return;
+  const ar=img.naturalWidth/img.naturalHeight;
+  const h=FULL_HERO_H*0.96, w=h*ar;
+  const run=Math.abs(P.speed)>60;
+  const bob=run?Math.abs(Math.sin(P.phase*1.2))*3.2:0;
+  const bx=P.x-58-st.camX, by=P.y-bob;
+  ctx.save();
+  /* 黄金の スピード線 */
+  ctx.strokeStyle='rgba(255,224,140,'+(0.32+0.2*Math.sin(st.t*14))+')';
+  ctx.lineWidth=2;
+  for(let i=0;i<3;i++){
+    const yy=by-26-i*28;
+    ctx.beginPath();ctx.moveTo(bx-w*0.5-46,yy);ctx.lineTo(bx-w*0.5-10,yy);ctx.stroke();
+  }
+  ctx.translate(bx,by);
+  ctx.rotate(-0.06);
+  ctx.shadowColor='rgba(255,200,90,.55)';ctx.shadowBlur=14;
+  ctx.drawImage(img,-w/2,-h,w,h);
+  ctx.restore();
+}
+
+/* ---------- 👋 スクイジー＆誘導の弧 ---------- */
+function drawGsWipeFX(){
+  const wp=GS.wipe;
+  if(wp.t<=0||st.mode!=='run')return;
+  const k=1-wp.t/0.55;
+  const cx=P.x-st.camX, cy=P.y-52;
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<3;i++){
+    const r=56+k*190+i*16;
+    const a=(1-k)*(0.55-i*0.13);
+    ctx.strokeStyle='rgba(255,240,170,'+a+')';
+    ctx.lineWidth=7-i*1.7;
+    ctx.beginPath();ctx.arc(cx+18,cy,r,-1.0+k*0.5,1.0+k*0.5);ctx.stroke();
+  }
+  for(let i=0;i<11;i++){
+    const a2=-0.95+i*0.19;
+    const r2=64+k*170;
+    ctx.fillStyle='rgba(205,245,255,'+(0.55*(1-k))+')';
+    ctx.beginPath();ctx.arc(cx+18+Math.cos(a2)*r2,cy+Math.sin(a2)*r2*0.9,3.2*(1-k*0.5),0,6.284);ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ---------- 🏎️ RIDE ハイオク満タンの 噴射 ---------- */
+function drawGsRideJet(){
+  if(st.mode!=='run'||GS.ride.t<=0||!RIDE.active)return;
+  const cx=P.x-st.camX, cy=P.y-22;
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  const l=128+Math.sin(st.t*22)*24;
+  const g=ctx.createLinearGradient(cx-30-l,0,cx-4,0);
+  g.addColorStop(0,'rgba(255,70,25,0)');
+  g.addColorStop(.38,'rgba(255,140,35,.62)');
+  g.addColorStop(.82,'rgba(255,214,90,.9)');
+  g.addColorStop(1,'rgba(255,250,210,.98)');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(cx-4,cy-19);
+  ctx.lineTo(cx-30-l,cy-4+Math.sin(st.t*18)*9);
+  ctx.lineTo(cx-4,cy+17);
+  ctx.closePath();ctx.fill();
+  const g2=ctx.createLinearGradient(cx-20-l*0.7,0,cx-2,0);
+  g2.addColorStop(0,'rgba(255,255,255,0)');
+  g2.addColorStop(1,'rgba(255,255,240,.95)');
+  ctx.fillStyle=g2;
+  ctx.beginPath();
+  ctx.moveTo(cx-2,cy-9);
+  ctx.lineTo(cx-20-l*0.7,cy+Math.sin(st.t*26)*5);
+  ctx.lineTo(cx-2,cy+9);
+  ctx.closePath();ctx.fill();
+  /* 炎の 粒 */
+  for(let i=0;i<4;i++){
+    const k=(st.t*2.4+i*0.27)%1;
+    ctx.fillStyle='rgba(255,'+Math.round(230-90*k)+','+Math.round(160-120*k)+','+(0.75*(1-k))+')';
+    ctx.beginPath();ctx.arc(cx-10-k*l*0.95,cy+(i%2?6:-5)+Math.sin(st.t*14+i)*3,6*(1-k*0.6),0,6.284);ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ---------- ⛽ 相方コンビの カットイン（画面座標） ---------- */
+function drawGsCutIn(){
+  const cb=GS.combo;
+  if(cb.cutT<=0)return;
+  const total=1.7,p=1-cb.cutT/total;
+  const inT=0.20,outT=0.66;
+  let k=1;
+  if(p<inT)k=clamp(p/inT,0,1);
+  else if(p>outT)k=clamp((1-p)/(1-outT),0,1);
+  if(k<=0)return;
+  const img=HERO_IMGS[cb.partner];
+  const w=Math.min(VW*0.92,540), h=Math.min(94,Math.max(76,VH*0.19));
+  const x0=(VW-w)/2, y0=VH*0.36-(1-k)*38;
+  ctx.save();
+  ctx.globalAlpha=k;
+  ctx.translate(x0,y0);
+  /* 斜めの 黒帯＋黄金のふち */
+  ctx.fillStyle='rgba(10,7,16,.94)';
+  ctx.beginPath();
+  ctx.moveTo(16,0);ctx.lineTo(w,0);ctx.lineTo(w-16,h);ctx.lineTo(0,h);
+  ctx.closePath();ctx.fill();
+  const bg=ctx.createLinearGradient(0,0,w,0);
+  bg.addColorStop(0,'rgba(255,180,60,.22)');
+  bg.addColorStop(.45,'rgba(255,200,80,.06)');
+  bg.addColorStop(1,'rgba(90,150,255,.16)');
+  ctx.fillStyle=bg;ctx.fill();
+  ctx.strokeStyle='rgba(255,206,90,.95)';ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle='rgba(226,60,44,.95)';
+  ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(26,0);ctx.lineTo(10,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(47,109,208,.95)';
+  ctx.beginPath();ctx.moveTo(w,h);ctx.lineTo(w-10,h);ctx.lineTo(w-26,0);ctx.lineTo(w-16,0);ctx.closePath();ctx.fill();
+  /* 相方の 顔の 窓（頭〜胸が 入るように 上の方を 切り取る） */
+  const bw=Math.min(78,h-14);
+  ctx.save();
+  ctx.beginPath();ctx.rect(22,7,bw,h-14);ctx.clip();
+  if(img&&img.naturalWidth){
+    const iw=img.naturalWidth, ih=img.naturalHeight;
+    const sh=ih*0.46, sw=iw;
+    const sc=Math.max(bw/sw,(h-14)/sh);
+    ctx.drawImage(img,22+bw/2-sw*sc/2,7+(h-14)/2-sh*sc/2,sw*sc,sh*sc);
+  }
+  ctx.restore();
+  ctx.strokeStyle='rgba(255,215,110,.8)';ctx.lineWidth=2;
+  ctx.strokeRect(22,7,bw,h-14);
+  /* テキスト */
+  const tx=22+bw+16;
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.font='900 11px system-ui,sans-serif';
+  ctx.fillStyle='#ffd76a';
+  ctx.fillText('⛽ 相方コンビ必殺技 — '+gsPartnerName(),tx,h*0.24);
+  const fs=Math.round(clamp(w*0.052,17,24));
+  ctx.font='900 '+fs+'px system-ui,sans-serif';
+  ctx.fillStyle='#fff6d0';
+  ctx.fillText('ハイオク満タン！',tx,h*0.57);
+  ctx.font='900 '+Math.round(fs*0.58)+'px system-ui,sans-serif';
+  ctx.fillStyle='#ffe1a8';
+  ctx.fillText('In Japan we say...!',tx,h*0.84);
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.restore();
+}
+
 /* ミサイル（空中・陸上）と 魚雷（水中）の描画 */
 function drawMissiles(){
   for(const m of MSL.list){
@@ -13949,6 +14605,7 @@ function render(){
     drawTunnelDark(dark);
   }
 
+  drawStations();
   drawItems();
   drawObstacles();
   drawFoeShots();
@@ -13960,7 +14617,10 @@ function render(){
   drawHelper();
   drawSpeedFX();
   drawTravelGoal();
+  drawGsRideJet();
+  drawGsComboPartner();
   drawPlayer();
+  drawGsWipeFX();
   drawMissiles();
   drawWaveCannonFX();
   drawParticles();
@@ -13977,6 +14637,8 @@ function render(){
   ctx.restore();
   /* FEVER TIME の 画面演出は 揺れの外側で 描く（画面全体を 覆う） */
   drawFeverFX();
+  /* ⛽ 相方コンビの カットイン（画面座標） */
+  drawGsCutIn();
 }
 
 /* ======================= loop ======================= */
@@ -14149,6 +14811,48 @@ window.__dash={
   mslInfo(){return {shots:MSL.count,hits:MSL.hits,killed:MSL.killed,cool:Math.round(MSL.cool*100)/100,live:MSL.list.length};},
   itemBands(){const m={};for(const it of LV.items){const off=Math.round(groundY-it.y);(m[it.type]=m[it.type]||[]).push(off);}const o={};for(const k in m)o[k]={n:m[k].length,min:Math.min(...m[k]),max:Math.max(...m[k])};return o;},
   pressW(){pressW();},
+  /* --- GSミアタ 4大アクションの 検証用 --- */
+  setHero(k){return pickHero(k,false);},
+  gsInfo(){
+    const s0=LV.stations||[];
+    return {hero:heroKey,gas:isGasHero(),partner:gsPartnerKey(),partnerName:gsPartnerName(),
+      combo:{t:Math.round(GS.combo.t*100)/100,cd:Math.round(GS.combo.cd*100)/100,cutT:Math.round(GS.combo.cutT*100)/100,
+        count:GS.combo.count,partner:GS.combo.partner,turbo:Math.max(0,Math.round(st.turboT*100)/100)},
+      wipe:{t:Math.round(GS.wipe.t*100)/100,cd:Math.round(GS.wipe.cd*100)/100,count:GS.wipe.count,
+        reflect:GS.wipe.reflect,smashed:GS.wipe.smashed,foeShots:FOE.shots.length},
+      ride:{t:Math.round(GS.ride.t*100)/100,cd:Math.round(GS.ride.cd*100)/100,count:GS.ride.count,
+        hits:GS.ride.hits,rideActive:RIDE.active,rideKind:RIDE.kind,speed:Math.round(P.speed)},
+      hiOct:Math.round(GS.hiOct*100)/100,hiOctCount:GS.hiOctCount,
+      station:{used:GS.station.used,last:GS.station.last,
+        list:s0.map(s=>({x:Math.round(s.x),y:Math.round(s.y),off:s.off,used:!!s.used,label:s.label}))},
+      pills:{gs:elGs?elGs.textContent:'',gsHidden:elGs?elGs.hidden:null,
+        wRing:elW?elW.className:'',ringDeg:elWRing?elWRing.style.getPropertyValue('--cg'):null},
+      pops:st.pops.map(p=>p.text),msg:st.msg,imgW:gsPartnerImg()?gsPartnerImg().naturalWidth:0};
+  },
+  gsCombo(){return activateGsCombo('debug');},
+  gsComboHold(){GS.holdT=0.6;GS.holdFired=false;return tryGsComboFromHold();},
+  gsWipe(){return doGsWipe();},
+  gsRideBoost(){return activateGsRideBoost('debug');},
+  gsStationTeleport(i){
+    const s=(LV.stations||[])[i||0];
+    if(!s)return null;
+    P.x=s.x-160;P.y=(travelMode()==='run')?floorY(P.x):(s.y-84);
+    P.vy=0;P.grounded=travelMode()==='run';st.camX=P.x-VW*0.31;
+    return {x:Math.round(s.x),y:Math.round(s.y)};
+  },
+  gsStationFillNow(i){
+    const s=(LV.stations||[])[i||0];
+    return s?gsStationFill(s):false;
+  },
+  gsSetHiOct(v){GS.hiOct=Math.max(0,v==null?HI_OCT_DUR:v);return GS.hiOct;},
+  gsResetCooldowns(){GS.combo.cd=0;GS.combo.t=0;GS.combo.cutT=0;GS.wipe.cd=0;GS.ride.cd=0;GS.ride.t=0;return true;},
+  gsShotNear(dx,dy){
+    FOE.shots.push({x:P.x+(dx==null?190:dx),y:P.y-56+(dy||0),vx:-140,vy:0,r:10,t:0,life:3.0,who:3,ph:0});
+    return FOE.shots.length;
+  },
+  gsClearShots(){FOE.shots.length=0;BOSS.shots.length=0;MID.shots.length=0;return true;},
+  gsClearStations(){for(const s of (LV.stations||[]))s.used=false;GS.station.used=0;GS.hiOct=0;return LV.stations.length;},
+  gsClearTurbo(){st.turboT=0;return 0;},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
   assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4,party4helmet:imgParty4H,kart:imgKart,ironchef:imgIronChef,finalegod:imgFinaleGod,eunos:imgEunos};

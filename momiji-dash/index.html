@@ -623,6 +623,7 @@
         <li><span class="k">DEPTH</span><span>ステージ6 地底潜航：段差を おりながら 浅層→結晶洞→マグマ層へ。落石・ドリルメカ・コウモリ・溶岩弾</span></li>
         <li><span class="k w">SHOT</span><span>🚀ミサイル／魚雷（水中は魚雷）：F・X（または Enter）で発射、短く押すと連射。水中・空中の敵を 1発で撃破（刺客・ウツボは2発）、中ボス・ボス・4人目の刺客にも ダメージ、敵の弾も 撃ち落とせる</span></li>
         <li><span class="k w">WAVE</span><span>🚀長押し＝波動砲チャージ！ 約0.9秒でMAX（ボタンの まわりが 光る）→ 離すと 極太ビームが 前方を 貫通。道中の敵・敵弾は まとめて消し飛ばし、中ボス・ボス・4人目の刺客に 大ダメージ（5〜6）。0.35秒以上で 小ビーム（2ダメージ）</span></li>
+        <li><span class="k w">GAS</span><span>イッセイ・ミニー（GSミアタ）を 選ぶと、🚀は ミサイル／波動砲ではなく <b>ガソリン噴射</b> に変化（短押しで 黄金〜虹色の 燃料ジェット・長押しで 超高圧ガソリンジェット）。威力・射程・連射は ワッカーの ミサイル／波動砲と 同じで、飛沫ぶん 当たりやすい</span></li>
         <li><span class="k w">SWIM</span><span>ステージ7 深海：十字キーの▲（または JUMP・↑）で ぐんぐん浮上、▼（↓）で しっかり潜水。押さなければ ごくゆっくり沈む。アイテムは 泳ぐ高さ（中層〜水面寄り）に 配置</span></li>
         <li><span class="k w">FLY</span><span>ステージ8 天空：▲（または JUMP・↑）で 上昇、▼（↓）で 下降。アイテムは 中高度〜上空に 配置。加速ウインドリングを くぐると スピードアップ＆スコア</span></li>
         <li><span class="k">ST3-5</span><span>キャンプ場（ハチ・あらいぐま・焚き火）／屋台横丁（たこ焼き・提灯・鉄板）／魔王城（亡霊・よろい・星）</span></li>
@@ -753,6 +754,10 @@ let spriteReady=false;
 const FULL_HERO_H=118;   /* 全身キャラの 足元からの高さ（バストアップの 84＋足の30＝114 に合わせる） */
 function heroBody(){return (HERO_DEFS[heroKey]||HERO_DEFS.default).body;}
 function isFullHero(){return heroBody()==='full';}
+/* GSミアタの2人（イッセイ／ミニー）は 🚀が ガソリン噴射になる */
+function isGasHero(){return heroKey==='issei'||heroKey==='minnie';}
+function shotName(){return isGasHero()?'ガソリン噴射':'ミサイル';}
+function waveName(){return isGasHero()?'超高圧ガソリンジェット':'波動砲';}
 function fullHeroW(){
   const im=imgRunner;
   const ar=(im&&im.naturalWidth&&im.naturalHeight)?im.naturalWidth/im.naturalHeight:0.55;
@@ -801,6 +806,10 @@ function syncHeroCards(){
   }
   const cur=document.getElementById('csCurrent');
   if(cur)cur.textContent='▸ '+(HERO_DEFS[heroKey]||HERO_DEFS.default).name;
+  const bm=document.getElementById('bM');
+  if(bm)bm.setAttribute('aria-label',isGasHero()
+    ?'ガソリン噴射（短押しで連射、長押しでチャージ、離すと超高圧ジェット）'
+    :'ミサイル／魚雷を発射（長押しでチャージ、離すと波動砲）');
 }
 function pickHero(key,save){
   if(!HERO_DEFS[key])key='default';
@@ -978,6 +987,25 @@ const Sfx={
     }
   },
   boom(){this.noise(.22,.18,320,.8,0,900);this.tone(120,.16,'sawtooth',.10,58);},
+  /* --- GSミアタの2人：ガソリン噴射の SE --- */
+  gasSpray(){
+    this.noise(.17,.13,1600,1.0,2800,700);
+    this.tone(720,.13,'sawtooth',.07,300);
+    this.tone(180,.10,'square',.05,120,.02);
+  },
+  gasJet(small){
+    if(small){
+      this.noise(.30,.22,1400,1.0,3000,520);
+      this.tone(620,.26,'sawtooth',.11,160);
+      this.tone(150,.20,'square',.07,90,.02);
+    }else{
+      this.noise(.60,.32,1100,0.9,3600,260);
+      this.tone(140,.55,'sawtooth',.19,44);
+      this.tone(62,.60,'sine',.22,30,.02);
+      this.tone(1900,.22,'square',.09,300,.02);
+      this.noise(.50,.20,2600,1.1,.05,700);
+    }
+  },
   bubble(){this.tone(520,.10,'sine',.09,1150);this.tone(900,.09,'sine',.05,null,.05);},
   wind(){this.noise(.34,.085,900,1.1,0,2700);},
   thunder(){this.noise(.5,.10,220,.8,0,120);this.tone(72,.42,'sawtooth',.075,40);},
@@ -2524,7 +2552,7 @@ const BADGES=[
   {id:'gold',  icon:'👑', name:'黄金コンプ', desc:'黄金のモミジ 3枚を そろえて クリア'},
   {id:'fever', icon:'🔥', name:'FEVER達成',  desc:'FEVER TIME に 突入する'},
   {id:'dodge', icon:'💨', name:'JUST回避',   desc:'JUST DODGE を 決める'},
-  {id:'wave',  icon:'🚀', name:'波動砲',     desc:'波動砲を MAXまで チャージして 発射'},
+  {id:'wave',  icon:'🚀', name:'波動砲／ガソリンジェット', desc:'🚀を MAXまで チャージして 発射（イッセイ・ミニーは 超高圧ガソリンジェット）'},
   {id:'combo', icon:'⛓', name:'50コンボ',   desc:'50コンボを つなげる'},
   {id:'all',   icon:'🏆', name:'全8面制覇',  desc:'8ステージ すべて クリア'}
 ];
@@ -2887,13 +2915,16 @@ function fireMissile(){
   MSL.cool=MSL.cd;MSL.count++;
   const tm=travelMode();
   const y=P.y-(tm==='run'?44:36);
-  MSL.list.push({x:P.x+30,y,vx:MSL.speed,vy:0,t:0,life:1.9,under:(tm==='swim')});
-  Sfx.missile();
+  const gas=isGasHero();
+  /* ガソリン噴射は 射程を 少し長く（life 2.1） */
+  MSL.list.push({x:P.x+30,y,vx:MSL.speed,vy:0,t:0,life:gas?2.1:1.9,under:(tm==='swim'),gas});
+  if(gas)Sfx.gasSpray(); else Sfx.missile();
   return true;
 }
-function missileBurst(x,y,r,big){
+function missileBurst(x,y,r,big,gas){
   const n=big?18:10;
-  for(let i=0;i<n;i++)spark(x+rr(-r,r),y+rr(-r,r),rr(2,5),['#ffe45a','#ff8a3d','#fff','#9be6ff'][i%4]);
+  const cols=gas?['#fff3a0','#ffd166','#ff9a3d','#9dffc4','#9edcff']:['#ffe45a','#ff8a3d','#fff','#9be6ff'];
+  for(let i=0;i<n;i++)spark(x+rr(-r,r),y+rr(-r,r),rr(2,5),cols[i%cols.length]);
   for(let i=0;i<(big?7:4);i++)puff(x+rr(-r,r),y+rr(-r,r),big?4.5:3);
   st.shake=Math.max(st.shake,big?.45:.2);
   Sfx.boom();
@@ -2905,10 +2936,10 @@ function missileVsShots(m){
     for(let i=g.length-1;i>=0;i--){
       const s=g[i];
       if(s.delay>0)continue;
-      const r=(s.r||14)+10;
+      const r=(s.r||14)+(m.gas?16:10);
       if(Math.abs(s.x-m.x)<r&&Math.abs(s.y-m.y)<r){
         g.splice(i,1);
-        missileBurst(s.x,s.y,10,false);
+        missileBurst(s.x,s.y,10,false,m.gas);
         addScore(30,s.x,s.y);MSL.hits++;
         return true;
       }
@@ -2921,11 +2952,11 @@ function missileHitObstacle(o,m){
   if(o.hp==null)o.hp=(o.type==='assassin')?2:(o.type==='eel'?2:1);
   o.hp-=1;MSL.hits++;
   if(o.hp<=0){
-    missileBurst(m.x,m.y,16,true);
+    missileBurst(m.x,m.y,16,true,m.gas);
     MSL.killed++;
     smashObstacle(o);
   }else{
-    missileBurst(m.x,m.y,12,false);
+    missileBurst(m.x,m.y,12,false,m.gas);
     addScore(60,m.x,m.y);st.combo++;trackCombo();
   }
 }
@@ -2942,8 +2973,9 @@ function missileUpdate(dt){
         if(o.dead)continue;
         if(o.type==='windring'||o.type==='bubbleRing'||o.type==='stormcloud')continue;
         const ox=obX(o), ot=obTop(o);
-        if(m.x<ox-o.w/2-4||m.x>ox+o.w/2+4)continue;
-        if(m.y<ot-4||m.y>ot+o.h+4)continue;
+        const pad=m.gas?11:4;   /* ガソリン噴射は 飛沫ぶん 当たり判定を 少し広く */
+        if(m.x<ox-o.w/2-pad||m.x>ox+o.w/2+pad)continue;
+        if(m.y<ot-pad||m.y>ot+o.h+pad)continue;
         missileHitObstacle(o,m);hit=true;break;
       }
     }
@@ -2966,7 +2998,7 @@ function missileUpdate(dt){
       }
     }
     if(hit||m.t>m.life||m.x-st.camX>VW+90||m.x<P.x-460){
-      if(!hit)missileBurst(m.x,m.y,7,false);
+      if(!hit)missileBurst(m.x,m.y,7,false,m.gas);
       MSL.list.splice(i,1);
     }
   }
@@ -3016,28 +3048,31 @@ function onWcFull(){
   WC.fulls++;
   Sfx.chargeMax();
   st.shake=Math.max(st.shake,.5);
-  st.flash=Math.max(st.flash,.28);st.flashCol='200,245,255';
-  st.pops.push({x:P.x,y:P.y-152,text:'MAX！ 波動砲 OK',t:0,life:1.1,col:'#fff3a0'});
-  msg('MAX！ 離すと 波動砲!!');
-  for(let i=0;i<26;i++)spark(P.x+rr(-70,70),P.y-rr(10,140),rr(2,5),['#9be6ff','#fff3a0','#fff'][i%3]);
+  const gas=isGasHero();
+  st.flash=Math.max(st.flash,.28);st.flashCol=gas?'255,228,150':'200,245,255';
+  st.pops.push({x:P.x,y:P.y-152,text:gas?'MAX！ ガソリン満タン':'MAX！ 波動砲 OK',t:0,life:1.1,col:'#fff3a0'});
+  msg(gas?'MAX！ 離すと 超高圧ジェット!!':'MAX！ 離すと 波動砲!!');
+  const cols=gas?['#ffd166','#9dffc4','#fff']:['#9be6ff','#fff3a0','#fff'];
+  for(let i=0;i<26;i++)spark(P.x+rr(-70,70),P.y-rr(10,140),rr(2,5),cols[i%3]);
 }
 function fireWaveCannon(small){
   if(st.mode!=='run')return false;
   const tm=travelMode();
   const y=P.y-(tm==='run'?52:36);
   const dmg=small?2:6;
+  const gas=isGasHero();
   WC.beams.push({x0:P.x+22,y,front:P.x+72,w:small?30:82,t:0,life:small?.42:.60,
-                 dmg,small,hitB:false,hitM:false,hitR:false,kills:0});
+                 dmg,small,gas,hitB:false,hitM:false,hitR:false,kills:0});
   WC.fired++;WC.shots++;WC.lastDmg=dmg;WC.maxDmg=Math.max(WC.maxDmg,dmg);
   if(!small)unlockBadge('wave');
   st.shake=Math.max(st.shake,small?.75:1.7);
   st.flash=Math.max(st.flash,small?.20:.42);
-  st.flashCol=small?'170,235,255':'255,252,235';
-  Sfx.waveCannon(small);
-  st.pops.push({x:P.x+150,y:y-72,text:small?'BEAM!':'WAVE CANNON!!',t:0,life:small?.9:1.3,
-                col:small?'#bfefff':'#fff3a0'});
-  msg(small?'ビーム発射！':'波動砲 発射！！ MAX POWER!!');
-  for(let i=0;i<(small?18:34);i++)spark(P.x+rr(20,74),y+rr(-14,14),rr(2,6),['#fff','#9be6ff','#ffe45a'][i%3]);
+  st.flashCol=gas?(small?'255,225,150':'255,240,190'):(small?'170,235,255':'255,252,235');
+  if(gas)Sfx.gasJet(small); else Sfx.waveCannon(small);
+  st.pops.push({x:P.x+150,y:y-72,text:gas?(small?'GAS SPRAY!':'GASOLINE JET!!'):(small?'BEAM!':'WAVE CANNON!!'),t:0,life:small?.9:1.3,
+                col:gas?'#ffe9a0':(small?'#bfefff':'#fff3a0')});
+  msg(gas?(small?'ガソリン噴射！':'超高圧ガソリンジェット 発射！！ フルパワー!!'):(small?'ビーム発射！':'波動砲 発射！！ MAX POWER!!'));
+  for(let i=0;i<(small?18:34);i++)spark(P.x+rr(20,74),y+rr(-14,14),rr(2,6),(gas?['#fff','#ffd166','#9dffc4']:['#fff','#9be6ff','#ffe45a'])[i%3]);
   return true;
 }
 /* 貫通判定：道中の敵・敵弾を まとめて 消し飛ばし、ボスには 大ダメージ */
@@ -3058,8 +3093,8 @@ function wcBeamHits(b){
       o.hp=0;
     }
     MSL.hits++;
-    if(o.hp<=0){MSL.killed++;b.kills++;missileBurst(ox,b.y,16,!b.small);smashObstacle(o);}
-    else missileBurst(ox,b.y,12,false);
+    if(o.hp<=0){MSL.killed++;b.kills++;missileBurst(ox,b.y,16,!b.small,b.gas);smashObstacle(o);}
+    else missileBurst(ox,b.y,12,false,b.gas);
   }
   /* 敵弾（刺客・中ボス・ボス）も まとめて 消す */
   for(const g of [FOE.shots,BOSS.shots,MID.shots]){
@@ -3068,7 +3103,7 @@ function wcBeamHits(b){
       if(s.delay>0)continue;
       if(s.x<b.x0||s.x>b.front)continue;
       if(Math.abs(s.y-b.y)>halfY+(s.r||14))continue;
-      g.splice(i,1);missileBurst(s.x,s.y,10,false);addScore(30,s.x,s.y);MSL.hits++;
+      g.splice(i,1);missileBurst(s.x,s.y,10,false,b.gas);addScore(30,s.x,s.y);MSL.hits++;
     }
   }
   /* 中ボス・ボス・ライバル：1本のビームで 1回 */
@@ -3103,7 +3138,7 @@ function wcUpdate(dt){
     if(WC.partT<=0){
       WC.partT=Math.max(.022,.058-r*.036);
       WC.parts.push({a:rr(0,6.283),r:rr(64,150),t:0,life:rr(.22,.42),sp:rr(1.6,3.4),
-                     col:Math.random()<.5?'#9be6ff':'#fff3a0'});
+                     col:isGasHero()?(Math.random()<.55?'#ffd166':'#9dffc4'):(Math.random()<.5?'#9be6ff':'#fff3a0')});
     }
     for(let i=WC.parts.length-1;i>=0;i--){
       const p=WC.parts[i];p.t+=dt;p.r=Math.max(0,p.r-dt*(240+p.sp*160));
@@ -3766,7 +3801,8 @@ function startGame(stageId){
   KART.active=false;KART.cool=rr(15,22);KART.smoke.length=0;
   hideOverlay();
   updateHUD(true);
-  msg((STAGE.def&&STAGE.def.startMsg)||'スタート！');
+  const _sm=(STAGE.def&&STAGE.def.startMsg)||'スタート！';
+  msg(isGasHero()?_sm.replace('ミサイル','ガソリン噴射').replace('魚雷','ガソリン噴射'):_sm);
 }
 btnStart.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();startGame(STAGE.id);});
 if(btnNext)btnNext.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();
@@ -4050,7 +4086,7 @@ function damageBoss(n,how){
   if(bossBar){bossBar.classList.add('hit');setTimeout(()=>{if(bossBar)bossBar.classList.remove('hit');},180);}
   updateBossBar();
   bossRageCheck();
-  msg(how==='part'?(BOSS.def.short+'に 反撃パーツ直撃!! 大ダメージ！'):how==='wave'?('⚡波動砲 直撃！！ '+BOSS.def.short+'に 大ダメージ！'):how==='shot'?('🚀ミサイル直撃！ '+BOSS.def.short+'にダメージ！'):(how==='stomp'?'踏みつけ！ '+BOSS.def.short+'にダメージ！':(how==='dark'?'ダークボールを はじき返した！':'体当たり！ ダメージ！')));
+  msg(how==='part'?(BOSS.def.short+'に 反撃パーツ直撃!! 大ダメージ！'):how==='wave'?((isGasHero()?'⛽超高圧ガソリンジェット':'⚡波動砲')+' 直撃！！ '+BOSS.def.short+'に 大ダメージ！'):how==='shot'?((isGasHero()?'⛽ガソリン噴射 直撃！ ':'🚀ミサイル直撃！ ')+BOSS.def.short+'にダメージ！'):(how==='stomp'?'踏みつけ！ '+BOSS.def.short+'にダメージ！':(how==='dark'?'ダークボールを はじき返した！':'体当たり！ ダメージ！')));
   if(BOSS.hp<=0)defeatBoss();
 }
 function fireBolt(){
@@ -11689,6 +11725,70 @@ function drawMissiles(){
     if(x<-90||x>VW+90)continue;
     const fade=clamp((m.life-m.t)/0.22,0,1);
     ctx.save();ctx.globalAlpha=fade;
+    if(m.gas){
+      /* ガソリン噴射：ノズル（左・細い）から 先端（右・広い）へ 扇形に 広がる 黄金〜虹色の 燃料ジェット＋飛沫 */
+      const fl=1+Math.sin(st.t*46+m.t*14)*0.16;
+      /* 後方へ 引く 燃料ミスト */
+      for(let i=1;i<=9;i++){
+        const tx=x-14-i*9, ty=y+Math.sin(st.t*15+i*2.1)*(1.4+i*0.6);
+        ctx.fillStyle='rgba(255,'+(198-i*9)+','+(72+i*7)+','+(0.32*(1-i/10))+')';
+        ctx.beginPath();ctx.ellipse(tx,ty,4.6+i*1.0,2.8+i*0.55,0,0,6.284);ctx.fill();
+      }
+      ctx.translate(x,y);
+      const L1=-50, L2=22, sp=13*fl;
+      /* 1) 噴射コーン本体（黄金→白→虹色） */
+      const jg=ctx.createLinearGradient(L1,0,L2,0);
+      jg.addColorStop(0,'rgba(255,120,40,.30)');
+      jg.addColorStop(.22,'rgba(255,162,50,.62)');
+      jg.addColorStop(.52,'rgba(255,224,90,.92)');
+      jg.addColorStop(.78,'rgba(232,255,170,.90)');
+      jg.addColorStop(.93,'rgba(160,240,255,.85)');
+      jg.addColorStop(1,'rgba(150,205,255,.72)');
+      ctx.fillStyle=jg;
+      ctx.beginPath();
+      ctx.moveTo(L1,-1.8);
+      ctx.quadraticCurveTo(L1+18,-sp*0.45, L2,-sp);
+      ctx.quadraticCurveTo(L2+10,0, L2,sp);
+      ctx.quadraticCurveTo(L1+18,sp*0.45, L1,1.8);
+      ctx.quadraticCurveTo(L1-6,0, L1,-1.8);
+      ctx.closePath();ctx.fill();
+      /* 2) 芯の 白い ジェット */
+      const cg=ctx.createLinearGradient(L1+2,0,L2-2,0);
+      cg.addColorStop(0,'rgba(255,255,255,.15)');
+      cg.addColorStop(.5,'rgba(255,255,235,.95)');
+      cg.addColorStop(1,'rgba(255,250,195,.95)');
+      ctx.fillStyle=cg;
+      ctx.beginPath();
+      ctx.moveTo(L1+4,-1.4);
+      ctx.quadraticCurveTo((L1+L2)/2,-sp*0.40, L2-4,-sp*0.62);
+      ctx.quadraticCurveTo(L2+2,0, L2-4,sp*0.62);
+      ctx.quadraticCurveTo((L1+L2)/2,sp*0.40, L1+4,1.4);
+      ctx.closePath();ctx.fill();
+      /* 3) 虹色の 縁（屈折光） */
+      ctx.lineWidth=1.6;ctx.globalAlpha=fade*.75;
+      ctx.strokeStyle='rgba(170,255,190,.9)';
+      ctx.beginPath();ctx.moveTo(L1+8,-sp*0.24);ctx.quadraticCurveTo(L1+22,-sp*0.62, L2-2,-sp*0.92);ctx.stroke();
+      ctx.strokeStyle='rgba(150,220,255,.9)';
+      ctx.beginPath();ctx.moveTo(L1+8,sp*0.24);ctx.quadraticCurveTo(L1+22,sp*0.62, L2-2,sp*0.92);ctx.stroke();
+      ctx.globalAlpha=1;
+      /* 4) 飛沫（虹色の粒が 扇状に 飛び散る） */
+      const dc=['#ffd166','#ffb347','#a8ffcf','#9edcff','#fff6c0'];
+      for(let i=0;i<11;i++){
+        const a=st.t*6.5+i*0.72;
+        const spread=(i%2?1:-1)*(2.6+(i%5)*2.2);
+        const px=L2-6+Math.cos(a*1.5)*15, py=spread*fl+Math.sin(a)*4;
+        ctx.fillStyle=dc[i%dc.length];
+        ctx.beginPath();ctx.arc(px,py,1.7+(i%3)*0.7,0,6.284);ctx.fill();
+      }
+      /* 5) 先端の ノズル光 */
+      const hg=ctx.createRadialGradient(L2,0,1,L2,0,15*fl);
+      hg.addColorStop(0,'rgba(255,255,255,.95)');
+      hg.addColorStop(.38,'rgba(255,234,145,.72)');
+      hg.addColorStop(1,'rgba(255,170,60,0)');
+      ctx.fillStyle=hg;ctx.beginPath();ctx.arc(L2,0,15*fl,0,6.284);ctx.fill();
+      ctx.restore();
+      continue;
+    }
     if(m.under){
       /* 泡の trail */
       for(let i=1;i<=5;i++){
@@ -11731,6 +11831,68 @@ function drawMissiles(){
     ctx.restore();
   }
 }
+/* ガソリン噴射の ビーム（超高圧ジェット）：黄金→虹色の 帯＋波打つ飛沫 */
+function drawGasJetBeam(b){
+  const x0=b.x0-st.camX, x1=b.front-st.camX, y=b.y;
+  const fade=clamp((b.life-b.t)/.16,0,1), grow=clamp(b.t/.05,0,1);
+  const h=(b.small?10:24)*(.5+.5*grow), wide=Math.max(4,x1-x0), K=b.small?0.7:1;
+  ctx.save();ctx.globalAlpha=fade;ctx.lineCap='round';
+  /* 外側の アンバーの 炎（加算） */
+  ctx.globalCompositeOperation='lighter';
+  const g1=ctx.createLinearGradient(0,y-h*3,0,y+h*3);
+  g1.addColorStop(0,'rgba(255,140,40,0)');
+  g1.addColorStop(.36,'rgba(255,170,60,'+(0.13*K)+')');
+  g1.addColorStop(.5,'rgba(255,225,120,'+(0.21*K)+')');
+  g1.addColorStop(.64,'rgba(255,170,60,'+(0.13*K)+')');
+  g1.addColorStop(1,'rgba(255,140,40,0)');
+  ctx.fillStyle=g1;ctx.fillRect(x0,y-h*3,wide,h*6);
+  ctx.globalCompositeOperation='source-over';
+  /* 本体：黄金→白→虹色（緑・水色の照り） */
+  const g2=ctx.createLinearGradient(0,y-h*1.2,0,y+h*1.2);
+  g2.addColorStop(0,'rgba(255,150,40,'+(0.9*K)+')');
+  g2.addColorStop(.24,'rgba(255,206,70,'+(0.96*K)+')');
+  g2.addColorStop(.46,'rgba(255,252,220,1)');
+  g2.addColorStop(.54,'rgba(226,255,214,1)');
+  g2.addColorStop(.76,'rgba(155,236,255,'+(0.9*K)+')');
+  g2.addColorStop(1,'rgba(140,200,255,'+(0.75*K)+')');
+  ctx.fillStyle=g2;ctx.fillRect(x0,y-h*1.2,wide,h*2.4);
+  /* 乱流の 白い 筋 */
+  for(let k=0;k<10;k++){
+    const tt=((k/10)+st.t*1.6)%1, xx=x0+wide*tt;
+    const yy=y+Math.sin(tt*18+st.t*24+k)*h*.55;
+    ctx.fillStyle='rgba(255,255,255,'+(fade*(0.20+0.16*Math.sin(st.t*30+k)))+')';
+    ctx.beginPath();ctx.ellipse(xx,yy,h*.30,h*.15,0,0,6.284);ctx.fill();
+  }
+  /* 飛び散る ガソリン飛沫 */
+  for(let k=0;k<14;k++){
+    const tt=((k/14)+st.t*2.2)%1, xx=x0+wide*tt;
+    const yy=y+Math.sin(st.t*17+k*2.3)*h*1.55;
+    ctx.fillStyle='rgba(255,224,120,'+(fade*.7)+')';
+    ctx.beginPath();ctx.arc(xx,yy,2.2+1.6*Math.abs(Math.cos(k+st.t*9)),0,6.284);ctx.fill();
+  }
+  /* 先端の 閃光 */
+  const fl=h*3.0;
+  const fg=ctx.createRadialGradient(x1,y,1,x1,y,fl);
+  fg.addColorStop(0,'rgba(255,255,255,'+(0.95*K)+')');
+  fg.addColorStop(.25,'rgba(255,240,150,'+(0.8*K)+')');
+  fg.addColorStop(.55,'rgba(255,170,60,'+(0.4*K)+')');
+  fg.addColorStop(1,'rgba(255,120,30,0)');
+  ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x1,y,fl,0,6.284);ctx.fill();
+  /* 銃口（ノズル）の 光 */
+  const rg=ctx.createRadialGradient(x0,y,1,x0,y,h*2.2);
+  rg.addColorStop(0,'rgba(255,255,240,.9)');
+  rg.addColorStop(.4,'rgba(255,210,110,'+(0.5*K)+')');
+  rg.addColorStop(1,'rgba(255,150,40,0)');
+  ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x0,y,h*2.2,0,6.284);ctx.fill();
+  /* 衝撃波リング */
+  const al=clamp(1-b.t/b.life,0,1);
+  for(let k=0;k<2;k++){
+    const pr=b.t*900+k*60;
+    ctx.strokeStyle='rgba(255,236,170,'+(al*.5*K)+')';ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.ellipse(x1-pr*.4,y,h*1.1+pr*.22,h*.62+pr*.16,0,0,6.284);ctx.stroke();
+  }
+  ctx.restore();
+}
 /* 波動砲：チャージの 光（粒子が集まる・エネルギー球）と 発射ビームの 描画 */
 function drawWaveCannonFX(){
   if(WC.charging){
@@ -11753,13 +11915,20 @@ function drawWaveCannonFX(){
     ctx.globalAlpha=1;
     const puls=WC.full?1+.10*Math.sin(st.t*26):1;
     const R=(8+46*r)*puls;
+    const gasC=isGasHero();
     const g=ctx.createRadialGradient(mx,my,1,mx,my,R);
     g.addColorStop(0,'rgba(255,255,255,.98)');
-    g.addColorStop(.32,'rgba(186,244,255,.92)');
-    g.addColorStop(.66,'rgba(96,196,255,.45)');
-    g.addColorStop(1,'rgba(70,150,255,0)');
+    if(gasC){
+      g.addColorStop(.32,'rgba(255,236,150,.92)');
+      g.addColorStop(.66,'rgba(255,178,66,.45)');
+      g.addColorStop(1,'rgba(255,140,40,0)');
+    }else{
+      g.addColorStop(.32,'rgba(186,244,255,.92)');
+      g.addColorStop(.66,'rgba(96,196,255,.45)');
+      g.addColorStop(1,'rgba(70,150,255,0)');
+    }
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(mx,my,R,0,6.284);ctx.fill();
-    ctx.strokeStyle='rgba(198,246,255,'+(.28+.55*r)+')';
+    ctx.strokeStyle=gasC?'rgba(255,238,175,'+(.28+.55*r)+')':'rgba(198,246,255,'+(.28+.55*r)+')';
     ctx.lineWidth=1.6+2.2*r;
     ctx.beginPath();ctx.ellipse(mx,my,R*1.22,R*1.02,0,0,6.284);ctx.stroke();
     if(WC.full){
@@ -11774,6 +11943,7 @@ function drawWaveCannonFX(){
   for(const b of WC.beams){
     const x0=b.x0-st.camX, x1=b.front-st.camX, y=b.y;
     if(x1<-60)continue;
+    if(b.gas){drawGasJetBeam(b);continue;}
     const fade=clamp((b.life-b.t)/.16,0,1);
     const grow=clamp(b.t/.05,0,1);
     const h=(b.small?9:22)*(.5+.5*grow);
@@ -13975,7 +14145,7 @@ window.__dash={
   wcPress(){shotPress();return WC.charging;},
   wcRelease(){shotRelease();return {fired:WC.fired,lastDmg:WC.lastDmg};},
   wcFire(small){fireWaveCannon(!!small);return WC.beams.length;},
-  missiles(){return MSL.list.map(m=>({x:Math.round(m.x),y:Math.round(m.y),under:!!m.under}));},
+  missiles(){return MSL.list.map(m=>({x:Math.round(m.x),y:Math.round(m.y),under:!!m.under,gas:!!m.gas}));},
   mslInfo(){return {shots:MSL.count,hits:MSL.hits,killed:MSL.killed,cool:Math.round(MSL.cool*100)/100,live:MSL.list.length};},
   itemBands(){const m={};for(const it of LV.items){const off=Math.round(groundY-it.y);(m[it.type]=m[it.type]||[]).push(off);}const o={};for(const k in m)o[k]={n:m[k].length,min:Math.min(...m[k]),max:Math.max(...m[k])};return o;},
   pressW(){pressW();},

@@ -517,9 +517,9 @@
       <div class="charSel" id="charSel" role="radiogroup" aria-label="主人公をえらぶ">
         <div class="csTitle">主人公を えらぶ <span id="csCurrent"></span></div>
         <div class="csRow">
-          <button class="csCard on" type="button" data-hero="default" role="radio" aria-checked="true" aria-label="いつもの主人公を選ぶ">
+          <button class="csCard on" type="button" data-hero="default" role="radio" aria-checked="true" aria-label="ワッカーを選ぶ">
             <span class="csThumb"><img src="../giant_char.png" alt="" draggable="false"></span>
-            <span class="csName">いつもの主人公</span>
+            <span class="csName">ワッカー</span>
           </button>
           <button class="csCard" type="button" data-hero="issei" role="radio" aria-checked="false" aria-label="イッセイ（GSミアタ）を選ぶ">
             <span class="csThumb gs"><img src="gs_issei.png" alt="" draggable="false"></span>
@@ -691,10 +691,10 @@ window.addEventListener('orientationchange',()=>setTimeout(resize,120));
 
 /* ======================= assets ======================= */
 /* 主人公（プレイヤーキャラ）：タイトル画面で 3人から 選べる
-   default = いつもの主人公（バストアップ＋描画の脚）
+   default = ワッカー（バストアップ＋描画の脚）
    issei / minnie = GSミアタの2人（全身立ち絵を そのまま描く） */
 const HERO_DEFS={
-  default:{name:'いつもの主人公',src:'../giant_char.png',body:'bust'},
+  default:{name:'ワッカー',src:'../giant_char.png',body:'bust'},
   issei:{name:'イッセイ',src:'gs_issei.png',body:'full'},
   minnie:{name:'ミニー',src:'gs_minnie.png',body:'full'}
 };

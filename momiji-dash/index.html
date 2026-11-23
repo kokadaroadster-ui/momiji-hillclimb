@@ -1380,6 +1380,73 @@ function playRunStep(i,when){
   if(s===4||s===12)msnare(when);
   if(bar===3&&(s===13||s===15))mnoise(.10,.035,700,1.0,when);
 }
+/* ===== キャラ別の 走行BGM（GSミアタ） =====
+   イッセイ: JDMナイトの ユーロビート（154BPM・４つ打ち＋爆速シンセベース）
+   ミニー : 明るくキャッチーな ポップ（152BPM・弾むアルペジオと クラップ）
+   ワッカーは 従来の MRUN（148BPM）のまま、ボス曲・特殊ステージ曲（地下・水中・空など）も そのまま */
+const MRUN_ISSEI={
+  bpm:154,
+  roots:[45,41,43,40],
+  arp:[[69,72,76,79],[65,69,72,76],[67,71,74,79],[64,68,71,76]],
+  mel:[
+    [81,null,79,null,76,null,79,null,81,null,84,null,81,null,79,null],
+    [77,null,76,null,72,null,76,null,77,null,81,null,77,null,76,null],
+    [79,null,83,null,86,null,83,null,79,null,83,null,86,null,88,null],
+    [76,null,80,null,83,null,80,null,76,null,80,null,83,null,76,null]
+  ]
+};
+function playRunIsseiStep(i,when){
+  const bar=Math.floor(i/16)%4, s=i%16, root=MRUN_ISSEI.roots[bar];
+  /* ４つ打ちキック＋オフビートのハット（ユーロビートの 疾走感） */
+  if(s%4===0)mkick(when);
+  if(s%4===2)mnoise(.035,.014,9200,1.8,when);
+  if(s===4||s===12)msnare(when);
+  /* シンセベース：８分で オクターブ跳ね */
+  if(s%2===0){
+    const oct=(s%8===6)?12:0;
+    mnote(mtof(root-12+oct),.11,'sawtooth',.060,when);
+  }
+  /* ファンキーな スタブ */
+  if(s===0||s===3||s===6||s===10||s===13){
+    const ch=MRUN_ISSEI.arp[bar];
+    mnote(mtof(ch[0]),.10,'square',.024,when);
+    mnote(mtof(ch[2]),.10,'square',.019,when);
+  }
+  const mel=MRUN_ISSEI.mel[bar];
+  if(mel[s]!=null)mnote(mtof(mel[s]),.12,'sawtooth',.028,when);
+  if(bar===3&&(s===14||s===15))mnoise(.09,.030,1200,1.0,when);
+}
+const MRUN_MINNIE={
+  bpm:152,
+  roots:[48,43,45,41],
+  arp:[[72,76,79,84],[67,71,74,79],[69,72,76,81],[65,69,72,77]],
+  mel:[
+    [84,null,84,86,null,84,null,79,81,null,79,null,76,null,null,null],
+    [83,null,83,86,null,83,null,79,81,null,79,null,74,null,null,null],
+    [81,null,81,84,null,81,null,76,79,null,76,null,72,null,null,null],
+    [77,null,77,81,null,77,null,72,74,null,74,null,77,null,null,null]
+  ]
+};
+function playRunMinnieStep(i,when){
+  const bar=Math.floor(i/16)%4, s=i%16, root=MRUN_MINNIE.roots[bar];
+  if(s===0||s===8||s===10)mkick(when);
+  if(s===4||s===12)mnoise(.07,.048,2200,1.2,when);      /* クラップ */
+  if(s%4===2)mnoise(.03,.013,9500,1.6,when);
+  if(s%2===0){
+    const seq=MRUN_MINNIE.arp[bar];
+    mnote(mtof(seq[(s>>1)%4]),.10,'square',.026,when);
+  }
+  if(s%4===0)mnote(mtof(root-12),.16,'triangle',.048,when);
+  const mel=MRUN_MINNIE.mel[bar];
+  if(mel[s]!=null)mnote(mtof(mel[s]),.10,'triangle',.030,when);
+  if(bar===3&&s===15)mnote(mtof(84),.18,'triangle',.026,when);
+}
+/* 走行曲を キャラに合わせて 差し替える（特殊ステージの曲は そのまま） */
+function heroRunTrack(base){
+  if(base!=='run'||!isGasHero())return base;
+  return heroKey==='issei'?'run_issei':'run_minnie';
+}
+
 /* ボス戦BGM: 緊迫のマイナー・リフ */
 const MBOSS={
   bpm:172,
@@ -1872,11 +1939,12 @@ function playSkyBossStep(i,when){
   if(s===15&&bar%2===1)mnoise(.3,.03,180,3,when);
   if(s%8===3)mnoise(.06,.014,4200,3,when);
 }
-const MUS_BPM={run:MRUN.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
+const MUS_BPM={run:MRUN.bpm,run_issei:MRUN_ISSEI.bpm,run_minnie:MRUN_MINNIE.bpm,boss:MBOSS.bpm,dungeon:MDUN.bpm,dungeon_boss:MDBOSS.bpm,ending:MEND.bpm,
   camp:MCAMP.bpm,camp_boss:MCAMPBOSS.bpm,yatai:MYATAI.bpm,yatai_boss:MYATAIBOSS.bpm,
   castle:MCASTLE.bpm,final_boss:MFINALBOSS.bpm,tl_boss:MTLB.bpm,
   depth:MDEPTH.bpm,depth_boss:MDBOSS2.bpm,aqua:MAQUA.bpm,aqua_boss:MABOSS2.bpm,sky:MSKY.bpm,sky_boss:MSBOSS2.bpm};
-const MUS_STEP={run:playRunStep,boss:playBossStep,dungeon:playDungeonStep,dungeon_boss:playDungeonBossStep,
+const MUS_STEP={run:playRunStep,run_issei:playRunIsseiStep,run_minnie:playRunMinnieStep,
+  boss:playBossStep,dungeon:playDungeonStep,dungeon_boss:playDungeonBossStep,
   ending:playEndingStep,camp:playCampStep,camp_boss:playCampBossStep,yatai:playYataiStep,
   yatai_boss:playYataiBossStep,castle:playCastleStep,final_boss:playFinalBossStep,tl_boss:playTlbStep,
   depth:playDepthStep,depth_boss:playDepthBossStep,aqua:playAquaStep,aqua_boss:playAquaBossStep,
@@ -1889,7 +1957,7 @@ function musicUpdate(dt){
   const fighting=BOSS.active&&(BOSS.phase==='intro'||BOSS.phase==='fight'||BOSS.phase==='defeat'||BOSS.phase==='warning');
   const midFight=MID.active&&(MID.phase==='intro'||MID.phase==='fight'||MID.phase==='defeat');
   if(st.mode==='ending')want='ending';
-  else if(st.mode==='run')want=(fighting||midFight)?(tlBoss?'tl_boss':d.bossTrack):d.runTrack;
+  else if(st.mode==='run')want=(fighting||midFight)?(tlBoss?'tl_boss':d.bossTrack):heroRunTrack(d.runTrack);
   if(want!==Mus.track){Mus.track=want;Mus.step=0;Mus.next=0;}
   if(!Sfx.ac)return;
   let duck=1;
@@ -3526,6 +3594,8 @@ function toggleMute(){
   muteBtn.textContent=Sfx.muted?'🔇':'🔊';
   muteBtn.setAttribute('aria-label',Sfx.muted?'サウンドをオン':'サウンドをオフ');
   muteBtn.style.opacity=Sfx.muted?.6:1;
+  /* ミュートしたら 声も すぐ 止める */
+  if(Sfx.muted)voiceCancel();
 }
 muteBtn.addEventListener('click',e=>{e.preventDefault();toggleMute();});
 
@@ -3901,6 +3971,8 @@ function startGame(stageId){
   entryHide();closeEntryModal();
   if(endEntry)endEntry.classList.remove('show');
   Sfx.init();
+  /* iOS Safari：STARTの タップで 声（speechSynthesis）を アンロック */
+  voiceUnlock();
   buildLevel(); relocateItems();
   st.mode='run'; st.t=0; st.runT=0; st.camX=-40; st.shake=0; st.flash=0;
   st.score=0; st.coins=0; st.hearts=4; st.gauge=0; st.bats=0;
@@ -6459,6 +6531,105 @@ function rideTrail(dt){
   }
 }
 
+/* ======================= GSミアタの ボイス（声真似・Web Speech API） =======================
+   「ハイオク満タン！」「In Japan we say...!」「オーライ！オーライ！」を speechSynthesis で 喋る。
+   イッセイ＝低めで 張りのある男性風（pitch 0.90）／ミニー＝明るく高い声（pitch 1.30）
+   START・ボタンの タップで アンロック（iOS Safari 対策）、ミュート中は 喋らない、連続発話は 待って かぶらない */
+const Voice={
+  supported:(typeof window!=='undefined')&&('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window),
+  unlocked:false, said:0, lastText:'', lastAt:0, seqAt:0,
+  timers:[], voices:[], last:null, lastVoiceName:''
+};
+function voiceVoices(){
+  if(!Voice.supported)return Voice.voices;
+  try{
+    const v=window.speechSynthesis.getVoices()||[];
+    if(v.length)Voice.voices=v;
+  }catch(e){}
+  return Voice.voices;
+}
+/* 端末にある声から キャラに合うものを 選ぶ（なければ 既定の声＋pitchで 色をつける） */
+function voicePick(en){
+  const list=voiceVoices();
+  if(!list.length)return null;
+  const re=en?/^en/i:/^ja/i;
+  const c=list.filter(v=>re.test(v.lang||''));
+  if(!c.length)return null;
+  if(heroKey==='minnie')return c.find(v=>/kyoko|o-?ren|nanami|female|woman|女性|google 日本語/i.test(v.name||''))||c[0];
+  if(heroKey==='issei')return c.find(v=>/otoya|hattori|takumi|male|man|男性|google 日本語/i.test(v.name||''))||c[0];
+  return c[0];
+}
+function voiceUnlock(){
+  if(!Voice.supported)return false;
+  try{
+    if(window.speechSynthesis.paused)window.speechSynthesis.resume();
+    voiceVoices();
+    if(!Voice.unlocked){
+      const u=new SpeechSynthesisUtterance('ん');
+      u.volume=0.01;u.lang='ja-JP';u.rate=1.1;u.pitch=1;
+      window.speechSynthesis.speak(u);
+      Voice.unlocked=true;
+    }
+  }catch(e){}
+  return Voice.unlocked;
+}
+function voiceCancel(){
+  for(const t of Voice.timers)clearTimeout(t);
+  Voice.timers.length=0;
+  if(!Voice.supported)return;
+  try{window.speechSynthesis.cancel();}catch(e){}
+}
+function voiceSayOne(text){
+  if(!Voice.supported||!text||Sfx.muted||!Voice.unlocked)return false;
+  try{
+    const en=/^[\x20-\x7E]+$/.test(text);
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=en?'en-US':'ja-JP';
+    u.pitch=heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0);
+    u.rate=1.12;
+    u.volume=1;
+    const v=voicePick(en);
+    if(v){u.voice=v;Voice.lastVoiceName=v.name||'';}else Voice.lastVoiceName='';
+    window.speechSynthesis.speak(u);
+    Voice.said++;Voice.lastText=text;Voice.lastAt=performance.now();
+    Voice.last={text,lang:u.lang,pitch:u.pitch,rate:u.rate,voice:Voice.lastVoiceName};
+    return true;
+  }catch(e){return false;}
+}
+/* 1こと（クールダウン 2.2秒で かぶりを 防ぐ） */
+function voiceSay(text){
+  if(!Voice.supported||Sfx.muted)return false;
+  if(!Voice.unlocked)voiceUnlock();
+  if(!Voice.unlocked)return false;
+  const now=performance.now();
+  if(now-Voice.seqAt<2200)return false;
+  Voice.seqAt=now;
+  voiceCancel();
+  return voiceSayOne(text);
+}
+/* 連続セリフ（例：ハイオク満タン！ → In Japan we say...!） */
+function voiceSayLines(lines,gap){
+  if(!Voice.supported||Sfx.muted||!lines||!lines.length)return false;
+  if(!Voice.unlocked)voiceUnlock();
+  if(!Voice.unlocked)return false;
+  const now=performance.now();
+  if(now-Voice.seqAt<2600)return false;
+  Voice.seqAt=now;
+  voiceCancel();
+  const g=gap==null?900:gap;
+  const ok=voiceSayOne(lines[0]);
+  for(let i=1;i<lines.length;i++){
+    const t=setTimeout(()=>{if(!Sfx.muted)voiceSayOne(lines[i]);},g*i);
+    Voice.timers.push(t);
+  }
+  return ok;
+}
+if(Voice.supported){
+  try{window.speechSynthesis.onvoiceschanged=()=>voiceVoices();}catch(e){}
+  try{window.addEventListener('pointerdown',()=>voiceUnlock(),{once:true});
+      window.addEventListener('keydown',()=>voiceUnlock(),{once:true});}catch(e){}
+}
+
 /* ======================= GSミアタ 4大アクション（2026-11-23） =======================
    ⛽1 相方コンビ必殺技（W）  : 相方が カットイン＆並走。「ハイオク満タン！」「In Japan we say...!」
    👋2 オーライ誘導＆窓拭き（▼）: スクイジーの弧で、周囲の敵弾を 前方へ 跳ね返し ザコも ふき飛ばす
@@ -6505,6 +6676,8 @@ function activateGsCombo(src){
   /* 大きなカットインが セリフを見せるので、テロップや ポップは 重ねない（字幕は 画面下の メッセージだけ） */
   for(let i=0;i<44;i++)spark(P.x+rr(-96,96),P.y-rr(0,160),rr(2,6),['#fff6c0','#ffd45e','#ff8a3d','#fff'][i%4]);
   ringFX(P.x,P.y-40,18,180,.6,'255,214,120');
+  /* 声真似ボイス：「ハイオク満タン！」「In Japan we say...!」 */
+  voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);
   msg('⛽ 相方コンビ必殺技！ 5秒 無敵＋超加速!!');
   return true;
 }
@@ -6560,6 +6733,7 @@ function doGsWipe(){
   for(let i=0;i<22;i++)spark(P.x+rr(0,190),cy+rr(-70,70),rr(1.6,4),['#fff8cc','#bfe9ff','#ffd45e'][i%3]);
   for(let i=0;i<6;i++)puff(P.x+rr(30,150),cy+rr(-40,40),rr(2.4,4.6));
   ringFX(P.x+70,cy,14,120,.36,'255,240,180');
+  if(isGasHero())voiceSay('オーライ、オーライ！');
   if(n>0)addScore(160*n,P.x+120,P.y-120);
   if(sm>0)addScore(120*sm,P.x+150,P.y-96);
   msg(n>0?('👋 オーライ！オーライ！ 敵弾を '+n+'発 跳ね返した！ ピカピカ！')
@@ -6584,6 +6758,7 @@ function activateGsRideBoost(src){
   st.pops.push({x:P.x+120,y:P.y-150,text:'RIDE BOOST!',t:0,life:1.2,col:'#fff6cc',size:16});
   for(let i=0;i<30;i++)spark(P.x+rr(-60,60),P.y-rr(0,110),rr(2,5),['#fff3b0','#ffd45e','#ff8a3d','#fff'][i%4]);
   ringFX(P.x,P.y-24,16,150,.5,'255,200,110');
+  voiceSay('ハイオク満タン、ブースト！');
   msg('🏎️⛽ ハイオク満タン ブースト!! 無敵体当たりで 敵を 弾き飛ばせ！');
   return true;
 }
@@ -6618,6 +6793,7 @@ function gsStationFill(s){
   for(let i=0;i<10;i++)puff(sx0-26+rr(-8,26),sy0-46+rr(-12,12),rr(2.6,5));
   for(let i=0;i<14;i++)spark(P.x+rr(-40,40),P.y-rr(0,120),rr(2,5),['#fff3b0','#ffd45e','#fff'][i%3]);
   msg('⛽ GS MIATAS SS で 給油！ ハート+1 ＋ ハイオク満タン（'+Math.round(HI_OCT_DUR)+'秒 速度＆攻撃力UP）');
+  voiceSay('ハイオク満タン！');
   return true;
 }
 /* 給油所の 縦位置は 画面サイズ・地形に合わせて 置き直す */
@@ -14853,6 +15029,20 @@ window.__dash={
   gsClearShots(){FOE.shots.length=0;BOSS.shots.length=0;MID.shots.length=0;return true;},
   gsClearStations(){for(const s of (LV.stations||[]))s.used=false;GS.station.used=0;GS.hiOct=0;return LV.stations.length;},
   gsClearTurbo(){st.turboT=0;return 0;},
+  /* --- 音楽／ボイスの 検証用 --- */
+  musicInfo(){return {track:Mus.track,bpm:MUS_BPM[Mus.track]||0,step:Mus.step,notes:Mus.notes,
+    muted:Sfx.muted,vol:Math.round(Mus.vol*100)/100,gain:Sfx.musBus?Math.round(Sfx.musBus.gain.value*100)/100:null,
+    ctx:Sfx.ac?Sfx.ac.state:null,hero:heroKey};},
+  voiceInfo(){return {supported:Voice.supported,unlocked:Voice.unlocked,muted:Sfx.muted,said:Voice.said,
+    last:Voice.last,lastText:Voice.lastText,seqAt:Math.round(Voice.seqAt),
+    speaking:(Voice.supported?!!window.speechSynthesis.speaking:false),
+    voices:(Voice.supported?(window.speechSynthesis.getVoices()||[]).map(v=>v.name+'/'+v.lang).slice(0,8):[]),
+    hero:heroKey,pitch:heroKey==='minnie'?1.30:(heroKey==='issei'?0.90:1.0)};},
+  voiceUnlock(){return voiceUnlock();},
+  voiceTest(t){return voiceSay(t||'ハイオク満タン！');},
+  voiceLines(){return voiceSayLines(['ハイオク満タン！','In Japan we say...!'],900);},
+  voiceCancel(){voiceCancel();return true;},
+  voiceResetCooldown(){Voice.seqAt=0;return true;},
   bossStart(){startBoss();},
   bossKind(){return bossKind();},
   assetCheck(){const m={runner:imgRunner,doc:imgDoc,boss:imgBoss,chick:imgChick,unadon:imgUnadon,okonomiyaki:imgOkonomi,final:imgFinalBoss,fishing:imgFishing,helper:imgHelper,helper2:imgHelper2,truelast:imgTrueLast,party1:imgParty1,party2:imgParty2,party3:imgParty3,party4:imgParty4,party4helmet:imgParty4H,kart:imgKart,ironchef:imgIronChef,finalegod:imgFinaleGod,eunos:imgEunos};
